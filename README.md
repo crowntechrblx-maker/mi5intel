@@ -5,7 +5,7 @@
 
 ## Deployment Guide
 
-### 1. Get a free PostgreSQL database (Neon)
+### 1. Get a free PostgreSQL database (Neon)!
 
 1. Go to [neon.tech](https://neon.tech) and sign up (free)
 2. Create a new project (any name)
