@@ -1,0 +1,34 @@
+<%- include('partials/header', { pageTitle: 'Settings' }) %>
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">ACCOUNT SETTINGS</h1>
+    <p class="page-subtitle">Manage your operator credentials</p>
+  </div>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+<% if (success) { %><div class="alert alert-success"><%= success %></div><% } %>
+
+<div class="form-panel" style="max-width:500px">
+  <div class="panel-header"><span class="panel-title">CHANGE PASSWORD</span></div>
+  <div class="panel-body">
+    <form action="/settings/password" method="POST" class="intel-form">
+      <div class="form-group">
+        <label class="form-label">CURRENT PASSWORD</label>
+        <input class="form-input" type="password" name="current_password" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">NEW PASSWORD</label>
+        <input class="form-input" type="password" name="new_password" minlength="8" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">CONFIRM NEW PASSWORD</label>
+        <input class="form-input" type="password" name="confirm_password" minlength="8" required>
+      </div>
+      <button class="btn btn-primary" type="submit">UPDATE PASSWORD</button>
+    </form>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

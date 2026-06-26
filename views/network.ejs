@@ -1,0 +1,39 @@
+<%- include('partials/header', { pageTitle: 'Network View' }) %>
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">NETWORK VIEW</h1>
+    <p class="page-subtitle">Visual entity grid — <%= entities.length %> registered entities</p>
+  </div>
+  <a href="/watchlist/add" class="btn btn-primary">+ REGISTER ENTITY</a>
+</div>
+
+<% if (entities.length === 0) { %>
+<div class="empty-state-full">
+  <p>No entities in registry. <a href="/watchlist/add">Register the first entity.</a></p>
+</div>
+<% } else { %>
+<div class="network-grid">
+  <% entities.forEach(function(e) { %>
+  <a href="/watchlist/<%= e.id %>" class="network-card severity-border-<%= e.severity.toLowerCase() %>">
+    <div class="network-avatar">
+      <% if (e.avatar_url) { %>
+        <img src="<%= e.avatar_url %>" alt="<%= e.username %>">
+      <% } else { %>
+        <span><%= e.username.charAt(0).toUpperCase() %></span>
+      <% } %>
+      <span class="network-status-dot status-dot-<%= e.status.toLowerCase() %>"></span>
+    </div>
+    <div class="network-info">
+      <div class="network-username"><%= e.username %></div>
+      <div class="network-id">RBX: <%= e.roblox_id %></div>
+      <div class="network-badges">
+        <span class="severity-badge severity-<%= e.severity.toLowerCase() %>"><%= e.severity %></span>
+      </div>
+    </div>
+  </a>
+  <% }); %>
+</div>
+<% } %>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,285 @@
+<%- include('../partials/header', { pageTitle: entity.username }) %>
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">ENTITY DOSSIER — <%= entity.username.toUpperCase() %></h1>
+    <p class="page-subtitle">Intelligence file #<%= String(entity.id).padStart(4, '0') %> &bull; Roblox ID: <%= entity.roblox_id %></p>
+  </div>
+  <div class="header-actions">
+    <form action="/watchlist/<%= entity.id %>/refresh" method="POST" style="display:inline">
+      <button class="btn btn-secondary" type="submit" id="refresh-btn" onclick="this.textContent='REFRESHING...'">REFRESH FROM API</button>
+    </form>
+    <a href="/watchlist" class="btn btn-ghost">← BACK TO REGISTRY</a>
+  </div>
+</div>
+
+<% if (added) { %><div class="alert alert-success" style="margin-bottom:1rem">Entity successfully registered in the intelligence database.</div><% } %>
+<% if (info === 'already_exists') { %><div class="alert alert-info" style="margin-bottom:1rem">This entity already exists in the registry.</div><% } %>
+
+<% const p = entity.profile; %>
+
+<div class="profile-grid">
+
+  <!-- LEFT: Avatar & Core Info -->
+  <div class="profile-left">
+    <div class="panel">
+      <div class="avatar-section">
+        <% if (p && p.body_avatar_url) { %>
+          <img class="profile-avatar" src="<%= p.body_avatar_url %>" alt="<%= entity.username %>">
+        <% } else if (entity.avatar_url) { %>
+          <img class="profile-avatar profile-avatar--head" src="<%= entity.avatar_url %>" alt="<%= entity.username %>">
+        <% } else { %>
+          <div class="profile-avatar-placeholder"><%= entity.username.charAt(0).toUpperCase() %></div>
+        <% } %>
+        <% if (p && p.is_banned) { %>
+          <div class="banned-overlay">ACCOUNT BANNED</div>
+        <% } %>
+      </div>
+
+      <div class="profile-identity">
+        <div class="profile-username"><%= entity.username %></div>
+        <% if (entity.display_name && entity.display_name !== entity.username) { %>
+          <div class="profile-displayname">"<%= entity.display_name %>"</div>
+        <% } %>
+        <div class="profile-id">RBX: <%= entity.roblox_id %></div>
+        <% if (p && p.created) { %>
+          <div class="profile-created">Joined: <%= new Date(p.created).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %></div>
+        <% } %>
+      </div>
+
+      <div class="profile-badges-row">
+        <span class="severity-badge severity-<%= entity.severity.toLowerCase() %>"><%= entity.severity %></span>
+        <span class="status-badge status-<%= entity.status.toLowerCase() %>"><%= entity.status %></span>
+      </div>
+
+      <% if (p) { %>
+      <div class="stat-row-mini">
+        <div class="mini-stat">
+          <div class="mini-stat-val"><%= p.friends_count || 0 %></div>
+          <div class="mini-stat-lbl">FRIENDS</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-val"><%= p.followers_count || 0 %></div>
+          <div class="mini-stat-lbl">FOLLOWERS</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-val"><%= p.following_count || 0 %></div>
+          <div class="mini-stat-lbl">FOLLOWING</div>
+        </div>
+      </div>
+      <% } %>
+
+      <% if (p && p.roblox_badges && p.roblox_badges.length > 0) { %>
+      <div class="profile-section">
+        <div class="section-label">ROBLOX BADGES</div>
+        <div class="badge-list">
+          <% p.roblox_badges.forEach(function(b) { %>
+          <span class="roblox-badge" title="<%= b.description || b.name %>"><%= b.name %></span>
+          <% }); %>
+        </div>
+      </div>
+      <% } %>
+    </div>
+
+    <!-- Classification panel -->
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">CLASSIFICATION</span></div>
+      <form action="/watchlist/<%= entity.id %>/update" method="POST" class="update-form">
+        <div class="form-group-compact">
+          <label class="form-label-sm">SEVERITY</label>
+          <select class="form-input-sm" name="severity">
+            <% ['LOW','MEDIUM','HIGH','CRITICAL'].forEach(function(s) { %>
+            <option value="<%= s %>" <%= entity.severity === s ? 'selected' : '' %>><%= s %></option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="form-group-compact">
+          <label class="form-label-sm">STATUS</label>
+          <select class="form-input-sm" name="status">
+            <% ['ACTIVE','INACTIVE','ARCHIVED','BANNED'].forEach(function(s) { %>
+            <option value="<%= s %>" <%= entity.status === s ? 'selected' : '' %>><%= s %></option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="form-group-compact">
+          <label class="form-label-sm">CATEGORY</label>
+          <input class="form-input-sm" type="text" name="category" value="<%= entity.category %>">
+        </div>
+        <button class="btn btn-secondary btn-sm btn-full" type="submit">UPDATE CLASSIFICATION</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- RIGHT: Detailed data -->
+  <div class="profile-right">
+
+    <!-- Bio -->
+    <% if (p && p.description) { %>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">PROFILE DESCRIPTION</span></div>
+      <div class="panel-body">
+        <p class="bio-text"><%= p.description %></p>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Past usernames -->
+    <% if (p && p.username_history && p.username_history.length > 0) { %>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">PAST USERNAMES (<%= p.username_history.length %>)</span></div>
+      <div class="panel-body">
+        <div class="username-history">
+          <% p.username_history.forEach(function(h) { %>
+          <span class="past-username"><%= h.name %></span>
+          <% }); %>
+        </div>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Groups -->
+    <% if (p && p.groups && p.groups.length > 0) { %>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">GROUP AFFILIATIONS (<%= p.groups.length %>)</span></div>
+      <div class="panel-body panel-body--compact">
+        <% p.groups.forEach(function(g) { %>
+        <div class="group-row">
+          <div class="group-icon">
+            <% if (g.group && g.group.memberCount) { %>
+              <span class="group-count-badge"><%= g.group.memberCount > 999 ? Math.floor(g.group.memberCount/1000) + 'k' : g.group.memberCount %></span>
+            <% } else { %>G<% } %>
+          </div>
+          <div class="group-info">
+            <div class="group-name"><%= g.group ? g.group.name : 'Unknown Group' %></div>
+            <div class="group-meta">
+              Role: <strong><%= g.role ? g.role.name : '—' %></strong>
+              <% if (g.group) { %> &bull; ID: <%= g.group.id %><% } %>
+            </div>
+          </div>
+        </div>
+        <% }); %>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Friends list -->
+    <% if (p && p.friends_list && p.friends_list.length > 0) { %>
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">KNOWN ASSOCIATES (<%= p.friends_list.length %> shown)</span>
+      </div>
+      <div class="panel-body">
+        <div class="friends-grid">
+          <% p.friends_list.slice(0, 24).forEach(function(f) { %>
+          <div class="friend-chip" title="<%= f.name %>">
+            <span class="friend-initial"><%= f.name.charAt(0).toUpperCase() %></span>
+            <span class="friend-name"><%= f.name %></span>
+          </div>
+          <% }); %>
+          <% if (p.friends_list.length > 24) { %>
+          <div class="friend-chip friend-chip--more">+<%= p.friends_list.length - 24 %> more</div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Games created -->
+    <% if (p && p.games && p.games.length > 0) { %>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">CREATED EXPERIENCES (<%= p.games.length %>)</span></div>
+      <div class="panel-body panel-body--compact">
+        <% p.games.forEach(function(g) { %>
+        <div class="game-row">
+          <div class="game-info">
+            <div class="game-name"><%= g.name %></div>
+            <div class="game-meta">
+              <% if (g.placeVisits !== undefined) { %>Visits: <strong><%= g.placeVisits.toLocaleString() %></strong> &bull; <% } %>
+              <% if (g.created) { %>Created: <%= new Date(g.created).toLocaleDateString('en-GB') %><% } %>
+            </div>
+          </div>
+          <% if (g.rootPlaceId) { %>
+          <a href="https://www.roblox.com/games/<%= g.rootPlaceId %>" target="_blank" rel="noopener" class="table-action-btn">VIEW</a>
+          <% } %>
+        </div>
+        <% }); %>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Analyst notes -->
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">ANALYST NOTES</span></div>
+      <div class="panel-body">
+        <form action="/watchlist/<%= entity.id %>/update" method="POST">
+          <input type="hidden" name="severity" value="<%= entity.severity %>">
+          <input type="hidden" name="status" value="<%= entity.status %>">
+          <input type="hidden" name="category" value="<%= entity.category %>">
+          <textarea class="form-input form-textarea" name="notes" rows="5" placeholder="Enter intelligence notes, incident references, or context..."><%= entity.notes || '' %></textarea>
+          <button class="btn btn-secondary btn-sm" type="submit" style="margin-top:.5rem">SAVE NOTES</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Tags -->
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">INTELLIGENCE TAGS</span></div>
+      <div class="panel-body">
+        <div class="tags-row" style="margin-bottom:.75rem">
+          <% if (entity.tags && entity.tags.length > 0) { %>
+            <% entity.tags.forEach(function(t) { %>
+            <span class="tag-pill">
+              <%= t.tag %>
+              <form action="/watchlist/<%= entity.id %>/tags/remove" method="POST" style="display:inline">
+                <input type="hidden" name="tag" value="<%= t.tag %>">
+                <button type="submit" class="tag-remove" title="Remove tag">&times;</button>
+              </form>
+            </span>
+            <% }); %>
+          <% } else { %>
+            <span class="text-muted">No tags assigned.</span>
+          <% } %>
+        </div>
+        <form action="/watchlist/<%= entity.id %>/tags" method="POST" class="tag-add-form">
+          <input class="form-input-sm" type="text" name="tag" placeholder="ADD TAG..." maxlength="30" required>
+          <button class="btn btn-secondary btn-sm" type="submit">ADD</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Audit history for this entity -->
+    <% if (auditHistory && auditHistory.length > 0) { %>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">AUDIT HISTORY</span></div>
+      <div class="panel-body panel-body--compact">
+        <% auditHistory.forEach(function(log) { %>
+        <div class="audit-row">
+          <span class="audit-action-badge"><%= log.action.replace(/_/g, ' ') %></span>
+          <span class="audit-actor"><%= log.actor %></span>
+          <span class="audit-time"><%= new Date(log.created_at).toLocaleString('en-GB') %></span>
+        </div>
+        <% }); %>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Danger zone -->
+    <div class="panel panel-danger">
+      <div class="panel-header"><span class="panel-title">DANGER ZONE</span></div>
+      <div class="panel-body">
+        <p class="danger-text">Permanently remove this entity from the intelligence registry. This action cannot be undone.</p>
+        <form action="/watchlist/<%= entity.id %>/delete" method="POST" onsubmit="return confirm('Remove <%= entity.username %> from the registry? This cannot be undone.')">
+          <button class="btn btn-danger" type="submit">PURGE ENTITY FROM REGISTRY</button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="profile-meta">
+  Last updated: <%= entity.last_fetched ? new Date(entity.last_fetched).toLocaleString('en-GB') : 'Never' %> &bull;
+  Added by: <%= entity.added_by %> on <%= new Date(entity.added_at).toLocaleDateString('en-GB') %>
+</div>
+
+<%- include('../partials/footer') %>

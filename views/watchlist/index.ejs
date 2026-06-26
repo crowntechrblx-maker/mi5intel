@@ -1,0 +1,99 @@
+<%- include('../partials/header', { pageTitle: 'Watchlist' }) %>
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">WATCHLIST DATABASE REGISTRY</h1>
+    <p class="page-subtitle">Flagged entity intelligence files & index cards</p>
+  </div>
+  <div class="header-actions">
+    <a href="/watchlist/batch" class="btn btn-secondary">BATCH UPLOAD</a>
+    <a href="/watchlist/add" class="btn btn-primary">+ REGISTER NEW ENTITY</a>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <form action="/watchlist" method="GET" class="filter-form">
+    <div class="search-wrap">
+      <svg class="search-icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/></svg>
+      <input class="search-input" type="text" name="q" value="<%= filters.q || '' %>" placeholder="Search registry index by username, category, ID...">
+    </div>
+    <select name="severity" class="filter-select">
+      <option value="">ALL SEVERITIES</option>
+      <option value="CRITICAL" <%= filters.severity === 'CRITICAL' ? 'selected' : '' %>>CRITICAL</option>
+      <option value="HIGH" <%= filters.severity === 'HIGH' ? 'selected' : '' %>>HIGH</option>
+      <option value="MEDIUM" <%= filters.severity === 'MEDIUM' ? 'selected' : '' %>>MEDIUM</option>
+      <option value="LOW" <%= filters.severity === 'LOW' ? 'selected' : '' %>>LOW</option>
+    </select>
+    <select name="status" class="filter-select">
+      <option value="">ALL STATUSES</option>
+      <option value="ACTIVE" <%= filters.status === 'ACTIVE' ? 'selected' : '' %>>ACTIVE</option>
+      <option value="INACTIVE" <%= filters.status === 'INACTIVE' ? 'selected' : '' %>>INACTIVE</option>
+      <option value="ARCHIVED" <%= filters.status === 'ARCHIVED' ? 'selected' : '' %>>ARCHIVED</option>
+      <option value="BANNED" <%= filters.status === 'BANNED' ? 'selected' : '' %>>BANNED</option>
+    </select>
+    <button type="submit" class="btn btn-secondary btn-sm">FILTER</button>
+    <a href="/watchlist" class="btn btn-ghost btn-sm">CLEAR</a>
+  </form>
+</div>
+
+<div class="registry-table-wrap">
+  <table class="registry-table">
+    <thead>
+      <tr>
+        <th>COGNIZANCE</th>
+        <th>TARGET IDENTITY</th>
+        <th>CLASSIFICATION CATEGORY</th>
+        <th>SURVEILLANCE SEVERITY</th>
+        <th>OPERATIONAL STATUS</th>
+        <th>DOSSIER ACTION</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (entities.length === 0) { %>
+      <tr>
+        <td colspan="6" class="empty-row">NO ENTITY INDEXES DETECTED WITHIN QUERY PARAMETERS</td>
+      </tr>
+      <% } else { %>
+      <% entities.forEach(function(e) { %>
+      <tr class="entity-tr" data-href="/watchlist/<%= e.id %>">
+        <td class="col-id"><span class="entity-index"><%= String(e.id).padStart(4, '0') %></span></td>
+        <td class="col-identity">
+          <div class="identity-cell">
+            <div class="table-avatar">
+              <% if (e.avatar_url) { %>
+                <img src="<%= e.avatar_url %>" alt="">
+              <% } else { %>
+                <span><%= e.username.charAt(0).toUpperCase() %></span>
+              <% } %>
+            </div>
+            <div>
+              <div class="table-username"><%= e.username %></div>
+              <div class="table-meta"><%= e.display_name !== e.username ? e.display_name : '' %> &bull; <%= e.roblox_id %></div>
+            </div>
+          </div>
+        </td>
+        <td class="col-category">
+          <span class="category-tag"><%= e.category %></span>
+          <% if (e.tags && e.tags.length > 0) { %>
+            <% e.tags.slice(0, 2).forEach(function(tag) { %>
+            <span class="mini-tag"><%= tag %></span>
+            <% }); %>
+          <% } %>
+        </td>
+        <td class="col-severity"><span class="severity-badge severity-<%= e.severity.toLowerCase() %>"><%= e.severity %></span></td>
+        <td class="col-status"><span class="status-badge status-<%= e.status.toLowerCase() %>"><%= e.status %></span></td>
+        <td class="col-action">
+          <a href="/watchlist/<%= e.id %>" class="table-action-btn">VIEW DOSSIER</a>
+        </td>
+      </tr>
+      <% }); %>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<div class="table-footer">
+  <span class="table-count"><%= entities.length %> ENTITY INDEX<%= entities.length !== 1 ? 'ES' : '' %> WITHIN CURRENT PARAMETERS</span>
+</div>
+
+<%- include('../partials/footer') %>

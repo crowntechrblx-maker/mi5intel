@@ -1,0 +1,85 @@
+<%- include('partials/header', { pageTitle: 'Intelligence Desk' }) %>
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">INTELLIGENCE DESK</h1>
+    <p class="page-subtitle">Overview of entity registry and recent activity</p>
+  </div>
+  <a href="/watchlist/add" class="btn btn-primary">+ REGISTER NEW ENTITY</a>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-value"><%= stats.total %></div>
+    <div class="stat-label">TOTAL ENTITIES</div>
+  </div>
+  <div class="stat-card stat-card--critical">
+    <div class="stat-value"><%= stats.critical %></div>
+    <div class="stat-label">CRITICAL SEVERITY</div>
+  </div>
+  <div class="stat-card stat-card--high">
+    <div class="stat-value"><%= stats.high %></div>
+    <div class="stat-label">HIGH SEVERITY</div>
+  </div>
+  <div class="stat-card stat-card--active">
+    <div class="stat-value"><%= stats.active %></div>
+    <div class="stat-label">ACTIVE STATUS</div>
+  </div>
+</div>
+
+<div class="dashboard-grid">
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">RECENTLY REGISTERED ENTITIES</span>
+      <a href="/watchlist" class="panel-link">VIEW ALL &rarr;</a>
+    </div>
+    <div class="panel-body">
+      <% if (recent.length === 0) { %>
+        <div class="empty-state">No entities registered yet. <a href="/watchlist/add">Register the first entity.</a></div>
+      <% } else { %>
+        <% recent.forEach(function(e) { %>
+        <a href="/watchlist/<%= e.id %>" class="entity-row">
+          <div class="entity-avatar">
+            <% if (e.avatar_url) { %>
+              <img src="<%= e.avatar_url %>" alt="<%= e.username %>">
+            <% } else { %>
+              <span><%= e.username.charAt(0).toUpperCase() %></span>
+            <% } %>
+          </div>
+          <div class="entity-info">
+            <div class="entity-username"><%= e.username %></div>
+            <div class="entity-meta"><%= e.display_name || '' %> &bull; RBX: <%= e.roblox_id %></div>
+          </div>
+          <div class="entity-badges">
+            <span class="severity-badge severity-<%= e.severity.toLowerCase() %>"><%= e.severity %></span>
+            <span class="status-badge status-<%= e.status.toLowerCase() %>"><%= e.status %></span>
+          </div>
+        </a>
+        <% }); %>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">RECENT AUDIT ACTIVITY</span>
+      <a href="/audit" class="panel-link">VIEW ALL &rarr;</a>
+    </div>
+    <div class="panel-body">
+      <% if (recentLogs.length === 0) { %>
+        <div class="empty-state">No audit events recorded.</div>
+      <% } else { %>
+        <% recentLogs.forEach(function(log) { %>
+        <div class="audit-row">
+          <span class="audit-action-badge"><%= log.action.replace(/_/g, ' ') %></span>
+          <span class="audit-actor"><%= log.actor %></span>
+          <% if (log.target) { %><span class="audit-target"><%= log.target %></span><% } %>
+          <span class="audit-time"><%= new Date(log.created_at).toLocaleString('en-GB') %></span>
+        </div>
+        <% }); %>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

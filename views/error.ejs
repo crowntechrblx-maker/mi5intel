@@ -1,0 +1,27 @@
+<% if (typeof user !== 'undefined' && user) { %>
+<%- include('partials/header', { pageTitle: 'Error ' + code }) %>
+<div class="page-header">
+  <div>
+    <h1 class="page-title">ERROR <%= code %></h1>
+    <p class="page-subtitle"><%= message %></p>
+  </div>
+  <a href="/" class="btn btn-ghost">← RETURN TO DESK</a>
+</div>
+<%- include('partials/footer') %>
+<% } else { %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Error <%= code %> — HM Intelligence Database</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="auth-body">
+  <div class="auth-container">
+    <h1 class="page-title">ERROR <%= code %></h1>
+    <p><%= message %></p>
+    <a href="/" class="btn btn-primary">← RETURN</a>
+  </div>
+</body>
+</html>
+<% } %>

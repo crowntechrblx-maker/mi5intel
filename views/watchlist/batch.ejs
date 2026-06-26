@@ -1,0 +1,118 @@
+<%- include('../partials/header', { pageTitle: 'Batch Upload' }) %>
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">BATCH ENTITY REGISTRATION</h1>
+    <p class="page-subtitle">Upload multiple Roblox entities simultaneously — max 50 per batch</p>
+  </div>
+  <a href="/watchlist/add" class="btn btn-secondary">SINGLE ENTITY INSTEAD</a>
+</div>
+
+<div class="form-panel">
+  <% if (typeof error !== 'undefined' && error) { %>
+  <div class="alert alert-error"><%= error %></div>
+  <% } %>
+
+  <% if (!results) { %>
+  <form action="/watchlist/batch" method="POST" class="intel-form" id="batch-form">
+    <div class="form-section">
+      <h2 class="section-title">ENTITY IDENTIFIERS</h2>
+      <div class="form-group">
+        <label class="form-label" for="identifiers">USERNAMES OR USER IDs</label>
+        <textarea class="form-input form-textarea" id="identifiers" name="identifiers" rows="10"
+          placeholder="Enter one per line, or comma-separated:&#10;Builderman&#10;156&#10;ROBLOX&#10;1234567"></textarea>
+        <span class="form-hint">Mix of usernames and numeric IDs accepted. Maximum 50 entities per batch.</span>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h2 class="section-title">DEFAULT CLASSIFICATION</h2>
+      <p class="section-hint">Applied to all entities in this batch (can be adjusted individually afterwards)</p>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="severity">DEFAULT SEVERITY</label>
+          <select class="form-input" id="severity" name="severity">
+            <option value="LOW">LOW</option>
+            <option value="MEDIUM">MEDIUM</option>
+            <option value="HIGH">HIGH</option>
+            <option value="CRITICAL">CRITICAL</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="category">DEFAULT CATEGORY</label>
+          <input class="form-input" type="text" id="category" name="category" value="UNCATEGORISED">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit" id="submit-btn">
+        <span class="btn-text">PROCESS BATCH</span>
+        <span class="btn-loading" style="display:none">QUERYING ROBLOX API...</span>
+      </button>
+      <a href="/watchlist" class="btn btn-ghost">CANCEL</a>
+    </div>
+  </form>
+
+  <script>
+  document.getElementById('batch-form').addEventListener('submit', function() {
+    document.querySelector('.btn-text').style.display = 'none';
+    document.querySelector('.btn-loading').style.display = 'inline';
+    document.getElementById('submit-btn').disabled = true;
+  });
+  </script>
+
+  <% } else { %>
+
+  <div class="batch-results">
+    <h2 class="section-title">BATCH PROCESSING COMPLETE</h2>
+    <div class="batch-summary">
+      <span class="batch-stat batch-added"><%= results.filter(r => r.status === 'added').length %> ADDED</span>
+      <span class="batch-stat batch-exists"><%= results.filter(r => r.status === 'exists').length %> ALREADY IN REGISTRY</span>
+      <span class="batch-stat batch-error"><%= results.filter(r => r.status === 'error').length %> FAILED</span>
+    </div>
+
+    <table class="registry-table">
+      <thead>
+        <tr>
+          <th>INPUT</th>
+          <th>RESULT</th>
+          <th>RESOLVED USERNAME</th>
+          <th>ACTION</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% results.forEach(function(r) { %>
+        <tr>
+          <td class="mono"><%= r.identifier %></td>
+          <td>
+            <% if (r.status === 'added') { %>
+              <span class="status-badge status-active">REGISTERED</span>
+            <% } else if (r.status === 'exists') { %>
+              <span class="status-badge status-inactive">DUPLICATE</span>
+            <% } else { %>
+              <span class="severity-badge severity-high">FAILED</span>
+            <% } %>
+          </td>
+          <td><%= r.username || '—' %></td>
+          <td>
+            <% if (r.id) { %>
+              <a href="/watchlist/<%= r.id %>" class="table-action-btn">VIEW</a>
+            <% } else { %>
+              <span class="text-muted"><%= r.message || '' %></span>
+            <% } %>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+
+    <div class="form-actions" style="margin-top:1.5rem">
+      <a href="/watchlist" class="btn btn-primary">VIEW WATCHLIST</a>
+      <a href="/watchlist/batch" class="btn btn-secondary">NEW BATCH</a>
+    </div>
+  </div>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

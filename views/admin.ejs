@@ -1,0 +1,114 @@
+<%- include('partials/header', { pageTitle: 'User Management' }) %>
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">OPERATOR MANAGEMENT</h1>
+    <p class="page-subtitle">Manage system access and operator clearance levels</p>
+  </div>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+<% if (success) { %><div class="alert alert-success"><%= success %></div><% } %>
+
+<div class="admin-grid">
+  <div class="panel">
+    <div class="panel-header"><span class="panel-title">REGISTER NEW OPERATOR</span></div>
+    <div class="panel-body">
+      <form action="/admin/users/add" method="POST" class="intel-form">
+        <div class="form-group-compact">
+          <label class="form-label-sm">USERNAME</label>
+          <input class="form-input-sm" type="text" name="username" required>
+        </div>
+        <div class="form-group-compact">
+          <label class="form-label-sm">DISPLAY NAME</label>
+          <input class="form-input-sm" type="text" name="display_name">
+        </div>
+        <div class="form-group-compact">
+          <label class="form-label-sm">PASSWORD (min 8 chars)</label>
+          <input class="form-input-sm" type="password" name="password" minlength="8" required>
+        </div>
+        <div class="form-group-compact">
+          <label class="form-label-sm">CLEARANCE LEVEL</label>
+          <select class="form-input-sm" name="role">
+            <option value="viewer">VIEWER — Read only</option>
+            <option value="analyst" selected>ANALYST — Can add/edit entities</option>
+            <option value="admin">ADMIN — Full system access</option>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-sm" type="submit">REGISTER OPERATOR</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="panel" style="grid-column: span 2">
+    <div class="panel-header"><span class="panel-title">REGISTERED OPERATORS (<%= users.length %>)</span></div>
+    <table class="registry-table">
+      <thead>
+        <tr>
+          <th>OPERATOR</th>
+          <th>CLEARANCE</th>
+          <th>LAST ACCESS</th>
+          <th>REGISTERED</th>
+          <th>CREATED BY</th>
+          <th>ACTIONS</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% users.forEach(function(u) { %>
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:.5rem">
+              <div class="user-avatar-sm"><%= u.username.charAt(0).toUpperCase() %></div>
+              <div>
+                <div class="table-username"><%= u.display_name || u.username %></div>
+                <div class="table-meta">@<%= u.username %></div>
+              </div>
+            </div>
+          </td>
+          <td><span class="role-badge role-<%= u.role %>"><%= u.role.toUpperCase() %></span></td>
+          <td class="mono text-muted"><%= u.last_login ? new Date(u.last_login).toLocaleString('en-GB') : 'Never' %></td>
+          <td class="mono text-muted"><%= new Date(u.created_at).toLocaleDateString('en-GB') %></td>
+          <td class="mono text-muted"><%= u.created_by || '—' %></td>
+          <td>
+            <div class="action-group">
+              <% if (u.id !== user.id) { %>
+              <!-- Change role -->
+              <form action="/admin/users/<%= u.id %>/change-role" method="POST" style="display:inline">
+                <select class="form-input-xs" name="role" onchange="this.form.submit()">
+                  <option value="viewer" <%= u.role === 'viewer' ? 'selected' : '' %>>VIEWER</option>
+                  <option value="analyst" <%= u.role === 'analyst' ? 'selected' : '' %>>ANALYST</option>
+                  <option value="admin" <%= u.role === 'admin' ? 'selected' : '' %>>ADMIN</option>
+                </select>
+              </form>
+              <!-- Delete -->
+              <form action="/admin/users/<%= u.id %>/delete" method="POST" style="display:inline" onsubmit="return confirm('Delete operator <%= u.username %>?')">
+                <button class="btn btn-danger btn-xs" type="submit">DELETE</button>
+              </form>
+              <% } else { %>
+              <span class="text-muted">YOU</span>
+              <% } %>
+              <!-- Reset password -->
+              <button class="btn btn-secondary btn-xs" onclick="toggleReset('<%= u.id %>')">RESET PW</button>
+            </div>
+            <div id="reset-<%= u.id %>" style="display:none;margin-top:.5rem">
+              <form action="/admin/users/<%= u.id %>/reset-password" method="POST" style="display:flex;gap:.5rem;align-items:center">
+                <input class="form-input-xs" type="password" name="new_password" placeholder="New password" minlength="8" required style="flex:1">
+                <button class="btn btn-secondary btn-xs" type="submit">SET</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+function toggleReset(id) {
+  const el = document.getElementById('reset-' + id);
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+</script>
+
+<%- include('partials/footer') %>
