@@ -158,52 +158,39 @@ document.addEventListener('contextmenu', function(e) {
   e.preventDefault();
 });
 
-// ── Security: blackout overlay + watermark stamp on screenshot ──
+// ── Security: blackout overlay + keyboard/focus protection ──────
 (function() {
-  var wm = document.getElementById('wm');
-
-  // Normal watermark: nearly invisible
-  if (wm) wm.style.opacity = '0.03';
-
-  // Overlay covers the page content
   var overlay = document.createElement('div');
   overlay.id = 'focus-shield';
-  overlay.style.cssText = 'display:none;position:fixed;inset:0;background:#000;z-index:99998;cursor:default';
+  overlay.style.cssText = [
+    'display:none',
+    'position:fixed',
+    'inset:0',
+    'background:#000',
+    'z-index:99999',
+    'align-items:center',
+    'justify-content:center',
+    'flex-direction:column',
+    'gap:12px',
+    'cursor:default'
+  ].join(';');
+  overlay.innerHTML =
+    '<svg width="40" height="36" viewBox="0 0 110 96" fill="none" style="opacity:.2">' +
+      '<polygon points="55,3 107,93 3,93" stroke="#fff" stroke-width="2.5" fill="none" stroke-linejoin="round"/>' +
+    '</svg>' +
+    '<span style="color:#2a2a2a;font-family:\'Courier New\',monospace;font-size:11px;letter-spacing:4px;text-transform:uppercase">Session Obscured</span>';
   document.body.appendChild(overlay);
 
-  // Watermark sits above the overlay so it stamps any screenshot
-  if (wm) wm.style.zIndex = '99999';
-
-  function wmStamp() {
-    if (wm) {
-      wm.style.transition = 'opacity 0s';
-      wm.style.opacity = '0.72';
-    }
-  }
-  function wmReset() {
-    if (wm) {
-      wm.style.transition = 'opacity 2s ease';
-      wm.style.opacity = '0.03';
-    }
-  }
-
-  function hide() {
-    overlay.style.display = 'none';
-    wmReset();
-  }
-  function show() {
-    overlay.style.display = 'block';
-    wmStamp();
-  }
+  function hide() { overlay.style.display = 'none'; }
+  function show() { overlay.style.display = 'flex'; }
 
   var flashTimer = null;
   function flash() {
     show();
     clearTimeout(flashTimer);
-    flashTimer = setTimeout(hide, 900);
+    flashTimer = setTimeout(hide, 800);
   }
 
-  // Win+Shift+S and any focus loss triggers blur
   window.addEventListener('blur', show);
   window.addEventListener('focus', hide);
   document.addEventListener('visibilitychange', function() {
@@ -211,8 +198,8 @@ document.addEventListener('contextmenu', function(e) {
   });
 
   document.addEventListener('keydown', function(e) {
-    var k    = e.key;
-    var ctrl = e.ctrlKey || e.metaKey;
+    var k     = e.key;
+    var ctrl  = e.ctrlKey || e.metaKey;
     var shift = e.shiftKey;
 
     if (k === 'PrintScreen' || k === 'Print' || k === 'Snapshot') {
