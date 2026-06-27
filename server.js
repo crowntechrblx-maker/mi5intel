@@ -25,12 +25,13 @@ async function main() {
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
 
-  // Inject footer globals into every view
+  // Inject globals into every view
   const { version } = require('./package.json');
   app.use((req, res, next) => {
     res.locals.appVersion  = version;
     res.locals.appEnv      = process.env.NODE_ENV === 'production' ? 'PROD' : 'DEV';
     res.locals.buildDate   = '27 Jun 2026';
+    res.locals.clientIp    = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || '—';
     next();
   });
 

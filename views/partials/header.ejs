@@ -36,6 +36,46 @@
 <body>
 
 <!-- ═══════════════════════════════════════
+     WATERMARK  (fixed, pointer-events:none)
+     ═══════════════════════════════════════ -->
+<% if (user) { %>
+<div id="wm" aria-hidden="true" style="
+  position:fixed;inset:0;
+  pointer-events:none;
+  z-index:9000;
+  overflow:hidden;
+  transform:rotate(-25deg) scale(1.6);
+  transform-origin:center center;
+  opacity:0.045;
+  display:flex;
+  flex-wrap:wrap;
+  align-content:flex-start;
+  gap:28px 0;
+  padding:40px 10px;
+  user-select:none;
+  -webkit-user-select:none;
+">
+  <%
+    const wmUser = user.username.toUpperCase();
+    const wmTs   = new Date().toLocaleString('en-GB', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    const wmIp   = locals.clientIp || '—';
+    const wmText = wmUser + '   ' + wmTs + '   ' + wmIp;
+    const wmRepeat = Array(60).fill(wmText).join('');
+  %>
+  <span style="
+    white-space:nowrap;
+    font-family:'Courier New',Courier,monospace;
+    font-size:11px;
+    letter-spacing:2px;
+    color:#ffffff;
+    line-height:2.8;
+    display:block;
+    width:100%;
+  "><%= wmRepeat %></span>
+</div>
+<% } %>
+
+<!-- ═══════════════════════════════════════
      HEADER  grid-area: header (full width)
      ═══════════════════════════════════════ -->
 <header class="site-header">
