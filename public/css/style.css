@@ -497,6 +497,58 @@ button:focus-visible { outline: 3px solid var(--yellow); }
 .empty-state-full { display: flex; align-items: center; justify-content: center; min-height: 200px; color: var(--mid-grey); font-size: 13px; }
 .classification-badge { display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 9px; background: rgba(212,53,28,.12); border: 1px solid rgba(212,53,28,.4); color: #e07070; border-radius: var(--r); text-transform: uppercase; margin-top: 8px; }
 
+/* ── 5-column stats grid ── */
+.stats-grid--5 { grid-template-columns: repeat(5, 1fr); }
+.stat-card--medium { border-top-color: #906000; }
+.stat-card--medium .stat-value { color: #ffc966; }
+
+/* ── Header search bar ── */
+.header-search {
+  display: flex;
+  align-items: center;
+  position: relative;
+  flex: 0 0 220px;
+  margin-left: 4px;
+}
+.header-search-icon {
+  position: absolute;
+  left: 9px;
+  color: var(--mid-grey);
+  pointer-events: none;
+  flex-shrink: 0;
+}
+.header-search-input {
+  width: 100%;
+  padding: 5px 10px 5px 28px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid var(--border-2);
+  border-radius: var(--r);
+  color: var(--white);
+  font-size: 12px;
+  font-family: var(--font);
+  outline: none;
+  transition: background 0.15s, border-color 0.15s, width 0.2s;
+}
+.header-search-input::placeholder { color: var(--mid-grey); }
+.header-search-input:focus {
+  background: rgba(255,255,255,.1);
+  border-color: var(--blue-light);
+  outline: 2px solid var(--yellow);
+  outline-offset: 0;
+}
+
+/* ── Login shake ── */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  15%, 45%, 75% { transform: translateX(-7px); }
+  30%, 60%, 90% { transform: translateX(7px); }
+}
+.auth-card--shake { animation: shake 0.45s ease; }
+
+/* ── Profile left/right ── */
+.profile-left  { display: flex; flex-direction: column; gap: 0; }
+.profile-right { display: flex; flex-direction: column; gap: 0; }
+
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }

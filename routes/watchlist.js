@@ -7,40 +7,86 @@ const { fullProfileFetch } = require('../services/roblox');
 
 function actor(req) { return req.session.user.username; }
 
-// List
-router.get('/', requireAuth, async (req, res) => {
-  const { q, severity, status, category } = req.query;
+// Shared filter builder
+function buildFilters(query) {
+  const { q, severity, status, category } = query;
   const conditions = ['1=1'];
   const params = [];
-
   if (q) {
-    const i = params.length + 1;
-    conditions.push(`(username ILIKE $${i} OR display_name ILIKE $${i} OR roblox_id ILIKE $${i} OR category ILIKE $${i})`);
     params.push(`%${q}%`);
+    conditions.push(`(username ILIKE $${params.length} OR display_name ILIKE $${params.length} OR roblox_id ILIKE $${params.length} OR category ILIKE $${params.length})`);
   }
-  if (severity) { params.push(severity); conditions.push(`severity = $${params.length}`); }
-  if (status)   { params.push(status);   conditions.push(`status = $${params.length}`); }
-  if (category) { params.push(`%${category}%`); conditions.push(`category ILIKE $${params.length}`); }
+  if (severity) { params.push(severity);          conditions.push(`severity = $${params.length}`); }
+  if (status)   { params.push(status);            conditions.push(`status = $${params.length}`); }
+  if (category) { params.push(`%${category}%`);  conditions.push(`category ILIKE $${params.length}`); }
+  return { where: conditions.join(' AND '), params };
+}
 
-  const entities = await db.all(
-    `SELECT * FROM roblox_entities WHERE ${conditions.join(' AND ')} ORDER BY added_at DESC`,
-    params
-  );
+// ── List (with pagination) ─────────────────────────────────────
+router.get('/', requireAuth, async (req, res) => {
+  const limit  = 25;
+  const pageNum = Math.max(1, parseInt(req.query.page) || 1);
+  const offset  = (pageNum - 1) * limit;
+  const { where, params } = buildFilters(req.query);
+
+  const [entities, totalRow] = await Promise.all([
+    db.all(
+      `SELECT * FROM roblox_entities WHERE ${where} ORDER BY added_at DESC LIMIT $${params.length+1} OFFSET $${params.length+2}`,
+      [...params, limit, offset]
+    ),
+    db.get(`SELECT COUNT(*) AS cnt FROM roblox_entities WHERE ${where}`, params),
+  ]);
 
   for (const e of entities) {
     const tags = await db.all('SELECT tag FROM entity_tags WHERE entity_id=$1', [e.id]);
     e.tags = tags.map(t => t.tag);
   }
 
-  res.render('watchlist/index', { user: req.session.user, entities, filters: { q, severity, status, category }, page: 'watchlist' });
+  const total = parseInt(totalRow.cnt);
+  res.render('watchlist/index', {
+    user: req.session.user,
+    entities,
+    total,
+    limit,
+    offset,
+    pageNum,
+    filters: { q: req.query.q, severity: req.query.severity, status: req.query.status, category: req.query.category },
+    page: 'watchlist',
+  });
 });
 
-// Add form
+// ── CSV Export ─────────────────────────────────────────────────
+router.get('/export', requireAuth, async (req, res) => {
+  const { where, params } = buildFilters(req.query);
+  const entities = await db.all(
+    `SELECT * FROM roblox_entities WHERE ${where} ORDER BY added_at DESC`,
+    params
+  );
+
+  const header = ['ID','Roblox ID','Username','Display Name','Category','Severity','Status','Added By','Added At','Last Fetched','Notes'];
+  const rows = entities.map(e => [
+    e.id, e.roblox_id, `"${(e.username||'').replace(/"/g,'""')}"`,
+    `"${(e.display_name||'').replace(/"/g,'""')}"`,
+    `"${(e.category||'').replace(/"/g,'""')}"`,
+    e.severity, e.status,
+    e.added_by,
+    new Date(e.added_at).toISOString(),
+    e.last_fetched ? new Date(e.last_fetched).toISOString() : '',
+    `"${(e.notes||'').replace(/"/g,'""')}"`,
+  ]);
+
+  const csv = [header.join(','), ...rows.map(r => r.join(','))].join('\r\n');
+  res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+  res.setHeader('Content-Disposition', `attachment; filename="mi5-watchlist-${Date.now()}.csv"`);
+  res.send(csv);
+});
+
+// ── Add form ────────────────────────────────────────────────────
 router.get('/add', requireAuth, (req, res) => {
   res.render('watchlist/add', { user: req.session.user, error: null, page: 'watchlist' });
 });
 
-// Add single
+// ── Add single ─────────────────────────────────────────────────
 router.post('/add', requireAuth, async (req, res) => {
   const { identifier, severity, category, notes, tags } = req.body;
   if (!identifier) {
@@ -71,12 +117,12 @@ router.post('/add', requireAuth, async (req, res) => {
   res.redirect(`/watchlist/${lastInsertId}?added=1`);
 });
 
-// Batch form
+// ── Batch form ─────────────────────────────────────────────────
 router.get('/batch', requireAuth, (req, res) => {
   res.render('watchlist/batch', { user: req.session.user, results: null, error: null, page: 'watchlist' });
 });
 
-// Batch process
+// ── Batch process ──────────────────────────────────────────────
 router.post('/batch', requireAuth, async (req, res) => {
   const { identifiers, severity, category } = req.body;
   if (!identifiers) {
@@ -108,37 +154,95 @@ router.post('/batch', requireAuth, async (req, res) => {
   res.render('watchlist/batch', { user: req.session.user, results, error: null, page: 'watchlist' });
 });
 
-// View profile
+// ── View profile ───────────────────────────────────────────────
 router.get('/:id', requireAuth, async (req, res) => {
   const entity = await db.get('SELECT * FROM roblox_entities WHERE id=$1', [req.params.id]);
   if (!entity) return res.status(404).render('error', { user: req.session.user, code: 404, message: 'Entity not found in registry.' });
 
-  const [tags, auditHistory] = await Promise.all([
+  const [tags, auditHistory, allEntities] = await Promise.all([
     db.all('SELECT * FROM entity_tags WHERE entity_id=$1 ORDER BY created_at DESC', [entity.id]),
     db.all('SELECT * FROM audit_logs WHERE target=$1 ORDER BY created_at DESC LIMIT 20', [entity.username]),
+    db.all('SELECT id, username, display_name, avatar_url, severity, status, profile_data FROM roblox_entities WHERE id != $1', [entity.id]),
   ]);
+
   entity.tags = tags;
   entity.profile = entity.profile_data;
 
+  // Shared group mapping
+  const myGroupIds = (entity.profile?.groups || []).map(g => g.group?.id).filter(Boolean);
+  const sharedWith = [];
+  if (myGroupIds.length > 0) {
+    for (const other of allEntities) {
+      const theirGroupIds = (other.profile_data?.groups || []).map(g => g.group?.id).filter(Boolean);
+      const sharedIds = myGroupIds.filter(id => theirGroupIds.includes(id));
+      if (sharedIds.length > 0) {
+        const sharedGroupNames = (entity.profile.groups || [])
+          .filter(g => sharedIds.includes(g.group?.id))
+          .map(g => g.group?.name)
+          .filter(Boolean);
+        sharedWith.push({ entity: other, count: sharedIds.length, groupNames: sharedGroupNames });
+      }
+    }
+    sharedWith.sort((a, b) => b.count - a.count);
+  }
+
+  // Consume session flash for refresh diff
+  const refreshDiff = req.session.refreshDiff || null;
+  if (req.session.refreshDiff) delete req.session.refreshDiff;
+
   await logAudit(actor(req), 'VIEW_ENTITY', entity.username, 'entity', null, req.ip);
-  res.render('watchlist/profile', { user: req.session.user, entity, auditHistory, info: req.query.info || null, added: req.query.added || null, page: 'watchlist' });
+  res.render('watchlist/profile', {
+    user: req.session.user,
+    entity,
+    auditHistory,
+    sharedWith,
+    refreshDiff,
+    info: req.query.info || null,
+    added: req.query.added || null,
+    page: 'watchlist',
+  });
 });
 
-// Refresh from Roblox API
+// ── Refresh from Roblox API (with diff) ───────────────────────
 router.post('/:id/refresh', requireAuth, async (req, res) => {
   const entity = await db.get('SELECT * FROM roblox_entities WHERE id=$1', [req.params.id]);
   if (!entity) return res.status(404).end();
-  const profile = await fullProfileFetch(entity.roblox_id);
-  if (profile.error) return res.redirect(`/watchlist/${entity.id}?refreshError=1`);
+
+  const oldP = entity.profile_data || {};
+  const newP = await fullProfileFetch(entity.roblox_id);
+  if (newP.error) return res.redirect(`/watchlist/${entity.id}?refreshError=1`);
+
+  // Compute diff
+  const diff = {};
+  for (const [key, label] of [['friends_count','Friends'],['followers_count','Followers'],['following_count','Following']]) {
+    if ((oldP[key] ?? null) !== (newP[key] ?? null)) {
+      diff[label] = { from: oldP[key] ?? '—', to: newP[key] ?? '—' };
+    }
+  }
+  const oldGroups = (oldP.groups || []).length;
+  const newGroups = (newP.groups || []).length;
+  if (oldGroups !== newGroups) diff['Groups'] = { from: oldGroups, to: newGroups };
+  if (!!oldP.is_banned !== !!newP.is_banned) {
+    diff['Account banned'] = { from: oldP.is_banned ? 'Yes' : 'No', to: newP.is_banned ? 'Yes' : 'No' };
+  }
+  if (oldP.description !== newP.description) diff['Bio'] = { from: 'changed', to: 'updated' };
+
   await db.run(
     'UPDATE roblox_entities SET username=$1, display_name=$2, avatar_url=$3, profile_data=$4, last_fetched=NOW() WHERE id=$5',
-    [profile.username, profile.display_name, profile.avatar_url, JSON.stringify(profile), entity.id]
+    [newP.username, newP.display_name, newP.avatar_url, JSON.stringify(newP), entity.id]
   );
-  await logAudit(actor(req), 'REFRESH_ENTITY', profile.username, 'entity', 'Profile refreshed from Roblox API', req.ip);
+  await logAudit(actor(req), 'REFRESH_ENTITY', newP.username, 'entity',
+    Object.keys(diff).length > 0
+      ? 'Changes: ' + Object.entries(diff).map(([k,v]) => `${k}: ${v.from}→${v.to}`).join(', ')
+      : 'No changes detected',
+    req.ip
+  );
+
+  req.session.refreshDiff = Object.keys(diff).length > 0 ? diff : null;
   res.redirect(`/watchlist/${entity.id}`);
 });
 
-// Update metadata
+// ── Update metadata ────────────────────────────────────────────
 router.post('/:id/update', requireAuth, async (req, res) => {
   const { severity, status, category, notes } = req.body;
   const entity = await db.get('SELECT * FROM roblox_entities WHERE id=$1', [req.params.id]);
@@ -151,25 +255,23 @@ router.post('/:id/update', requireAuth, async (req, res) => {
   res.redirect(`/watchlist/${entity.id}`);
 });
 
-// Add tag
+// ── Add tag ────────────────────────────────────────────────────
 router.post('/:id/tags', requireAuth, async (req, res) => {
   const { tag } = req.body;
   if (!tag) return res.redirect(`/watchlist/${req.params.id}`);
   const tagClean = tag.trim().toUpperCase().slice(0, 30);
   const existing = await db.get('SELECT id FROM entity_tags WHERE entity_id=$1 AND tag=$2', [req.params.id, tagClean]);
-  if (!existing) {
-    await db.run('INSERT INTO entity_tags (entity_id, tag, created_by) VALUES ($1,$2,$3)', [req.params.id, tagClean, actor(req)]);
-  }
+  if (!existing) await db.run('INSERT INTO entity_tags (entity_id, tag, created_by) VALUES ($1,$2,$3)', [req.params.id, tagClean, actor(req)]);
   res.redirect(`/watchlist/${req.params.id}`);
 });
 
-// Remove tag
+// ── Remove tag ─────────────────────────────────────────────────
 router.post('/:id/tags/remove', requireAuth, async (req, res) => {
   await db.run('DELETE FROM entity_tags WHERE entity_id=$1 AND tag=$2', [req.params.id, req.body.tag]);
   res.redirect(`/watchlist/${req.params.id}`);
 });
 
-// Delete entity
+// ── Delete entity ──────────────────────────────────────────────
 router.post('/:id/delete', requireAuth, async (req, res) => {
   const entity = await db.get('SELECT * FROM roblox_entities WHERE id=$1', [req.params.id]);
   if (entity) {

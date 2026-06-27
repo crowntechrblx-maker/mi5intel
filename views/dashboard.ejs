@@ -5,10 +5,13 @@
     <span class="govuk-caption-m">HM GOVERNMENT INTELLIGENCE DATABASE</span>
     <h1 class="govuk-heading-xl">Intelligence Desk</h1>
   </div>
-  <a href="/watchlist/add" class="govuk-button govuk-button--primary">+ Register Entity</a>
+  <div class="govuk-page-header__actions">
+    <a href="/watchlist/batch" class="govuk-button govuk-button--secondary">BATCH UPLOAD</a>
+    <a href="/watchlist/add" class="govuk-button govuk-button--primary">+ Register Entity</a>
+  </div>
 </div>
 
-<div class="stats-grid">
+<div class="stats-grid stats-grid--5">
   <div class="stat-card">
     <div class="stat-value"><%= stats.total %></div>
     <div class="stat-label">TOTAL ENTITIES</div>
@@ -20,6 +23,10 @@
   <div class="stat-card stat-card--high">
     <div class="stat-value"><%= stats.high %></div>
     <div class="stat-label">HIGH SEVERITY</div>
+  </div>
+  <div class="stat-card stat-card--medium">
+    <div class="stat-value"><%= stats.medium %></div>
+    <div class="stat-label">MEDIUM SEVERITY</div>
   </div>
   <div class="stat-card stat-card--active">
     <div class="stat-value"><%= stats.active %></div>
@@ -40,15 +47,11 @@
         <% recent.forEach(function(e) { %>
         <a href="/watchlist/<%= e.id %>" class="entity-row">
           <div class="entity-avatar">
-            <% if (e.avatar_url) { %>
-              <img src="<%= e.avatar_url %>" alt="<%= e.username %>">
-            <% } else { %>
-              <span><%= e.username.charAt(0).toUpperCase() %></span>
-            <% } %>
+            <% if (e.avatar_url) { %><img src="<%= e.avatar_url %>" alt=""><% } else { %><span><%= e.username.charAt(0).toUpperCase() %></span><% } %>
           </div>
           <div class="entity-info">
             <div class="entity-username"><%= e.username %></div>
-            <div class="entity-meta"><%= e.display_name || '' %><% if (e.display_name) { %> &bull; <% } %>RBX: <%= e.roblox_id %></div>
+            <div class="entity-meta">RBX: <%= e.roblox_id %><% if (e.category) { %> &bull; <%= e.category %><% } %></div>
           </div>
           <div class="entity-badges">
             <strong class="govuk-tag govuk-tag--sev-<%= e.severity.toLowerCase() %>"><%= e.severity %></strong>

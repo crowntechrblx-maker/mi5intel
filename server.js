@@ -46,37 +46,54 @@ async function main() {
 
   // Dashboard
   app.get('/', requireAuth, async (req, res) => {
-    const [total, critical, high, active, recent, recentLogs] = await Promise.all([
+    const [total, critical, high, medium, active, recent, recentLogs] = await Promise.all([
       db.get('SELECT COUNT(*) AS cnt FROM roblox_entities'),
       db.get("SELECT COUNT(*) AS cnt FROM roblox_entities WHERE severity='CRITICAL'"),
       db.get("SELECT COUNT(*) AS cnt FROM roblox_entities WHERE severity='HIGH'"),
+      db.get("SELECT COUNT(*) AS cnt FROM roblox_entities WHERE severity='MEDIUM'"),
       db.get("SELECT COUNT(*) AS cnt FROM roblox_entities WHERE status='ACTIVE'"),
-      db.all('SELECT * FROM roblox_entities ORDER BY added_at DESC LIMIT 5'),
-      db.all('SELECT * FROM audit_logs ORDER BY created_at DESC LIMIT 10'),
+      db.all('SELECT * FROM roblox_entities ORDER BY added_at DESC LIMIT 6'),
+      db.all('SELECT * FROM audit_logs ORDER BY created_at DESC LIMIT 12'),
     ]);
     res.render('dashboard', {
       user: req.session.user,
-      stats: {
-        total: total.cnt,
-        critical: critical.cnt,
-        high: high.cnt,
-        active: active.cnt,
-      },
+      stats: { total: total.cnt, critical: critical.cnt, high: high.cnt, medium: medium.cnt, active: active.cnt },
       recent,
       recentLogs,
       page: 'dashboard',
     });
   });
 
+  // Global search
+  app.get('/search', requireAuth, async (req, res) => {
+    const q = (req.query.q || '').trim();
+    if (q.length < 2) {
+      return res.render('search', { user: req.session.user, q, entities: [], logs: [], page: null });
+    }
+    const like = `%${q}%`;
+    const [entities, logs] = await Promise.all([
+      db.all(
+        `SELECT * FROM roblox_entities WHERE username ILIKE $1 OR display_name ILIKE $1 OR roblox_id::text ILIKE $1 OR category ILIKE $1 ORDER BY added_at DESC LIMIT 20`,
+        [like]
+      ),
+      db.all(
+        `SELECT * FROM audit_logs WHERE actor ILIKE $1 OR target ILIKE $1 OR details ILIKE $1 ORDER BY created_at DESC LIMIT 20`,
+        [like]
+      ),
+    ]);
+    res.render('search', { user: req.session.user, q, entities, logs, page: null });
+  });
+
   // Audit logs
   app.get('/audit', requireAuth, async (req, res) => {
-    const { actor, action, page: pageNum } = req.query;
+    const { actor, action, target, page: pageNum } = req.query;
     const limit = 50;
     const offset = (parseInt(pageNum) - 1 || 0) * limit;
     const conditions = ['1=1'];
     const params = [];
-    if (actor) { conditions.push(`actor ILIKE $${params.length + 1}`); params.push(`%${actor}%`); }
-    if (action) { conditions.push(`action = $${params.length + 1}`); params.push(action); }
+    if (actor)  { conditions.push(`actor ILIKE $${params.length + 1}`);  params.push(`%${actor}%`); }
+    if (action) { conditions.push(`action = $${params.length + 1}`);     params.push(action); }
+    if (target) { conditions.push(`target ILIKE $${params.length + 1}`); params.push(`%${target}%`); }
     const where = conditions.join(' AND ');
     const [logs, totalRow] = await Promise.all([
       db.all(`SELECT * FROM audit_logs WHERE ${where} ORDER BY created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`, [...params, limit, offset]),
@@ -88,7 +105,7 @@ async function main() {
       total: parseInt(totalRow.cnt),
       limit,
       offset,
-      filters: { actor, action },
+      filters: { actor, action, target },
       page: 'audit',
     });
   });

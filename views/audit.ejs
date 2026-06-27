@@ -9,8 +9,9 @@
 
 <div class="filter-bar">
   <form action="/audit" method="GET" class="filter-form">
-    <input class="search-input" type="text" name="actor" value="<%= filters.actor || '' %>" placeholder="Filter by operator...">
-    <select name="action" class="filter-select">
+    <input class="search-input" type="text" name="actor" value="<%= filters.actor || '' %>" placeholder="Filter by operator…" style="max-width:180px">
+    <input class="search-input" type="text" name="target" value="<%= filters.target || '' %>" placeholder="Filter by target entity…" style="max-width:200px">
+    <select name="action" class="filter-select" style="width:auto">
       <option value="">ALL ACTIONS</option>
       <% ['LOGIN','LOGOUT','FAILED_LOGIN','ADD_ENTITY','VIEW_ENTITY','UPDATE_ENTITY','REFRESH_ENTITY','DELETE_ENTITY','CREATE_USER','DELETE_USER','CHANGE_ROLE','RESET_PASSWORD'].forEach(function(a) { %>
       <option value="<%= a %>" <%= filters.action === a ? 'selected' : '' %>><%= a.replace(/_/g,' ') %></option>
@@ -57,11 +58,12 @@
 <div class="table-footer">
   <span class="table-count">Showing <%= offset + 1 %>–<%= Math.min(offset + limit, total) %> of <%= total %> records</span>
   <div class="pagination">
+    <% const auditPage = Math.floor(offset/limit) + 1; const auditQs = `actor=${filters.actor||''}&action=${filters.action||''}&target=${filters.target||''}`; %>
     <% if (offset > 0) { %>
-    <a href="/audit?page=<%= Math.floor(offset/limit) %>&actor=<%= filters.actor||'' %>&action=<%= filters.action||'' %>" class="btn btn-ghost btn-sm">← PREV</a>
+    <a href="/audit?page=<%= auditPage - 1 %>&<%= auditQs %>" class="btn btn-ghost btn-sm">← PREV</a>
     <% } %>
     <% if (offset + limit < total) { %>
-    <a href="/audit?page=<%= Math.floor(offset/limit) + 2 %>&actor=<%= filters.actor||'' %>&action=<%= filters.action||'' %>" class="btn btn-ghost btn-sm">NEXT →</a>
+    <a href="/audit?page=<%= auditPage + 1 %>&<%= auditQs %>" class="btn btn-ghost btn-sm">NEXT →</a>
     <% } %>
   </div>
 </div>

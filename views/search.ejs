@@ -1,0 +1,87 @@
+<%- include('partials/header', { pageTitle: 'Search', page: null, q: q }) %>
+
+<div class="govuk-page-header">
+  <div>
+    <span class="govuk-caption-m">GLOBAL INTELLIGENCE SEARCH</span>
+    <h1 class="govuk-heading-xl"><% if (q) { %>Results for "<%= q %>"<% } else { %>Search<% } %></h1>
+  </div>
+</div>
+
+<form action="/search" method="GET" class="filter-form" style="margin-bottom:24px">
+  <div class="search-wrap" style="max-width:480px">
+    <svg class="search-icon" width="14" height="14" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/></svg>
+    <input class="search-input" type="search" name="q" value="<%= q %>" placeholder="Search entities, audit logs…" autofocus>
+  </div>
+  <button type="submit" class="btn btn-primary btn-sm">SEARCH</button>
+</form>
+
+<% if (q && q.length < 2) { %>
+<div class="govuk-notification-banner govuk-notification-banner--info">
+  <div class="govuk-notification-banner__header">QUERY TOO SHORT</div>
+  <div class="govuk-notification-banner__content">Enter at least 2 characters to search.</div>
+</div>
+<% } %>
+
+<% if (q && q.length >= 2) { %>
+
+<!-- Entity results -->
+<div class="panel" style="margin-bottom:24px">
+  <div class="panel-header">
+    <span class="panel-title">ENTITY REGISTRY</span>
+    <span class="govuk-tag govuk-tag--<%= entities.length > 0 ? 'blue' : 'grey' %>"><%= entities.length %> RESULT<%= entities.length !== 1 ? 'S' : '' %></span>
+  </div>
+  <% if (entities.length === 0) { %>
+  <div class="empty-state">No entities match "<%= q %>".</div>
+  <% } else { %>
+  <div class="panel-body--compact">
+    <% entities.forEach(function(e) { %>
+    <a href="/watchlist/<%= e.id %>" class="entity-row">
+      <div class="entity-avatar">
+        <% if (e.avatar_url) { %><img src="<%= e.avatar_url %>" alt=""><% } else { %><span><%= e.username.charAt(0).toUpperCase() %></span><% } %>
+      </div>
+      <div class="entity-info">
+        <div class="entity-username"><%= e.username %></div>
+        <div class="entity-meta">RBX: <%= e.roblox_id %><% if (e.display_name && e.display_name !== e.username) { %> · <%= e.display_name %><% } %><% if (e.category) { %> · <%= e.category %><% } %></div>
+      </div>
+      <div class="entity-badges">
+        <strong class="govuk-tag govuk-tag--sev-<%= e.severity.toLowerCase() %>"><%= e.severity %></strong>
+        <strong class="govuk-tag govuk-tag--status-<%= e.status.toLowerCase() %>"><%= e.status %></strong>
+      </div>
+    </a>
+    <% }); %>
+    <% if (entities.length === 20) { %>
+    <div style="padding:8px 16px;font-size:11px;color:var(--mid-grey);font-family:var(--mono)">Showing first 20 results — <a href="/watchlist?q=<%= encodeURIComponent(q) %>">view all in Watchlist</a></div>
+    <% } %>
+  </div>
+  <% } %>
+</div>
+
+<!-- Audit log results -->
+<div class="panel">
+  <div class="panel-header">
+    <span class="panel-title">AUDIT LOG EVENTS</span>
+    <span class="govuk-tag govuk-tag--<%= logs.length > 0 ? 'blue' : 'grey' %>"><%= logs.length %> RESULT<%= logs.length !== 1 ? 'S' : '' %></span>
+  </div>
+  <% if (logs.length === 0) { %>
+  <div class="empty-state">No audit events match "<%= q %>".</div>
+  <% } else { %>
+  <div class="panel-body--compact">
+    <% logs.forEach(function(log) { %>
+    <div class="audit-row" style="padding:8px 16px">
+      <span class="audit-action-badge"><%= log.action.replace(/_/g,' ') %></span>
+      <span class="audit-actor"><%= log.actor %></span>
+      <% if (log.target) { %><span class="audit-target"><%= log.target %></span><% } %>
+      <% if (log.details) { %><span style="font-size:11px;color:var(--mid-grey);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><%= log.details %></span><% } %>
+      <span class="audit-time"><%= new Date(log.created_at).toLocaleString('en-GB') %></span>
+    </div>
+    <% }); %>
+    <% if (logs.length === 20) { %>
+    <div style="padding:8px 16px;font-size:11px;color:var(--mid-grey);font-family:var(--mono)">Showing first 20 results — <a href="/audit?actor=<%= encodeURIComponent(q) %>">view all in Audit Logs</a></div>
+    <% } %>
+  </div>
+  <% } %>
+</div>
+
+<% } %>
+
+<%- include('partials/footer') %>

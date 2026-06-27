@@ -1,4 +1,4 @@
-<%- include('../partials/header', { pageTitle: 'Watchlist' }) %>
+<%- include('../partials/header', { pageTitle: 'Watchlist', page: 'watchlist' }) %>
 
 <div class="govuk-page-header">
   <div>
@@ -6,6 +6,7 @@
     <h1 class="govuk-heading-xl">Watchlist Database</h1>
   </div>
   <div class="govuk-page-header__actions">
+    <a href="/watchlist/export?<%= new URLSearchParams(filters).toString() %>" class="govuk-button govuk-button--secondary" title="Download current view as CSV">↓ EXPORT CSV</a>
     <a href="/watchlist/batch" class="govuk-button govuk-button--secondary">BATCH UPLOAD</a>
     <a href="/watchlist/add" class="govuk-button govuk-button--primary">+ REGISTER ENTITY</a>
   </div>
@@ -14,17 +15,17 @@
 <div class="filter-bar">
   <form action="/watchlist" method="GET" class="filter-form">
     <div class="search-wrap">
-      <svg class="search-icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/></svg>
+      <svg class="search-icon" width="14" height="14" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/></svg>
       <input class="search-input" type="text" name="q" value="<%= filters.q || '' %>" placeholder="Search by username, category, Roblox ID…">
     </div>
-    <select name="severity" class="filter-select">
+    <select name="severity" class="filter-select" style="width:auto">
       <option value="">ALL SEVERITIES</option>
       <option value="CRITICAL" <%= filters.severity === 'CRITICAL' ? 'selected' : '' %>>CRITICAL</option>
       <option value="HIGH"     <%= filters.severity === 'HIGH'     ? 'selected' : '' %>>HIGH</option>
       <option value="MEDIUM"   <%= filters.severity === 'MEDIUM'   ? 'selected' : '' %>>MEDIUM</option>
       <option value="LOW"      <%= filters.severity === 'LOW'      ? 'selected' : '' %>>LOW</option>
     </select>
-    <select name="status" class="filter-select">
+    <select name="status" class="filter-select" style="width:auto">
       <option value="">ALL STATUSES</option>
       <option value="ACTIVE"   <%= filters.status === 'ACTIVE'   ? 'selected' : '' %>>ACTIVE</option>
       <option value="INACTIVE" <%= filters.status === 'INACTIVE' ? 'selected' : '' %>>INACTIVE</option>
@@ -40,12 +41,12 @@
   <table class="govuk-table">
     <thead class="govuk-table__head">
       <tr>
-        <th class="govuk-table__header" style="width:60px">#</th>
+        <th class="govuk-table__header" style="width:54px">#</th>
         <th class="govuk-table__header">TARGET IDENTITY</th>
-        <th class="govuk-table__header">CATEGORY</th>
+        <th class="govuk-table__header">CATEGORY / TAGS</th>
         <th class="govuk-table__header">SEVERITY</th>
         <th class="govuk-table__header">STATUS</th>
-        <th class="govuk-table__header" style="width:120px"></th>
+        <th class="govuk-table__header" style="width:110px"></th>
       </tr>
     </thead>
     <tbody class="govuk-table__body">
@@ -59,33 +60,22 @@
       <% entities.forEach(function(e) { %>
       <tr class="govuk-table__row entity-tr" data-href="/watchlist/<%= e.id %>">
         <td class="govuk-table__cell">
-          <span class="entity-index"><%= String(e.id).padStart(4, '0') %></span>
+          <span class="entity-index"><%= String(e.id).padStart(4,'0') %></span>
         </td>
         <td class="govuk-table__cell">
           <div class="identity-cell">
             <div class="table-avatar">
-              <% if (e.avatar_url) { %>
-                <img src="<%= e.avatar_url %>" alt="">
-              <% } else { %>
-                <span><%= e.username.charAt(0).toUpperCase() %></span>
-              <% } %>
+              <% if (e.avatar_url) { %><img src="<%= e.avatar_url %>" alt=""><% } else { %><span><%= e.username.charAt(0).toUpperCase() %></span><% } %>
             </div>
             <div>
               <div class="table-username"><%= e.username %></div>
-              <div class="table-meta">
-                <%= e.display_name && e.display_name !== e.username ? e.display_name + ' &bull; ' : '' %>
-                <%= e.roblox_id %>
-              </div>
+              <div class="table-meta"><%= e.display_name && e.display_name !== e.username ? e.display_name + ' · ' : '' %><%= e.roblox_id %></div>
             </div>
           </div>
         </td>
         <td class="govuk-table__cell">
           <span class="category-tag"><%= e.category %></span>
-          <% if (e.tags && e.tags.length > 0) { %>
-            <% e.tags.slice(0, 2).forEach(function(tag) { %>
-            <span class="mini-tag"><%= tag %></span>
-            <% }); %>
-          <% } %>
+          <% if (e.tags && e.tags.length > 0) { %><% e.tags.slice(0,2).forEach(function(tag) { %><span class="mini-tag"><%= tag %></span><% }); %><% } %>
         </td>
         <td class="govuk-table__cell">
           <strong class="govuk-tag govuk-tag--sev-<%= e.severity.toLowerCase() %>"><%= e.severity %></strong>
@@ -102,7 +92,17 @@
     </tbody>
   </table>
   <div class="table-footer">
-    <span class="table-count"><%= entities.length %> ENTITY INDEX<%= entities.length !== 1 ? 'ES' : '' %> WITHIN CURRENT PARAMETERS</span>
+    <span class="table-count">
+      Showing <%= offset + 1 %>–<%= Math.min(offset + limit, total) %> of <%= total %> entit<%= total !== 1 ? 'ies' : 'y' %>
+    </span>
+    <div class="pagination">
+      <% if (offset > 0) { %>
+      <a href="/watchlist?page=<%= pageNum - 1 %>&q=<%= filters.q||'' %>&severity=<%= filters.severity||'' %>&status=<%= filters.status||'' %>" class="btn btn-ghost btn-sm">← PREV</a>
+      <% } %>
+      <% if (offset + limit < total) { %>
+      <a href="/watchlist?page=<%= pageNum + 1 %>&q=<%= filters.q||'' %>&severity=<%= filters.severity||'' %>&status=<%= filters.status||'' %>" class="btn btn-ghost btn-sm">NEXT →</a>
+      <% } %>
+    </div>
   </div>
 </div>
 

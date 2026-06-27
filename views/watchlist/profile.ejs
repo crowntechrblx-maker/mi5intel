@@ -113,6 +113,56 @@
   <!-- RIGHT: Detailed data -->
   <div class="profile-right">
 
+    <!-- Refresh diff -->
+    <% if (refreshDiff && Object.keys(refreshDiff).length > 0) { %>
+    <div class="govuk-notification-banner govuk-notification-banner--info" style="margin-bottom:16px">
+      <div class="govuk-notification-banner__header">API REFRESH — CHANGES DETECTED</div>
+      <div class="govuk-notification-banner__content">
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <% Object.entries(refreshDiff).forEach(function([field, val]) { %>
+          <tr>
+            <td style="padding:3px 12px 3px 0;color:var(--mid-grey);font-family:var(--mono);font-size:10px;text-transform:uppercase;white-space:nowrap"><%= field %></td>
+            <td style="padding:3px 8px 3px 0;color:#e08080;text-decoration:line-through"><%= val.from %></td>
+            <td style="padding:3px 8px 3px 0;color:var(--mid-grey)">→</td>
+            <td style="padding:3px 0;color:#5cb88a;font-weight:600"><%= val.to %></td>
+          </tr>
+          <% }); %>
+        </table>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Shared group affiliations with other watched entities -->
+    <% if (sharedWith && sharedWith.length > 0) { %>
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">NETWORK OVERLAP — SHARED GROUP AFFILIATIONS</span>
+        <span class="govuk-tag govuk-tag--red"><%= sharedWith.length %> LINKED</span>
+      </div>
+      <div class="panel-body--compact">
+        <% sharedWith.forEach(function(link) { %>
+        <a href="/watchlist/<%= link.entity.id %>" class="entity-row">
+          <div class="entity-avatar">
+            <% if (link.entity.avatar_url) { %><img src="<%= link.entity.avatar_url %>" alt=""><% } else { %><span><%= link.entity.username.charAt(0).toUpperCase() %></span><% } %>
+          </div>
+          <div class="entity-info">
+            <div class="entity-username"><%= link.entity.username %></div>
+            <div class="entity-meta" style="font-size:11px">
+              Shares <%= link.count %> group<%= link.count !== 1 ? 's' : '' %>:
+              <% link.groupNames.slice(0,3).forEach(function(n) { %><span class="mini-tag"><%= n %></span><% }); %>
+              <% if (link.groupNames.length > 3) { %><span style="color:var(--mid-grey)">+<%= link.groupNames.length - 3 %> more</span><% } %>
+            </div>
+          </div>
+          <div class="entity-badges">
+            <strong class="govuk-tag govuk-tag--sev-<%= link.entity.severity.toLowerCase() %>"><%= link.entity.severity %></strong>
+            <strong class="govuk-tag govuk-tag--status-<%= link.entity.status.toLowerCase() %>"><%= link.entity.status %></strong>
+          </div>
+        </a>
+        <% }); %>
+      </div>
+    </div>
+    <% } %>
+
     <!-- Bio -->
     <% if (p && p.description) { %>
     <div class="panel">
