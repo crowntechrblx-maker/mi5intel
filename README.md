@@ -69,7 +69,7 @@ Every time an entity's profile is refreshed (manually or by the auto-scheduler),
 
 Links are bidirectional — visible on both entities' dossiers. Optional notes per link. Full audit trail on creation and removal.
 
-### API Refresh & Diff
+### API Refresh & Diff``` 
 
 - **Manual refresh** — re-fetches live Roblox API data for any entity on demand
 - **Diff banner** — after a refresh, a one-time banner shows exactly what changed (old value → new value) for every affected field

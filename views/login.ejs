@@ -4,78 +4,372 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Authentication — MI5 Intel Portal</title>
-  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="/favicon.svg" type="image/png">
+  <meta name="robots" content="noindex, nofollow">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      background: #000;
+      color: #fff;
+      font-family: 'Courier New', Courier, monospace;
+      overflow-x: hidden;
+    }
+
+    /* ── Scanline overlay ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(255,255,255,0.015) 2px,
+        rgba(255,255,255,0.015) 4px
+      );
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    /* ── Layout ── */
+    .terminal-wrap {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px 80px;
+      position: relative;
+    }
+
+    /* ── Header: crest + title side by side ── */
+    .terminal-header {
+      display: flex;
+      align-items: center;
+      gap: 40px;
+      margin-bottom: 56px;
+      width: 100%;
+      max-width: 760px;
+    }
+
+    /* ── Crest ── */
+    .terminal-crest {
+      flex-shrink: 0;
+      width: 140px;
+      height: 140px;
+      opacity: 0.92;
+    }
+
+    /* ── Title block ── */
+    .terminal-title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .terminal-service {
+      font-size: 11px;
+      letter-spacing: 4px;
+      color: #888;
+      text-transform: uppercase;
+    }
+    .terminal-title {
+      font-size: clamp(22px, 4vw, 34px);
+      font-weight: 700;
+      letter-spacing: 8px;
+      text-transform: uppercase;
+      color: #fff;
+      line-height: 1.1;
+    }
+    .terminal-divider {
+      width: 100%;
+      height: 1px;
+      background: #333;
+      margin-top: 10px;
+    }
+
+    /* ── Form card ── */
+    .terminal-card {
+      width: 100%;
+      max-width: 480px;
+      border: 1px solid #222;
+      background: #030303;
+      padding: 36px 40px;
+    }
+
+    .terminal-card.shake {
+      animation: shake 0.42s cubic-bezier(.36,.07,.19,.97) both;
+    }
+    @keyframes shake {
+      10%, 90% { transform: translateX(-2px); }
+      20%, 80% { transform: translateX(4px); }
+      30%, 50%, 70% { transform: translateX(-6px); }
+      40%, 60% { transform: translateX(6px); }
+    }
+
+    .terminal-form-title {
+      font-size: 11px;
+      letter-spacing: 4px;
+      color: #555;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      border-bottom: 1px solid #1a1a1a;
+      padding-bottom: 14px;
+    }
+
+    /* ── Alerts ── */
+    .terminal-alert {
+      font-size: 12px;
+      letter-spacing: 1px;
+      padding: 10px 14px;
+      border-left: 3px solid;
+      margin-bottom: 20px;
+    }
+    .terminal-alert--error {
+      border-color: #c00;
+      background: rgba(200,0,0,0.06);
+      color: #e05555;
+    }
+    .terminal-alert--success {
+      border-color: #005930;
+      background: rgba(0,89,48,0.08);
+      color: #3d9970;
+    }
+    .terminal-alert-label {
+      font-weight: 700;
+      display: block;
+      margin-bottom: 3px;
+      font-size: 10px;
+      letter-spacing: 3px;
+    }
+
+    /* ── Form fields ── */
+    .terminal-field {
+      margin-bottom: 22px;
+    }
+    .terminal-label {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: #666;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .terminal-input {
+      width: 100%;
+      background: #000;
+      border: none;
+      border-bottom: 1px solid #333;
+      color: #fff;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 15px;
+      padding: 8px 0;
+      outline: none;
+      transition: border-color 0.2s;
+      letter-spacing: 2px;
+    }
+    .terminal-input:focus {
+      border-bottom-color: #fff;
+    }
+    .terminal-input::placeholder {
+      color: #2a2a2a;
+    }
+
+    /* cursor blink on focused input */
+    .terminal-input:focus {
+      caret-color: #fff;
+    }
+
+    /* ── Submit button ── */
+    .terminal-submit {
+      width: 100%;
+      margin-top: 8px;
+      background: transparent;
+      border: 1px solid #444;
+      color: #fff;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 11px;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      padding: 13px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    .terminal-submit:hover {
+      background: #fff;
+      border-color: #fff;
+      color: #000;
+    }
+    .terminal-submit:active {
+      background: #ccc;
+    }
+
+    /* ── Bottom warning ── */
+    .terminal-warning {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #000;
+      border-top: 1px solid #111;
+      padding: 14px 32px;
+      font-size: 10px;
+      color: #333;
+      letter-spacing: 1.5px;
+      text-align: center;
+      line-height: 1.6;
+    }
+  </style>
 </head>
-<body class="auth-body">
-  <div class="auth-container">
-    <div class="auth-header">
-      <!-- MI5 Triangle Logo (large) -->
-      <div class="auth-crown">
-        <svg class="auth-mi5-logo" viewBox="0 0 110 96" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <polygon points="55,3 107,93 3,93" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
-          <line x1="14" y1="80" x2="96" y2="80" stroke="currentColor" stroke-width="1.5"/>
-          <line x1="32" y1="80" x2="32" y2="93" stroke="currentColor" stroke-width="1"/>
-          <line x1="78" y1="80" x2="78" y2="93" stroke="currentColor" stroke-width="1"/>
-          <text x="55" y="19" text-anchor="middle" font-size="7" fill="currentColor" font-weight="700" font-family="serif">I</text>
-          <ellipse cx="55" cy="28" rx="8.5" ry="5.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
-          <circle cx="55" cy="28" r="3" fill="currentColor"/>
-          <circle cx="55" cy="28" r="1.2" fill="none" stroke="currentColor" stroke-width="0.5"/>
-          <text x="55" y="44" text-anchor="middle" font-size="8" fill="currentColor" font-weight="700" font-family="serif" letter-spacing="2">EIIR</text>
-          <line x1="55" y1="47" x2="55" y2="56" stroke="currentColor" stroke-width="1.5"/>
-          <line x1="50" y1="51" x2="60" y2="51" stroke="currentColor" stroke-width="1.5"/>
-          <rect x="43" y="72" width="24" height="6" stroke="currentColor" stroke-width="1.2" fill="none"/>
-          <polyline points="43,72 43,63 48,68 52,58 55,65 58,58 62,68 67,63 67,72" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
-          <circle cx="43" cy="63" r="1.2" fill="currentColor"/>
-          <circle cx="55" cy="65" r="1.2" fill="currentColor"/>
-          <circle cx="67" cy="63" r="1.2" fill="currentColor"/>
-          <rect x="44" y="58" width="22" height="9" rx="1" stroke="currentColor" stroke-width="1" fill="black" stroke-dasharray="1.5 1"/>
-          <text x="55" y="65.5" text-anchor="middle" font-size="7" fill="currentColor" font-weight="700" font-family="serif" letter-spacing="1.5">007</text>
-          <text x="25" y="77" text-anchor="middle" font-size="6.5" fill="currentColor" font-weight="700" font-family="serif">U.</text>
-          <text x="85" y="77" text-anchor="middle" font-size="6.5" fill="currentColor" font-weight="700" font-family="serif">K.</text>
-          <text x="23" y="90" text-anchor="middle" font-size="5.5" fill="currentColor" font-weight="700" font-family="serif">M</text>
-          <text x="55" y="90" text-anchor="middle" font-size="5" fill="currentColor" font-weight="700" font-family="serif" letter-spacing="1.2">INTELLIGENCE</text>
-          <text x="87" y="90" text-anchor="middle" font-size="5.5" fill="currentColor" font-weight="700" font-family="serif">V</text>
-        </svg>
-      </div>
-      <span class="auth-gov-dept">Military Intelligence Section 5</span>
-      <span class="auth-service-name">Intel Portal</span>
-      <div style="margin-top:8px">
-        <span class="header-phase">RESTRICTED — INTERNAL ONLY</span>
-      </div>
+<body>
+
+<div class="terminal-wrap">
+
+  <!-- ─── Crest + Title ─── -->
+  <div class="terminal-header">
+
+    <!-- Government Crest -->
+    <svg class="terminal-crest" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <!-- Outer ring -->
+      <circle cx="100" cy="100" r="96" stroke="#fff" stroke-width="1.2" fill="none" opacity="0.9"/>
+      <circle cx="100" cy="100" r="88" stroke="#fff" stroke-width="0.5" fill="none" opacity="0.3"/>
+
+      <!-- Wreath — left side -->
+      <g stroke="#fff" stroke-width="1" fill="none" opacity="0.75">
+        <ellipse cx="22" cy="100" rx="6" ry="10" transform="rotate(-20 22 100)"/>
+        <ellipse cx="28" cy="78"  rx="6" ry="10" transform="rotate(-40 28 78)"/>
+        <ellipse cx="40" cy="60"  rx="6" ry="10" transform="rotate(-60 40 60)"/>
+        <ellipse cx="57" cy="46"  rx="6" ry="10" transform="rotate(-78 57 46)"/>
+        <ellipse cx="24" cy="122" rx="6" ry="10" transform="rotate(0 24 122)"/>
+        <ellipse cx="32" cy="144" rx="6" ry="10" transform="rotate(20 32 144)"/>
+        <ellipse cx="46" cy="160" rx="6" ry="10" transform="rotate(40 46 160)"/>
+        <ellipse cx="64" cy="171" rx="6" ry="10" transform="rotate(60 64 171)"/>
+      </g>
+      <!-- Wreath — right side (mirror) -->
+      <g stroke="#fff" stroke-width="1" fill="none" opacity="0.75">
+        <ellipse cx="178" cy="100" rx="6" ry="10" transform="rotate(20 178 100)"/>
+        <ellipse cx="172" cy="78"  rx="6" ry="10" transform="rotate(40 172 78)"/>
+        <ellipse cx="160" cy="60"  rx="6" ry="10" transform="rotate(60 160 60)"/>
+        <ellipse cx="143" cy="46"  rx="6" ry="10" transform="rotate(78 143 46)"/>
+        <ellipse cx="176" cy="122" rx="6" ry="10" transform="rotate(0 176 122)"/>
+        <ellipse cx="168" cy="144" rx="6" ry="10" transform="rotate(-20 168 144)"/>
+        <ellipse cx="154" cy="160" rx="6" ry="10" transform="rotate(-40 154 160)"/>
+        <ellipse cx="136" cy="171" rx="6" ry="10" transform="rotate(-60 136 171)"/>
+      </g>
+
+      <!-- Crown base -->
+      <g stroke="#fff" fill="none">
+        <!-- Crown bottom band -->
+        <rect x="68" y="42" width="64" height="8" rx="1" stroke-width="1.2"/>
+        <!-- Crown arches -->
+        <path d="M68 42 Q72 24 80 20 Q88 36 96 38" stroke-width="1.2"/>
+        <path d="M96 38 Q100 26 100 20 Q100 26 104 38" stroke-width="1.2"/>
+        <path d="M104 38 Q112 36 120 20 Q128 24 132 42" stroke-width="1.2"/>
+        <!-- Crown orbs -->
+        <circle cx="68"  cy="42" r="4" fill="#fff" stroke="none"/>
+        <circle cx="80"  cy="20" r="4" fill="#fff" stroke="none"/>
+        <circle cx="100" cy="20" r="5" fill="#fff" stroke="none"/>
+        <circle cx="120" cy="20" r="4" fill="#fff" stroke="none"/>
+        <circle cx="132" cy="42" r="4" fill="#fff" stroke="none"/>
+      </g>
+
+      <!-- Shield body -->
+      <path d="M76 60 L76 108 Q76 124 100 134 Q124 124 124 108 L124 60 Z"
+            stroke="#fff" stroke-width="1.3" fill="none"/>
+
+      <!-- Shield quartering cross -->
+      <line x1="100" y1="60" x2="100" y2="134" stroke="#fff" stroke-width="0.8" opacity="0.5"/>
+      <line x1="76"  y1="97" x2="124" y2="97"  stroke="#fff" stroke-width="0.8" opacity="0.5"/>
+
+      <!-- Top-left: three lions passant (simplified) -->
+      <g fill="#fff" opacity="0.85">
+        <path d="M81 64 Q85 62 87 65 Q88 68 85 70 Q82 70 81 68 Z" />
+        <path d="M81 72 Q85 70 87 73 Q88 76 85 78 Q82 78 81 76 Z" />
+        <path d="M81 80 Q85 78 87 81 Q88 84 85 86 Q82 86 81 84 Z" />
+      </g>
+      <!-- Top-right: rampant lion (simplified) -->
+      <g fill="none" stroke="#fff" stroke-width="1" opacity="0.85">
+        <path d="M109 64 Q112 60 116 63 Q118 68 115 72 Q112 74 110 70 Q108 66 109 64 Z"/>
+        <line x1="113" y1="72" x2="113" y2="88"/>
+        <line x1="109" y1="78" x2="117" y2="78"/>
+      </g>
+      <!-- Bottom-left: harp (simplified) -->
+      <g stroke="#fff" stroke-width="1" fill="none" opacity="0.85">
+        <path d="M84 100 Q83 118 88 126 Q91 128 91 120 L91 100 Z"/>
+        <line x1="84" y1="100" x2="91" y2="100"/>
+        <path d="M84 100 Q88 94 91 100"/>
+      </g>
+      <!-- Bottom-right: fleur-de-lis (simplified) -->
+      <g fill="#fff" opacity="0.85">
+        <ellipse cx="113" cy="110" rx="2" ry="6"/>
+        <ellipse cx="108" cy="108" rx="3" ry="2"/>
+        <ellipse cx="118" cy="108" rx="3" ry="2"/>
+        <rect    x="112" y="116" width="2" height="8"/>
+      </g>
+
+      <!-- Motto banner -->
+      <path id="motto-arc" d="M 44 158 A 64 64 0 0 0 156 158" fill="none"/>
+      <text font-size="9" fill="#fff" opacity="0.6" font-family="Georgia, serif" font-weight="700" letter-spacing="3">
+        <textPath href="#motto-arc" startOffset="8%">DIEU ET MON DROIT</textPath>
+      </text>
+
+      <!-- Centre dot / seal -->
+      <circle cx="100" cy="100" r="3" fill="#fff" opacity="0.2"/>
+    </svg>
+
+    <!-- Title block -->
+    <div class="terminal-title-block">
+      <span class="terminal-service">Government Secure Terminal</span>
+      <div class="terminal-title">MI5 Computer<br>Terminal</div>
+      <div class="terminal-divider"></div>
     </div>
-
-    <div class="auth-card <%= error ? 'auth-card--shake' : '' %>">
-      <h1 class="auth-title">OPERATOR AUTHENTICATION</h1>
-      <p class="auth-subtitle">Authorised personnel only. All access is logged and monitored.</p>
-
-      <% if (setupDone) { %>
-        <div class="govuk-notification-banner govuk-notification-banner--success" style="margin-bottom:1rem">
-          <div class="govuk-notification-banner__header">SUCCESS</div>
-          <div class="govuk-notification-banner__content">Administrator account created. You may now sign in.</div>
-        </div>
-      <% } %>
-      <% if (error) { %>
-        <div class="govuk-notification-banner govuk-notification-banner--error" style="margin-bottom:1rem">
-          <div class="govuk-notification-banner__header">ACCESS DENIED</div>
-          <div class="govuk-notification-banner__content"><%= error %></div>
-        </div>
-      <% } %>
-
-      <form action="/login" method="POST" class="auth-form">
-        <input type="hidden" name="next" value="<%= next %>">
-        <div class="govuk-form-group">
-          <label class="govuk-label" for="username">OPERATOR ID</label>
-          <input class="govuk-input" type="text" id="username" name="username" autocomplete="username" autofocus required>
-        </div>
-        <div class="govuk-form-group">
-          <label class="govuk-label" for="password">ACCESS CODE</label>
-          <input class="govuk-input" type="password" id="password" name="password" autocomplete="current-password" required>
-        </div>
-        <button class="govuk-button govuk-button--primary govuk-button--full" type="submit">AUTHENTICATE &rarr;</button>
-      </form>
-    </div>
-
-    <p class="auth-footer">Unauthorised access is a criminal offence under the Computer Misuse Act 1990.</p>
   </div>
+
+  <!-- ─── Login Card ─── -->
+  <div class="terminal-card <%= error ? 'shake' : '' %>">
+    <div class="terminal-form-title">Operator Authentication Required</div>
+
+    <% if (setupDone) { %>
+    <div class="terminal-alert terminal-alert--success">
+      <span class="terminal-alert-label">System</span>
+      Administrator account created. You may now authenticate.
+    </div>
+    <% } %>
+
+    <% if (error) { %>
+    <div class="terminal-alert terminal-alert--error">
+      <span class="terminal-alert-label">Access Denied</span>
+      <%= error %>
+    </div>
+    <% } %>
+
+    <form action="/login" method="POST">
+      <input type="hidden" name="next" value="<%= next %>">
+
+      <div class="terminal-field">
+        <label class="terminal-label" for="username">Operator ID</label>
+        <input class="terminal-input" type="text" id="username" name="username"
+               autocomplete="username" autofocus required placeholder="_ _ _ _ _ _">
+      </div>
+
+      <div class="terminal-field">
+        <label class="terminal-label" for="password">Access Code</label>
+        <input class="terminal-input" type="password" id="password" name="password"
+               autocomplete="current-password" required placeholder="_ _ _ _ _ _">
+      </div>
+
+      <button class="terminal-submit" type="submit">Authenticate &rarr;</button>
+    </form>
+  </div>
+
+</div>
+
+<!-- ─── Footer Warning ─── -->
+<p class="terminal-warning">
+  Warning: you are logging into a Government Terminal which may contain information for authorised people only.<br>
+  Any unauthorised attempts to gain access to this system may result in legal action being taken.
+</p>
+
 </body>
 </html>
