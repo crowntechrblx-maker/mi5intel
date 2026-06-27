@@ -34,13 +34,14 @@ async function initSchema() {
       username      TEXT UNIQUE NOT NULL,
       password_hash TEXT NOT NULL,
       display_name  TEXT,
-      role          TEXT NOT NULL DEFAULT 'analyst' CHECK (role IN ('admin','analyst','viewer')),
+      role          TEXT NOT NULL DEFAULT 'analyst',
       permissions   JSONB NOT NULL DEFAULT '[]'::jsonb,
       last_login    TIMESTAMPTZ,
       created_at    TIMESTAMPTZ DEFAULT NOW(),
       created_by    TEXT
     );
     ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS permissions JSONB NOT NULL DEFAULT '[]'::jsonb;
+    ALTER TABLE admin_users DROP CONSTRAINT IF EXISTS admin_users_role_check;
 
     CREATE TABLE IF NOT EXISTS roblox_entities (
       id           SERIAL PRIMARY KEY,
