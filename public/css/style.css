@@ -622,3 +622,48 @@ button:focus-visible { outline: 3px solid var(--yellow); }
 @media print {
   html, body { display: none !important; }
 }
+
+/* ── Role cards (operator creation) ─────────────────────────── */
+.role-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .5rem;
+  margin-top: .4rem;
+}
+.role-card {
+  border: 1px solid #2e2f30;
+  background: #0b0c0c;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  display: block;
+}
+.role-card:hover { border-color: #505a5f; background: #111213; }
+.role-card--selected {
+  border-color: #1d70b8 !important;
+  background: rgba(29,112,184,0.06) !important;
+}
+.role-card-radio { display: none; }
+.role-card-inner { padding: .65rem .7rem; }
+.role-card-top {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  margin-bottom: .5rem;
+}
+.role-card-default {
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: #505a5f;
+  background: #1a1b1c;
+  padding: 1px 5px;
+  border-radius: 2px;
+}
+.role-card-perms {
+  list-style: none;
+  font-size: 10px;
+  color: #6f777b;
+  line-height: 1.7;
+  padding: 0;
+}
+.role-card-perms li { padding: 0; }
+.role-card-perms li:first-child { color: #b1b4b6; }

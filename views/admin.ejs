@@ -39,13 +39,67 @@
           <input class="form-input-sm" type="password" name="password" minlength="8" required autocomplete="new-password">
         </div>
 
+        <!-- Role title (free text) -->
         <div class="form-group-compact">
-          <label class="form-label-sm">CLEARANCE LEVEL</label>
-          <select class="form-input-sm" name="role" id="new-user-role" onchange="applyRolePreset(this.value, 'new')">
-            <option value="viewer">VIEWER — Read only</option>
-            <option value="analyst" selected>ANALYST — Can add/edit entities</option>
-            <option value="admin">ADMIN — Full access</option>
-          </select>
+          <label class="form-label-sm">ROLE TITLE <span class="required">*</span> <span class="form-hint-inline">(type anything — e.g. Handler, Trainee, Controller)</span></label>
+          <input class="form-input-sm" type="text" name="role" id="new-user-role-val"
+                 value="Analyst" required autocomplete="off" placeholder="e.g. Analyst, Handler, Trainee…">
+        </div>
+
+        <!-- Permission presets -->
+        <div class="form-group-compact">
+          <label class="form-label-sm">PERMISSION PRESET <span class="form-hint-inline">(click to pre-fill permissions below)</span></label>
+          <div class="role-cards">
+
+            <label class="role-card" data-role="viewer">
+              <input type="radio" name="_role_display" value="viewer" class="role-card-radio">
+              <div class="role-card-inner">
+                <div class="role-card-top">
+                  <span class="role-card-badge role-viewer">VIEWER</span>
+                  <span class="role-card-default">READ ONLY</span>
+                </div>
+                <ul class="role-card-perms">
+                  <li>&#10003; View entities &amp; dossiers</li>
+                  <li>&#10003; Browse audit logs</li>
+                  <li>&#10007; Cannot add or edit</li>
+                  <li>&#10007; No bulk actions</li>
+                </ul>
+              </div>
+            </label>
+
+            <label class="role-card role-card--selected" data-role="analyst">
+              <input type="radio" name="_role_display" value="analyst" class="role-card-radio" checked>
+              <div class="role-card-inner">
+                <div class="role-card-top">
+                  <span class="role-card-badge role-analyst">ANALYST</span>
+                  <span class="role-card-default">DEFAULT</span>
+                </div>
+                <ul class="role-card-perms">
+                  <li>&#10003; All VIEWER permissions</li>
+                  <li>&#10003; Add &amp; edit entities</li>
+                  <li>&#10003; Refresh profiles</li>
+                  <li>&#10007; No user management</li>
+                </ul>
+              </div>
+            </label>
+
+            <label class="role-card" data-role="admin">
+              <input type="radio" name="_role_display" value="admin" class="role-card-radio">
+              <div class="role-card-inner">
+                <div class="role-card-top">
+                  <span class="role-card-badge role-admin">ADMIN</span>
+                  <span class="role-card-default">FULL ACCESS</span>
+                </div>
+                <ul class="role-card-perms">
+                  <li>&#10003; Full portal access</li>
+                  <li>&#10003; Bulk actions</li>
+                  <li>&#10003; Manage operators</li>
+                  <li>&#10003; Scheduler control</li>
+                </ul>
+              </div>
+            </label>
+
+          </div>
         </div>
 
         <!-- Permission checkboxes -->
@@ -104,12 +158,12 @@
           <td>
             <div class="action-group">
               <% if (String(u.id) !== String(user.id)) { %>
-              <form action="/admin/users/<%= u.id %>/change-role" method="POST" style="display:inline">
-                <select class="form-input-xs" name="role" onchange="this.form.submit()" title="Change role">
-                  <option value="viewer"  <%= u.role === 'viewer'  ? 'selected' : '' %>>VIEWER</option>
-                  <option value="analyst" <%= u.role === 'analyst' ? 'selected' : '' %>>ANALYST</option>
-                  <option value="admin"   <%= u.role === 'admin'   ? 'selected' : '' %>>ADMIN</option>
-                </select>
+              <form action="/admin/users/<%= u.id %>/change-role" method="POST"
+                    style="display:inline-flex;gap:.3rem;align-items:center">
+                <input class="form-input-xs" type="text" name="role"
+                       value="<%= u.role %>" style="width:90px" title="Role title — type anything"
+                       autocomplete="off">
+                <button class="btn btn-secondary btn-xs" type="submit">SET</button>
               </form>
               <form action="/admin/users/<%= u.id %>/delete" method="POST" style="display:inline"
                     onsubmit="return confirm('Delete operator <%= u.username %>? This cannot be undone.')">
@@ -193,9 +247,22 @@ function toggleSection(id) {
   el.style.display = isHidden ? 'block' : 'none';
 }
 
-// Auto-apply role preset when changing clearance level on new user form
-document.getElementById('new-user-role')?.addEventListener('change', function() {
-  applyRolePreset(this.value, 'new');
+// Role cards — apply permission preset + suggest role name in text field + highlight card
+document.querySelectorAll('.role-card-radio').forEach(function(radio) {
+  radio.addEventListener('change', function() {
+    const preset = this.value; // viewer / analyst / admin
+    // Apply permission checkboxes for this preset
+    applyRolePreset(preset, 'new');
+    // Suggest the preset name in the role title field (capitalised), user can edit freely
+    const roleInput = document.getElementById('new-user-role-val');
+    if (roleInput) {
+      roleInput.value = preset.charAt(0).toUpperCase() + preset.slice(1);
+    }
+    // Highlight selected card
+    document.querySelectorAll('.role-card').forEach(function(card) {
+      card.classList.toggle('role-card--selected', card.dataset.role === preset);
+    });
+  });
 });
 </script>
 

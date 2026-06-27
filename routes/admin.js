@@ -38,12 +38,14 @@ router.post('/users/add', requireAdmin, async (req, res) => {
   const existing = await db.get('SELECT id FROM admin_users WHERE LOWER(username)=LOWER($1)', [username.trim()]);
   if (existing) return renderErr(`Username "${username}" already taken.`);
 
-  const validRoles = ['admin', 'analyst', 'viewer'];
-  const assignedRole = validRoles.includes(role) ? role : 'analyst';
+  if (!role || !role.trim()) return renderErr('Role title is required.');
+  const assignedRole = role.trim().slice(0, 64); // free text, max 64 chars
 
-  // Use checkboxes if provided, else fall back to role defaults
+  // Use checkboxes if provided, else fall back to analyst defaults
+  const basePreset = ['admin','analyst','viewer'].includes(assignedRole.toLowerCase())
+    ? assignedRole.toLowerCase() : 'analyst';
   let permissions = parsePermissions(req.body);
-  if (permissions.length === 0) permissions = ROLE_PERMISSIONS[assignedRole];
+  if (permissions.length === 0) permissions = ROLE_PERMISSIONS[basePreset];
 
   const hash = await bcrypt.hash(password, 12);
   await db.run(
@@ -105,13 +107,17 @@ router.post('/users/:id/change-role', requireAdmin, async (req, res) => {
   if (!target) return renderErr('Operator not found.');
   if (String(target.id) === String(req.session.user.id)) return renderErr('You cannot change your own role.');
 
-  const validRoles = ['admin', 'analyst', 'viewer'];
-  if (!validRoles.includes(role)) return renderErr('Invalid role.');
+  if (!role || !role.trim()) return renderErr('Role title is required.');
+  const cleanRole = role.trim().slice(0, 64);
 
-  // Sync permissions to new role defaults
-  const permissions = ROLE_PERMISSIONS[role];
-  await db.run('UPDATE admin_users SET role=$1, permissions=$2 WHERE id=$3', [role, JSON.stringify(permissions), target.id]);
-  await logAudit(actor(req), 'CHANGE_ROLE', target.username, 'admin', `Role → ${role}`, req.ip);
+  // Sync permissions to matching preset, or keep existing if custom role
+  const basePreset = ['admin','analyst','viewer'].includes(cleanRole.toLowerCase())
+    ? cleanRole.toLowerCase() : null;
+  const permissions = basePreset
+    ? ROLE_PERMISSIONS[basePreset]
+    : JSON.parse(target.permissions || '[]');
+  await db.run('UPDATE admin_users SET role=$1, permissions=$2 WHERE id=$3', [cleanRole, JSON.stringify(permissions), target.id]);
+  await logAudit(actor(req), 'CHANGE_ROLE', target.username, 'admin', `Role → ${cleanRole}`, req.ip);
 
   const updatedUsers = await getUsers();
   res.render('admin', { user: req.session.user, users: updatedUsers, PERMISSIONS, ROLE_PERMISSIONS, error: null, success: `Role updated for "${target.username}".`, page: 'admin' });
