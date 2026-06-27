@@ -171,4 +171,31 @@ async function fullProfileFetch(identifier) {
   };
 }
 
-module.exports = { fullProfileFetch, resolveUsername, getUserById };
+async function getGroupInfo(groupId) {
+  return apiFetch(`${ROBLOX_APIS.groups}/groups/${groupId}`);
+}
+
+async function getGroupIcon(groupId) {
+  const data = await apiFetch(
+    `${ROBLOX_APIS.thumbnails}/groups/icons?groupIds=${groupId}&size=150x150&format=Png&isCircular=false`
+  );
+  if (!data || !data.data || data.data.length === 0) return null;
+  return data.data[0].imageUrl || null;
+}
+
+// Fetches up to `pages` pages of group members (100 per page).
+async function getGroupMembers(groupId, pages = 1) {
+  const members = [];
+  let cursor = '';
+  for (let i = 0; i < pages; i++) {
+    const url = `${ROBLOX_APIS.groups}/groups/${groupId}/users?limit=100&sortOrder=Asc${cursor ? '&cursor=' + encodeURIComponent(cursor) : ''}`;
+    const data = await apiFetch(url);
+    if (!data || !data.data) break;
+    members.push(...data.data);
+    if (!data.nextPageCursor) break;
+    cursor = data.nextPageCursor;
+  }
+  return members;
+}
+
+module.exports = { fullProfileFetch, resolveUsername, getUserById, getGroupInfo, getGroupIcon, getGroupMembers };

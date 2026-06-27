@@ -41,12 +41,14 @@ async function main() {
   const authRoutes    = require('./routes/auth');
   const watchlistRoutes = require('./routes/watchlist');
   const adminRoutes   = require('./routes/admin');
+  const groupsRoutes  = require('./routes/groups');
   const { requireAuth, requireAdmin } = require('./middleware/auth');
   const db = require('./db/database');
 
   app.use('/', authRoutes);
   app.use('/watchlist', watchlistRoutes);
   app.use('/admin', adminRoutes);
+  app.use('/groups', groupsRoutes);
 
   // Dashboard
   app.get('/', requireAuth, async (req, res) => {

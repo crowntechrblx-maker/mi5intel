@@ -1,0 +1,178 @@
+<%- include('../partials/header', { pageTitle: group.group_name, page: 'groups' }) %>
+
+<div class="govuk-page-header">
+  <div>
+    <span class="govuk-caption-m">GROUPS OF INTEREST</span>
+    <h1 class="govuk-heading-xl"><%= group.group_name %></h1>
+  </div>
+  <div class="govuk-page-header__actions">
+    <form action="/groups/<%= group.id %>/refresh" method="POST" style="display:inline">
+      <button class="govuk-button govuk-button--secondary" type="submit"
+        onclick="this.disabled=true;this.textContent='REFRESHING…'">REFRESH GROUP DATA</button>
+    </form>
+    <a href="/groups" class="govuk-button govuk-button--ghost">← BACK</a>
+  </div>
+</div>
+
+<% if (added) { %><div class="govuk-notification-banner govuk-notification-banner--success" style="margin-bottom:1rem"><div class="govuk-notification-banner__header">SUCCESS</div><div class="govuk-notification-banner__content">Group registered successfully.</div></div><% } %>
+<% if (info === 'already_exists') { %><div class="govuk-notification-banner govuk-notification-banner--info" style="margin-bottom:1rem"><div class="govuk-notification-banner__header">INFO</div><div class="govuk-notification-banner__content">This group is already registered.</div></div><% } %>
+
+<!-- Add-all results banner -->
+<% if (addResult) { %>
+<div class="govuk-notification-banner govuk-notification-banner--<%= addResult.added > 0 ? 'success' : 'info' %>" style="margin-bottom:1.5rem">
+  <div class="govuk-notification-banner__header">BULK ADD COMPLETE</div>
+  <div class="govuk-notification-banner__content">
+    Processed <strong><%= addResult.total %></strong> members:
+    <strong style="color:#5cb88a"><%= addResult.added %> added</strong> &bull;
+    <strong style="color:var(--mid-grey)"><%= addResult.skipped %> already in registry</strong>
+    <% if (addResult.failed > 0) { %> &bull; <strong style="color:var(--red)"><%= addResult.failed %> failed</strong><% } %>
+  </div>
+</div>
+<% } %>
+
+<div class="profile-grid">
+
+  <!-- LEFT: Group info -->
+  <div class="profile-left">
+    <div class="panel">
+      <div class="avatar-section" style="padding-top:24px">
+        <% if (group.icon_url) { %>
+        <img src="<%= group.icon_url %>" alt="" style="width:80px;height:80px;border-radius:8px;border:1px solid var(--border);display:block;margin:0 auto 16px">
+        <% } else { %>
+        <div style="width:80px;height:80px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:var(--mid-grey);margin:0 auto 16px"><%= group.group_name.charAt(0).toUpperCase() %></div>
+        <% } %>
+        <div class="profile-identity">
+          <div class="profile-username"><%= group.group_name %></div>
+          <div class="profile-id">GROUP ID: <%= group.group_id %></div>
+        </div>
+      </div>
+
+      <div class="stat-row-mini">
+        <div class="mini-stat">
+          <div class="mini-stat-val"><%= (group.member_count || 0).toLocaleString() %></div>
+          <div class="mini-stat-lbl">MEMBERS</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-val" style="color:<%= flagged.length > 0 ? 'var(--red)' : 'var(--mid-grey)' %>"><%= flagged.length %></div>
+          <div class="mini-stat-lbl">FLAGGED</div>
+        </div>
+      </div>
+
+      <% if (group.description) { %>
+      <div class="profile-section" style="padding:12px 16px;border-top:1px solid var(--border)">
+        <div class="section-label">DESCRIPTION</div>
+        <p style="font-size:12px;color:var(--grey);line-height:1.5;margin:6px 0 0"><%= group.description %></p>
+      </div>
+      <% } %>
+    </div>
+
+    <!-- Add all members -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">BULK ENROLMENT</span>
+      </div>
+      <div class="panel-body">
+        <p style="font-size:12px;color:var(--grey);margin:0 0 12px;line-height:1.5">
+          Fetch up to <strong><%= addAllCap %></strong> members from this group and add them to the watchlist.
+          Members already in the registry are skipped automatically.
+        </p>
+        <% if ((group.member_count || 0) > addAllCap) { %>
+        <div class="govuk-warning-text" style="margin-bottom:12px;font-size:11px">
+          <span style="color:var(--yellow)">&#9888;</span>
+          This group has <strong><%= (group.member_count || 0).toLocaleString() %></strong> members. Only the first <%= addAllCap %> will be added.
+        </div>
+        <% } %>
+        <form action="/groups/<%= group.id %>/add-members" method="POST">
+          <div class="form-group-compact">
+            <label class="form-label-sm">DEFAULT SEVERITY</label>
+            <select class="form-input-sm" name="severity">
+              <% ['LOW','MEDIUM','HIGH','CRITICAL'].forEach(function(s) { %><option value="<%= s %>"><%= s %></option><% }); %>
+            </select>
+          </div>
+          <div class="form-group-compact">
+            <label class="form-label-sm">CATEGORY (defaults to group name)</label>
+            <input class="form-input-sm" type="text" name="category" value="<%= group.group_name %>">
+          </div>
+          <button class="btn btn-danger btn-sm btn-full" type="submit"
+            onclick="this.disabled=true;this.textContent='ADDING MEMBERS…';this.form.submit()"
+            style="margin-top:8px">
+            ADD ALL MEMBERS TO WATCHLIST
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Danger zone -->
+    <div class="panel panel-danger">
+      <div class="panel-header"><span class="panel-title">DANGER ZONE</span></div>
+      <div class="panel-body">
+        <p class="danger-text">Remove this group from monitoring. Watchlist entities already added are not affected.</p>
+        <form action="/groups/<%= group.id %>/delete" method="POST"
+          onsubmit="return confirm('Remove <%= group.group_name %> from monitoring?')">
+          <button class="btn btn-danger" type="submit">DEREGISTER GROUP</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Flagged members -->
+  <div class="profile-right">
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">WATCHLIST MEMBERS IN THIS GROUP</span>
+        <span class="govuk-tag govuk-tag--<%= flagged.length > 0 ? 'red' : 'grey' %>">
+          <%= flagged.length %> FLAGGED
+        </span>
+      </div>
+
+      <% if (flagged.length === 0) { %>
+      <div class="empty-state" style="padding:32px 16px">
+        <svg width="32" height="32" viewBox="0 0 20 20" fill="currentColor" style="opacity:.3;margin-bottom:8px"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+        <p style="margin:0;font-size:13px">No watchlist entities are members of this group.</p>
+        <p style="margin:4px 0 0;font-size:11px;color:var(--mid-grey)">
+          This updates in real time as entities are added or their profiles are refreshed.
+        </p>
+      </div>
+      <% } else { %>
+      <div class="panel-body--compact">
+        <% flagged.forEach(function(e) { %>
+        <a href="/watchlist/<%= e.id %>" class="entity-row">
+          <div class="entity-avatar">
+            <% if (e.avatar_url) { %><img src="<%= e.avatar_url %>" alt=""><% } else { %><span><%= e.username.charAt(0).toUpperCase() %></span><% } %>
+          </div>
+          <div class="entity-info">
+            <div class="entity-username"><%= e.username %></div>
+            <div class="entity-meta">
+              Role: <strong style="color:var(--grey)"><%= e.role_in_group %></strong>
+              &bull; <%= e.category %>
+            </div>
+          </div>
+          <div class="entity-badges">
+            <strong class="govuk-tag govuk-tag--sev-<%= e.severity.toLowerCase() %>"><%= e.severity %></strong>
+            <strong class="govuk-tag govuk-tag--status-<%= e.status.toLowerCase() %>"><%= e.status %></strong>
+          </div>
+        </a>
+        <% }); %>
+      </div>
+      <div class="table-footer">
+        <span class="table-count"><%= flagged.length %> watchlist entit<%= flagged.length !== 1 ? 'ies' : 'y' %> in this group</span>
+        <a href="/watchlist/export?category=<%= encodeURIComponent(group.group_name) %>" class="btn btn-ghost btn-sm">↓ EXPORT CSV</a>
+      </div>
+      <% } %>
+    </div>
+
+    <div class="govuk-inset-text" style="font-size:12px;margin-top:0">
+      <strong>How flagging works:</strong> The portal checks each watchlist entity's stored group memberships against this group's ID.
+      Flags update when you refresh an entity's profile or add new entities. The list above reflects stored data — use
+      "Refresh from API" on individual entities to get the latest membership.
+    </div>
+  </div>
+
+</div>
+
+<div class="profile-meta">
+  Registered by: <%= group.added_by %> on <%= new Date(group.added_at).toLocaleDateString('en-GB') %>
+  &bull; Last fetched: <%= group.last_fetched ? new Date(group.last_fetched).toLocaleString('en-GB') : 'Never' %>
+</div>
+
+<%- include('../partials/footer') %>

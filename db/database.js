@@ -103,8 +103,22 @@ async function initSchema() {
       PRIMARY KEY ("sid")
     );
 
+    CREATE TABLE IF NOT EXISTS groups_of_interest (
+      id           SERIAL PRIMARY KEY,
+      group_id     TEXT UNIQUE NOT NULL,
+      group_name   TEXT NOT NULL,
+      description  TEXT,
+      member_count INTEGER,
+      icon_url     TEXT,
+      group_data   JSONB,
+      added_by     TEXT NOT NULL,
+      added_at     TIMESTAMPTZ DEFAULT NOW(),
+      last_fetched TIMESTAMPTZ
+    );
+
     -- Indexes
     CREATE INDEX IF NOT EXISTS "IDX_session_expire"       ON "session"         ("expire");
+    CREATE INDEX IF NOT EXISTS idx_entities_profile_gin   ON roblox_entities   USING GIN (profile_data);
     CREATE INDEX IF NOT EXISTS idx_entities_severity      ON roblox_entities   (severity);
     CREATE INDEX IF NOT EXISTS idx_entities_status        ON roblox_entities   (status);
     CREATE INDEX IF NOT EXISTS idx_entities_added_at      ON roblox_entities   (added_at DESC);

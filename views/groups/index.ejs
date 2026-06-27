@@ -1,0 +1,69 @@
+<%- include('../partials/header', { pageTitle: 'Groups of Interest', page: 'groups' }) %>
+
+<div class="govuk-page-header">
+  <div>
+    <span class="govuk-caption-m">THREAT MAPPING</span>
+    <h1 class="govuk-heading-xl">Groups of Interest</h1>
+  </div>
+  <div class="govuk-page-header__actions">
+    <a href="/groups/add" class="govuk-button govuk-button--primary">+ REGISTER GROUP</a>
+  </div>
+</div>
+
+<% if (groups.length === 0) { %>
+<div class="empty-state-full">
+  <svg width="40" height="40" viewBox="0 0 20 20" fill="currentColor" style="opacity:.3;margin-bottom:12px"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/></svg>
+  <p>No groups registered. <a href="/groups/add">Register the first group.</a></p>
+</div>
+<% } else { %>
+<div class="govuk-table-wrapper">
+  <table class="govuk-table">
+    <thead class="govuk-table__head">
+      <tr>
+        <th class="govuk-table__header" style="width:54px">#</th>
+        <th class="govuk-table__header">GROUP</th>
+        <th class="govuk-table__header">ROBLOX ID</th>
+        <th class="govuk-table__header">MEMBERS</th>
+        <th class="govuk-table__header">FLAGGED IN WATCHLIST</th>
+        <th class="govuk-table__header">ADDED BY</th>
+        <th class="govuk-table__header">LAST FETCHED</th>
+        <th class="govuk-table__header" style="width:100px"></th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      <% groups.forEach(function(g) { %>
+      <tr class="govuk-table__row">
+        <td class="govuk-table__cell"><span class="entity-index"><%= String(g.id).padStart(4,'0') %></span></td>
+        <td class="govuk-table__cell">
+          <div style="display:flex;align-items:center;gap:10px">
+            <% if (g.icon_url) { %>
+            <img src="<%= g.icon_url %>" alt="" style="width:32px;height:32px;border-radius:4px;border:1px solid var(--border)">
+            <% } else { %>
+            <div style="width:32px;height:32px;border-radius:4px;background:var(--surface-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--mid-grey)"><%= g.group_name.charAt(0).toUpperCase() %></div>
+            <% } %>
+            <div>
+              <div class="table-username"><%= g.group_name %></div>
+              <% if (g.description) { %><div class="table-meta" style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><%= g.description.slice(0,80) %><%= g.description.length > 80 ? '…' : '' %></div><% } %>
+            </div>
+          </div>
+        </td>
+        <td class="govuk-table__cell"><span class="mono text-muted"><%= g.group_id %></span></td>
+        <td class="govuk-table__cell"><%= (g.member_count || 0).toLocaleString() %></td>
+        <td class="govuk-table__cell">
+          <% if (g.flagged_count > 0) { %>
+          <strong class="govuk-tag govuk-tag--red"><%= g.flagged_count %> FLAGGED</strong>
+          <% } else { %>
+          <span class="text-muted">None</span>
+          <% } %>
+        </td>
+        <td class="govuk-table__cell table-meta"><%= g.added_by %></td>
+        <td class="govuk-table__cell table-meta"><%= g.last_fetched ? new Date(g.last_fetched).toLocaleDateString('en-GB') : '—' %></td>
+        <td class="govuk-table__cell"><a href="/groups/<%= g.id %>" class="table-action-btn">VIEW</a></td>
+      </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</div>
+<% } %>
+
+<%- include('../partials/footer') %>

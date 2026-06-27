@@ -1,0 +1,37 @@
+<%- include('../partials/header', { pageTitle: 'Register Group', page: 'groups' }) %>
+
+<div class="govuk-page-header">
+  <div>
+    <span class="govuk-caption-m">THREAT MAPPING</span>
+    <h1 class="govuk-heading-xl">Register Group of Interest</h1>
+  </div>
+  <a href="/groups" class="govuk-button govuk-button--ghost">← BACK</a>
+</div>
+
+<div style="max-width:540px">
+  <% if (error) { %>
+  <div class="govuk-notification-banner govuk-notification-banner--error" style="margin-bottom:1.5rem">
+    <div class="govuk-notification-banner__header">ERROR</div>
+    <div class="govuk-notification-banner__content"><%= error %></div>
+  </div>
+  <% } %>
+
+  <div class="govuk-panel" style="padding:28px">
+    <form action="/groups/add" method="POST">
+      <div class="govuk-form-group">
+        <label class="govuk-label" for="group_id">ROBLOX GROUP ID</label>
+        <div class="govuk-hint">The numeric ID from the group's URL — e.g. roblox.com/groups/<strong>12345</strong>/name</div>
+        <input class="govuk-input" type="text" id="group_id" name="group_id"
+          pattern="\d+" inputmode="numeric" placeholder="e.g. 12345678"
+          autofocus required>
+      </div>
+      <button class="govuk-button govuk-button--primary" type="submit">FETCH &amp; REGISTER GROUP</button>
+    </form>
+  </div>
+
+  <div class="govuk-inset-text" style="margin-top:1.5rem">
+    Registering a group will cross-reference all existing watchlist entities against its membership. It does <strong>not</strong> automatically add members — you control that from the group detail page.
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
