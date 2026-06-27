@@ -1,4 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" fill="#070b12"/>
-  <path d="M16 3L19 10H26L20.5 14L22.5 21L16 17L9.5 21L11.5 14L6 10H13L16 3Z" fill="#00c853"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 96" fill="none">
+  <rect width="110" height="96" fill="#0d1017"/>
+  <polygon points="55,4 106,92 4,92" stroke="#00703c" stroke-width="3" fill="none" stroke-linejoin="round"/>
+  <line x1="15" y1="80" x2="95" y2="80" stroke="#00703c" stroke-width="1.5"/>
+  <ellipse cx="55" cy="28" rx="8" ry="5" stroke="#00703c" stroke-width="1.5" fill="none"/>
+  <circle cx="55" cy="28" r="3" fill="#00703c"/>
+  <text x="55" y="18" text-anchor="middle" font-size="7" fill="#00703c" font-weight="700" font-family="serif">I</text>
+  <text x="55" y="44" text-anchor="middle" font-size="7.5" fill="#00703c" font-weight="700" font-family="serif" letter-spacing="2">EIIR</text>
+  <polyline points="43,72 43,63 48,68 52,58 55,65 58,58 62,68 67,63 67,72" stroke="#00703c" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+  <rect x="43" y="72" width="24" height="6" stroke="#00703c" stroke-width="1.2" fill="none"/>
+  <text x="55" y="90" text-anchor="middle" font-size="5" fill="#00703c" font-weight="700" font-family="serif" letter-spacing="1">INTELLIGENCE</text>
 </svg>

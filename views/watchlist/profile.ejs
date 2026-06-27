@@ -7,7 +7,7 @@
   </div>
   <div class="header-actions">
     <form action="/watchlist/<%= entity.id %>/refresh" method="POST" style="display:inline">
-      <button class="btn btn-secondary" type="submit" id="refresh-btn" onclick="this.textContent='REFRESHING...'">REFRESH FROM API</button>
+      <button class="btn btn-secondary" type="submit" id="refresh-btn" onclick="this.disabled=true;this.textContent='REFRESHING…'">REFRESH FROM API</button>
     </form>
     <a href="/watchlist" class="btn btn-ghost">← BACK TO REGISTRY</a>
   </div>
@@ -48,8 +48,8 @@
       </div>
 
       <div class="profile-badges-row">
-        <span class="severity-badge severity-<%= entity.severity.toLowerCase() %>"><%= entity.severity %></span>
-        <span class="status-badge status-<%= entity.status.toLowerCase() %>"><%= entity.status %></span>
+        <strong class="govuk-tag govuk-tag--sev-<%= entity.severity.toLowerCase() %>"><%= entity.severity %></strong>
+        <strong class="govuk-tag govuk-tag--status-<%= entity.status.toLowerCase() %>"><%= entity.status %></strong>
       </div>
 
       <% if (p) { %>
@@ -137,11 +137,16 @@
     </div>
     <% } %>
 
-    <!-- Groups -->
+    <!-- Groups (collapsible) -->
     <% if (p && p.groups && p.groups.length > 0) { %>
-    <div class="panel">
-      <div class="panel-header"><span class="panel-title">GROUP AFFILIATIONS (<%= p.groups.length %>)</span></div>
-      <div class="panel-body panel-body--compact">
+    <div class="panel panel-collapsible" id="panel-groups">
+      <button type="button" class="panel-header panel-toggle" data-panel="panel-groups" aria-expanded="true">
+        <span class="panel-title">GROUP AFFILIATIONS (<%= p.groups.length %>)</span>
+        <span class="panel-chevron-wrap">
+          <svg class="panel-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        </span>
+      </button>
+      <div class="panel-body panel-body--compact panel-collapsible__body">
         <% p.groups.forEach(function(g) { %>
         <div class="group-row">
           <div class="group-icon">
@@ -165,9 +170,7 @@
     <!-- Friends list -->
     <% if (p && p.friends_list && p.friends_list.length > 0) { %>
     <div class="panel">
-      <div class="panel-header">
-        <span class="panel-title">KNOWN ASSOCIATES (<%= p.friends_list.length %> shown)</span>
-      </div>
+      <div class="panel-header"><span class="panel-title">KNOWN ASSOCIATES (<%= p.friends_list.length %> shown)</span></div>
       <div class="panel-body">
         <div class="friends-grid">
           <% p.friends_list.slice(0, 24).forEach(function(f) { %>
@@ -184,11 +187,16 @@
     </div>
     <% } %>
 
-    <!-- Games created -->
+    <!-- Games created (collapsible, collapsed by default if > 3) -->
     <% if (p && p.games && p.games.length > 0) { %>
-    <div class="panel">
-      <div class="panel-header"><span class="panel-title">CREATED EXPERIENCES (<%= p.games.length %>)</span></div>
-      <div class="panel-body panel-body--compact">
+    <div class="panel panel-collapsible <% if (p.games.length > 3) { %>panel-collapsible--collapsed<% } %>" id="panel-games">
+      <button type="button" class="panel-header panel-toggle" data-panel="panel-games" aria-expanded="<%= p.games.length <= 3 ? 'true' : 'false' %>">
+        <span class="panel-title">CREATED EXPERIENCES (<%= p.games.length %>)</span>
+        <span class="panel-chevron-wrap">
+          <svg class="panel-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        </span>
+      </button>
+      <div class="panel-body panel-body--compact panel-collapsible__body">
         <% p.games.forEach(function(g) { %>
         <div class="game-row">
           <div class="game-info">
@@ -241,17 +249,22 @@
           <% } %>
         </div>
         <form action="/watchlist/<%= entity.id %>/tags" method="POST" class="tag-add-form">
-          <input class="form-input-sm" type="text" name="tag" placeholder="ADD TAG..." maxlength="30" required>
+          <input class="form-input-sm" type="text" name="tag" placeholder="ADD TAG…" maxlength="30" required>
           <button class="btn btn-secondary btn-sm" type="submit">ADD</button>
         </form>
       </div>
     </div>
 
-    <!-- Audit history for this entity -->
+    <!-- Audit history (collapsible, collapsed by default) -->
     <% if (auditHistory && auditHistory.length > 0) { %>
-    <div class="panel">
-      <div class="panel-header"><span class="panel-title">AUDIT HISTORY</span></div>
-      <div class="panel-body panel-body--compact">
+    <div class="panel panel-collapsible panel-collapsible--collapsed" id="panel-audit">
+      <button type="button" class="panel-header panel-toggle" data-panel="panel-audit" aria-expanded="false">
+        <span class="panel-title">AUDIT HISTORY (<%= auditHistory.length %>)</span>
+        <span class="panel-chevron-wrap">
+          <svg class="panel-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        </span>
+      </button>
+      <div class="panel-body panel-body--compact panel-collapsible__body">
         <% auditHistory.forEach(function(log) { %>
         <div class="audit-row">
           <span class="audit-action-badge"><%= log.action.replace(/_/g, ' ') %></span>

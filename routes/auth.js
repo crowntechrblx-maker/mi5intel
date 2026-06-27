@@ -21,7 +21,7 @@ router.post('/login', async (req, res) => {
   }
   await db.run('UPDATE admin_users SET last_login=NOW() WHERE id=$1', [user.id]);
   await logAudit(user.username, 'LOGIN', user.username, 'auth', 'Successful login', req.ip);
-  req.session.user = { id: user.id, username: user.username, display_name: user.display_name || user.username, role: user.role };
+  req.session.user = { id: user.id, username: user.username, display_name: user.display_name || user.username, role: user.role, permissions: user.permissions || [] };
   const redirectTo = (next && next.startsWith('/') && !next.startsWith('//')) ? next : '/';
   res.redirect(redirectTo);
 });

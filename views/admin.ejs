@@ -7,49 +7,78 @@
   </div>
 </div>
 
-<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
-<% if (success) { %><div class="alert alert-success"><%= success %></div><% } %>
+<% if (error) { %>
+<div class="govuk-notification-banner govuk-notification-banner--error" style="margin-bottom:1.5rem">
+  <div class="govuk-notification-banner__header">ERROR</div>
+  <div class="govuk-notification-banner__content"><%= error %></div>
+</div>
+<% } %>
+<% if (success) { %>
+<div class="govuk-notification-banner govuk-notification-banner--success" style="margin-bottom:1.5rem">
+  <div class="govuk-notification-banner__header">SUCCESS</div>
+  <div class="govuk-notification-banner__content"><%= success %></div>
+</div>
+<% } %>
 
 <div class="admin-grid">
+  <!-- Register new operator form -->
   <div class="panel">
     <div class="panel-header"><span class="panel-title">REGISTER NEW OPERATOR</span></div>
     <div class="panel-body">
-      <form action="/admin/users/add" method="POST" class="intel-form">
+      <form action="/admin/users/add" method="POST" class="intel-form" id="add-operator-form">
         <div class="form-group-compact">
           <label class="form-label-sm">USERNAME <span class="required">*</span></label>
-          <input class="form-input-sm" type="text" name="username" required>
+          <input class="form-input-sm" type="text" name="username" required autocomplete="off">
         </div>
         <div class="form-group-compact">
           <label class="form-label-sm">DISPLAY NAME</label>
-          <input class="form-input-sm" type="text" name="display_name">
+          <input class="form-input-sm" type="text" name="display_name" autocomplete="off">
         </div>
         <div class="form-group-compact">
           <label class="form-label-sm">PASSWORD <span class="required">*</span> <span class="form-hint-inline">(min 8 chars)</span></label>
-          <input class="form-input-sm" type="password" name="password" minlength="8" required>
+          <input class="form-input-sm" type="password" name="password" minlength="8" required autocomplete="new-password">
         </div>
+
         <div class="form-group-compact">
           <label class="form-label-sm">CLEARANCE LEVEL</label>
-          <select class="form-input-sm" name="role">
+          <select class="form-input-sm" name="role" id="new-user-role" onchange="applyRolePreset(this.value, 'new')">
             <option value="viewer">VIEWER — Read only</option>
             <option value="analyst" selected>ANALYST — Can add/edit entities</option>
-            <option value="admin">ADMIN — Full system access</option>
+            <option value="admin">ADMIN — Full access</option>
           </select>
         </div>
-        <button class="btn btn-primary btn-sm" type="submit">REGISTER OPERATOR</button>
+
+        <!-- Permission checkboxes -->
+        <div class="perm-group" style="margin-top:.75rem">
+          <div class="perm-group-label">PERMISSIONS <span class="form-hint-inline">(auto-set from role, or customise)</span></div>
+          <% PERMISSIONS.forEach(function(p) { %>
+          <label class="perm-check" data-perm-key="<%= p.key %>">
+            <input type="checkbox" name="perm_<%= p.key %>"
+              <%= (ROLE_PERMISSIONS['analyst'] || []).includes(p.key) ? 'checked' : '' %>
+              class="perm-input perm-new">
+            <span class="perm-label"><%= p.label %></span>
+            <span class="perm-desc"><%= p.desc %></span>
+          </label>
+          <% }); %>
+        </div>
+
+        <button class="btn btn-primary btn-sm" type="submit" style="margin-top:.75rem">REGISTER OPERATOR</button>
       </form>
     </div>
   </div>
 
-  <div class="panel" style="grid-column: span 2">
-    <div class="panel-header"><span class="panel-title">REGISTERED OPERATORS (<%= users.length %>)</span></div>
+  <!-- Operators table -->
+  <div class="panel" style="overflow:visible">
+    <div class="panel-header">
+      <span class="panel-title">REGISTERED OPERATORS (<%= users.length %>)</span>
+    </div>
     <table class="registry-table">
       <thead>
         <tr>
           <th>OPERATOR</th>
           <th>CLEARANCE</th>
           <th>LAST ACCESS</th>
-          <th>REGISTERED</th>
-          <th>CREATED BY</th>
+          <th>REGISTERED BY</th>
           <th>ACTIONS</th>
         </tr>
       </thead>
@@ -65,10 +94,13 @@
               </div>
             </div>
           </td>
-          <td><span class="role-badge role-<%= u.role %>"><%= u.role.toUpperCase() %></span></td>
-          <td class="mono text-muted" style="font-size:10px"><%= u.last_login ? new Date(u.last_login).toLocaleString('en-GB') : 'Never' %></td>
-          <td class="mono text-muted" style="font-size:10px"><%= new Date(u.created_at).toLocaleDateString('en-GB') %></td>
-          <td class="mono text-muted"><%= u.created_by || '—' %></td>
+          <td>
+            <span class="role-badge role-<%= u.role %>"><%= u.role.toUpperCase() %></span>
+          </td>
+          <td class="mono text-muted" style="font-size:10px">
+            <%= u.last_login ? new Date(u.last_login).toLocaleString('en-GB') : 'Never' %>
+          </td>
+          <td class="mono text-muted" style="font-size:10px"><%= u.created_by || '—' %></td>
           <td>
             <div class="action-group">
               <% if (String(u.id) !== String(user.id)) { %>
@@ -84,14 +116,54 @@
                 <button class="btn btn-danger btn-xs" type="submit">DELETE</button>
               </form>
               <% } else { %>
-              <span class="text-muted" style="font-size:11px">YOU</span>
+              <span class="text-muted" style="font-size:11px;padding:0 .5rem">YOU</span>
               <% } %>
-              <button class="btn btn-secondary btn-xs" onclick="toggleReset('<%= u.id %>')">RESET PW</button>
+              <button class="btn btn-secondary btn-xs" type="button" onclick="toggleSection('reset-<%= u.id %>')">RESET PW</button>
+              <button class="btn btn-ghost btn-xs" type="button" onclick="toggleSection('perms-<%= u.id %>')">PERMISSIONS</button>
             </div>
+
+            <!-- Reset password inline -->
             <div id="reset-<%= u.id %>" style="display:none;margin-top:.4rem">
               <form action="/admin/users/<%= u.id %>/reset-password" method="POST" style="display:flex;gap:.4rem;align-items:center">
                 <input class="form-input-xs" type="password" name="new_password" placeholder="New password" minlength="8" required style="flex:1;min-width:120px">
                 <button class="btn btn-secondary btn-xs" type="submit">SET</button>
+                <button class="btn btn-ghost btn-xs" type="button" onclick="toggleSection('reset-<%= u.id %>')">CANCEL</button>
+              </form>
+            </div>
+
+            <!-- Permissions inline -->
+            <div id="perms-<%= u.id %>" style="display:none;margin-top:.75rem">
+              <form action="/admin/users/<%= u.id %>/permissions" method="POST">
+                <div class="perm-group perm-group--compact">
+                  <div class="perm-group-label" style="margin-bottom:.4rem">
+                    OPERATOR PERMISSIONS
+                    <% if (String(u.id) !== String(user.id)) { %>
+                    <span style="margin-left:.5rem">
+                      <button type="button" class="perm-preset-btn" onclick="applyRolePreset('<%= u.role %>', 'u<%= u.id %>')">RESET TO ROLE DEFAULTS</button>
+                    </span>
+                    <% } %>
+                  </div>
+                  <% const userPerms = u.permissions || []; %>
+                  <% PERMISSIONS.forEach(function(p) { %>
+                  <label class="perm-check perm-check--sm" data-perm-key="<%= p.key %>">
+                    <input type="checkbox" name="perm_<%= p.key %>"
+                      <%= userPerms.includes(p.key) ? 'checked' : '' %>
+                      class="perm-input perm-u<%= u.id %>"
+                      <% if (String(u.id) === String(user.id)) { %>disabled<% } %>>
+                    <span class="perm-label"><%= p.label %></span>
+                    <span class="perm-desc"><%= p.desc %></span>
+                  </label>
+                  <% }); %>
+                </div>
+                <% if (String(u.id) !== String(user.id)) { %>
+                <div style="display:flex;gap:.4rem;margin-top:.5rem">
+                  <button class="btn btn-secondary btn-xs" type="submit">SAVE PERMISSIONS</button>
+                  <button class="btn btn-ghost btn-xs" type="button" onclick="toggleSection('perms-<%= u.id %>')">CANCEL</button>
+                </div>
+                <% } else { %>
+                <p class="form-hint" style="margin-top:.4rem">You cannot modify your own permissions.</p>
+                <button class="btn btn-ghost btn-xs" type="button" onclick="toggleSection('perms-<%= u.id %>')">CLOSE</button>
+                <% } %>
               </form>
             </div>
           </td>
@@ -103,10 +175,28 @@
 </div>
 
 <script>
-function toggleReset(id) {
-  const el = document.getElementById('reset-' + id);
-  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+const ROLE_PERMISSIONS = <%- JSON.stringify(ROLE_PERMISSIONS) %>;
+
+function applyRolePreset(role, group) {
+  const perms = ROLE_PERMISSIONS[role] || [];
+  const inputs = document.querySelectorAll('.perm-' + group);
+  inputs.forEach(function(input) {
+    const key = input.closest('.perm-check')?.dataset.permKey;
+    if (key) input.checked = perms.includes(key);
+  });
 }
+
+function toggleSection(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const isHidden = el.style.display === 'none' || el.style.display === '';
+  el.style.display = isHidden ? 'block' : 'none';
+}
+
+// Auto-apply role preset when changing clearance level on new user form
+document.getElementById('new-user-role')?.addEventListener('change', function() {
+  applyRolePreset(this.value, 'new');
+});
 </script>
 
 <%- include('partials/footer') %>
