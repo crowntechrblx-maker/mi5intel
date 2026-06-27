@@ -3,32 +3,86 @@
 <div class="govuk-page-header">
   <div>
     <span class="govuk-caption-m">SYSTEM</span>
-    <h1 class="govuk-heading-xl">Account Settings</h1>
+    <h1 class="govuk-heading-xl">Settings</h1>
   </div>
 </div>
 
 <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
 <% if (success) { %><div class="alert alert-success"><%= success %></div><% } %>
+<% if (locals.schedulerTriggered) { %><div class="alert alert-success" style="margin-bottom:1rem">Manual refresh triggered — running in background.</div><% } %>
 
-<div class="form-panel" style="max-width:500px">
-  <div class="panel-header"><span class="panel-title">CHANGE PASSWORD</span></div>
-  <div class="panel-body">
-    <form action="/settings/password" method="POST" class="intel-form">
-      <div class="form-group">
-        <label class="form-label">CURRENT PASSWORD</label>
-        <input class="form-input" type="password" name="current_password" required>
-      </div>
-      <div class="form-group">
-        <label class="form-label">NEW PASSWORD</label>
-        <input class="form-input" type="password" name="new_password" minlength="8" required>
-      </div>
-      <div class="form-group">
-        <label class="form-label">CONFIRM NEW PASSWORD</label>
-        <input class="form-input" type="password" name="confirm_password" minlength="8" required>
-      </div>
-      <button class="btn btn-primary" type="submit">UPDATE PASSWORD</button>
-    </form>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:900px">
+
+  <!-- Change password -->
+  <div class="panel">
+    <div class="panel-header"><span class="panel-title">CHANGE PASSWORD</span></div>
+    <div class="panel-body">
+      <form action="/settings/password" method="POST" class="intel-form">
+        <div class="form-group">
+          <label class="form-label">CURRENT PASSWORD</label>
+          <input class="form-input" type="password" name="current_password" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">NEW PASSWORD</label>
+          <input class="form-input" type="password" name="new_password" minlength="8" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">CONFIRM NEW PASSWORD</label>
+          <input class="form-input" type="password" name="confirm_password" minlength="8" required>
+        </div>
+        <button class="btn btn-primary" type="submit">UPDATE PASSWORD</button>
+      </form>
+    </div>
   </div>
+
+  <!-- Auto-refresh scheduler -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">AUTO-REFRESH SCHEDULER</span>
+      <span class="govuk-tag govuk-tag--<%= schedulerState.running ? 'blue' : 'green' %>">
+        <%= schedulerState.running ? 'RUNNING' : 'IDLE' %>
+      </span>
+    </div>
+    <div class="panel-body">
+      <div class="stat-row-mini" style="margin-bottom:16px">
+        <div class="mini-stat">
+          <div class="mini-stat-val" style="font-size:18px"><%= schedulerState.lastRefreshed %></div>
+          <div class="mini-stat-lbl">LAST REFRESHED</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-val" style="font-size:18px;color:var(--blue-light)"><%= schedulerState.lastDiffs %></div>
+          <div class="mini-stat-lbl">WITH CHANGES</div>
+        </div>
+      </div>
+
+      <div style="font-size:11px;color:var(--mid-grey);font-family:var(--mono);margin-bottom:12px">
+        <div>LAST RUN: <%= schedulerState.lastRun ? new Date(schedulerState.lastRun).toLocaleString('en-GB') : 'Not yet run' %></div>
+        <div style="margin-top:4px">SCHEDULE: Every 30 min — CRITICAL &lt;12h · HIGH &lt;24h · MEDIUM &lt;72h</div>
+        <div style="margin-top:4px">MAX PER RUN: 20 entities</div>
+      </div>
+
+      <% if (user.role === 'admin') { %>
+      <form action="/settings/scheduler/run" method="POST">
+        <button class="btn btn-secondary btn-sm" type="submit"
+          onclick="this.disabled=true;this.textContent='TRIGGERING…'">RUN MANUAL REFRESH NOW</button>
+      </form>
+      <% } %>
+    </div>
+
+    <% if (schedulerState.log && schedulerState.log.length > 0) { %>
+    <div class="panel-body--compact" style="border-top:1px solid var(--border)">
+      <div style="padding:6px 16px;font-size:10px;font-family:var(--mono);color:var(--mid-grey);text-transform:uppercase;letter-spacing:.05em">Recent runs</div>
+      <% schedulerState.log.slice(0,5).forEach(function(entry) { %>
+      <div class="audit-row" style="padding:5px 16px">
+        <span class="audit-time" style="min-width:160px"><%= new Date(entry.time).toLocaleString('en-GB') %></span>
+        <span style="font-size:11px;color:var(--grey)"><%= entry.refreshed %> refreshed</span>
+        <% if (entry.diffs > 0) { %><span class="govuk-tag govuk-tag--blue" style="font-size:9px"><%= entry.diffs %> CHANGED</span><% } %>
+      </div>
+      <% }); %>
+    </div>
+    <% } %>
+  </div>
+
 </div>
 
 <%- include('partials/footer') %>

@@ -153,6 +153,21 @@ router.post('/:id/add-members', requireAuth, async (req, res) => {
   res.redirect(`/groups/${group.id}`);
 });
 
+// ── Bulk delete groups (admin only) ──────────────────────────
+router.post('/bulk', requireAuth, async (req, res) => {
+  if (req.session.user.role !== 'admin') return res.status(403).end();
+  const ids = [].concat(req.body.ids || []).map(Number).filter(Boolean);
+  if (!ids.length) return res.redirect('/groups');
+  for (const id of ids) {
+    const g = await db.get('SELECT * FROM groups_of_interest WHERE id=$1', [id]);
+    if (g) {
+      await db.run('DELETE FROM groups_of_interest WHERE id=$1', [id]);
+      await logAudit(actor(req), 'DELETE_GROUP', g.group_name, 'group', `Bulk-deleted group ${g.group_name}`, req.ip);
+    }
+  }
+  res.redirect('/groups');
+});
+
 // ── Delete group ──────────────────────────────────────────────
 router.post('/:id/delete', requireAuth, async (req, res) => {
   const group = await db.get('SELECT * FROM groups_of_interest WHERE id=$1', [req.params.id]);

@@ -38,6 +38,9 @@ async function main() {
     },
   }));
 
+  const scheduler     = require('./services/scheduler');
+  scheduler.start();
+
   const authRoutes    = require('./routes/auth');
   const watchlistRoutes = require('./routes/watchlist');
   const adminRoutes   = require('./routes/admin');
@@ -124,7 +127,20 @@ async function main() {
 
   // Settings
   app.get('/settings', requireAuth, (req, res) => {
-    res.render('settings', { user: req.session.user, page: 'settings', success: null, error: null });
+    res.render('settings', {
+      user: req.session.user,
+      page: 'settings',
+      success: null,
+      error: null,
+      schedulerState: scheduler.getState(),
+    });
+  });
+
+  // Manual trigger (admin only)
+  app.post('/settings/scheduler/run', requireAuth, async (req, res) => {
+    if (req.session.user.role !== 'admin') return res.status(403).end();
+    scheduler.runRefresh();
+    res.redirect('/settings?schedulerTriggered=1');
   });
 
   app.post('/settings/password', requireAuth, async (req, res) => {

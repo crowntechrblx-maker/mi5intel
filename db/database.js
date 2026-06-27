@@ -103,6 +103,18 @@ async function initSchema() {
       PRIMARY KEY ("sid")
     );
 
+    CREATE TABLE IF NOT EXISTS entity_links (
+      id               SERIAL PRIMARY KEY,
+      entity_id        INTEGER NOT NULL REFERENCES roblox_entities(id) ON DELETE CASCADE,
+      linked_entity_id INTEGER NOT NULL REFERENCES roblox_entities(id) ON DELETE CASCADE,
+      link_type        TEXT NOT NULL DEFAULT 'ASSOCIATE'
+                       CHECK (link_type IN ('ALT_ACCOUNT','SUSPECTED_ALT','ASSOCIATE','KNOWN_CONTACT','HANDLER')),
+      notes            TEXT,
+      created_by       TEXT NOT NULL,
+      created_at       TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE(entity_id, linked_entity_id)
+    );
+
     CREATE TABLE IF NOT EXISTS groups_of_interest (
       id           SERIAL PRIMARY KEY,
       group_id     TEXT UNIQUE NOT NULL,

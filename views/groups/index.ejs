@@ -16,10 +16,18 @@
   <p>No groups registered. <a href="/groups/add">Register the first group.</a></p>
 </div>
 <% } else { %>
+
+<form id="bulk-form" action="/groups/bulk" method="POST">
+  <input type="hidden" name="bulk_action" id="bulk-action-input" value="delete">
+  <input type="hidden" name="bulk_value"  id="bulk-value-input">
+
 <div class="govuk-table-wrapper">
   <table class="govuk-table">
     <thead class="govuk-table__head">
       <tr>
+        <% if (user.role === 'admin') { %>
+        <th class="govuk-table__header bulk-check-cell"><input type="checkbox" class="bulk-checkbox bulk-check-all" title="Select all"></th>
+        <% } %>
         <th class="govuk-table__header" style="width:54px">#</th>
         <th class="govuk-table__header">GROUP</th>
         <th class="govuk-table__header">ROBLOX ID</th>
@@ -27,12 +35,17 @@
         <th class="govuk-table__header">FLAGGED IN WATCHLIST</th>
         <th class="govuk-table__header">ADDED BY</th>
         <th class="govuk-table__header">LAST FETCHED</th>
-        <th class="govuk-table__header" style="width:100px"></th>
+        <th class="govuk-table__header" style="width:80px"></th>
       </tr>
     </thead>
     <tbody class="govuk-table__body">
       <% groups.forEach(function(g) { %>
       <tr class="govuk-table__row">
+        <% if (user.role === 'admin') { %>
+        <td class="govuk-table__cell bulk-check-cell">
+          <input type="checkbox" class="bulk-checkbox bulk-check" name="ids" value="<%= g.id %>">
+        </td>
+        <% } %>
         <td class="govuk-table__cell"><span class="entity-index"><%= String(g.id).padStart(4,'0') %></span></td>
         <td class="govuk-table__cell">
           <div style="display:flex;align-items:center;gap:10px">
@@ -43,7 +56,7 @@
             <% } %>
             <div>
               <div class="table-username"><%= g.group_name %></div>
-              <% if (g.description) { %><div class="table-meta" style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><%= g.description.slice(0,80) %><%= g.description.length > 80 ? '…' : '' %></div><% } %>
+              <% if (g.description) { %><div class="table-meta" style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><%= g.description.slice(0,80) %><%= g.description.length > 80 ? '…' : '' %></div><% } %>
             </div>
           </div>
         </td>
@@ -64,6 +77,19 @@
     </tbody>
   </table>
 </div>
+</form>
+
+<% if (user.role === 'admin') { %>
+<div class="bulk-bar" id="bulk-bar">
+  <span class="bulk-count" id="bulk-count">0 selected</span>
+  <div class="bulk-bar-divider"></div>
+  <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+    <button class="btn btn-danger btn-sm bulk-action-btn" data-action="delete">DELETE SELECTED</button>
+    <button class="btn btn-ghost btn-sm" id="bulk-clear-btn">CLEAR</button>
+  </div>
+</div>
+<% } %>
+
 <% } %>
 
 <%- include('../partials/footer') %>

@@ -64,3 +64,90 @@ document.querySelectorAll('.panel-collapsible--collapsed .panel-collapsible__bod
 document.querySelectorAll('.panel-collapsible--collapsed .panel-chevron').forEach(function(chevron) {
   chevron.style.transform = 'rotate(-90deg)';
 });
+
+// ── Bulk select ───────────────────────────────────────────────
+(function() {
+  var checkboxes   = document.querySelectorAll('.bulk-check');
+  var selectAll    = document.querySelector('.bulk-check-all');
+  var bulkBar      = document.getElementById('bulk-bar');
+  var bulkCount    = document.getElementById('bulk-count');
+  var bulkForm     = document.getElementById('bulk-form');
+  var actionInput  = document.getElementById('bulk-action-input');
+  var valueInput   = document.getElementById('bulk-value-input');
+  var clearBtn     = document.getElementById('bulk-clear-btn');
+
+  if (!bulkBar) return;
+
+  function getChecked() {
+    return Array.from(document.querySelectorAll('.bulk-check:checked'));
+  }
+
+  function update() {
+    var checked = getChecked();
+    var n = checked.length;
+    bulkBar.classList.toggle('bulk-bar--active', n > 0);
+    if (bulkCount) bulkCount.textContent = n + ' selected';
+    if (selectAll) {
+      selectAll.indeterminate = n > 0 && n < checkboxes.length;
+      selectAll.checked = n > 0 && n === checkboxes.length;
+    }
+  }
+
+  checkboxes.forEach(function(cb) {
+    cb.addEventListener('change', update);
+    cb.addEventListener('click', function(e) { e.stopPropagation(); });
+  });
+
+  if (selectAll) {
+    selectAll.addEventListener('change', function() {
+      checkboxes.forEach(function(cb) { cb.checked = selectAll.checked; });
+      update();
+    });
+  }
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', function() {
+      checkboxes.forEach(function(cb) { cb.checked = false; });
+      if (selectAll) { selectAll.checked = false; selectAll.indeterminate = false; }
+      update();
+    });
+  }
+
+  document.querySelectorAll('.bulk-action-btn').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      var action = btn.dataset.action;
+      var checked = getChecked();
+      if (!checked.length) return;
+
+      // Inject ids into the form
+      bulkForm.querySelectorAll('input[name="ids"]').forEach(function(el) { el.remove(); });
+      checked.forEach(function(cb) {
+        var inp = document.createElement('input');
+        inp.type = 'hidden'; inp.name = 'ids'; inp.value = cb.value;
+        bulkForm.appendChild(inp);
+      });
+
+      actionInput.value = action;
+      valueInput.value = '';
+
+      if (action === 'severity') {
+        var sel = document.getElementById('bulk-severity-select');
+        if (!sel || !sel.value) return;
+        valueInput.value = sel.value;
+      } else if (action === 'status') {
+        var sel2 = document.getElementById('bulk-status-select');
+        if (!sel2 || !sel2.value) return;
+        valueInput.value = sel2.value;
+      } else if (action === 'tag') {
+        var tagInp = document.getElementById('bulk-tag-input');
+        if (!tagInp || !tagInp.value.trim()) return;
+        valueInput.value = tagInp.value.trim().toUpperCase();
+      } else if (action === 'delete') {
+        if (!confirm(checked.length + ' entit' + (checked.length === 1 ? 'y' : 'ies') + ' will be permanently deleted. This cannot be undone.')) return;
+      }
+
+      bulkForm.submit();
+    });
+  });
+})();

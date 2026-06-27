@@ -169,11 +169,22 @@ router.get('/:id', requireAuth, async (req, res) => {
   const entity = await db.get('SELECT * FROM roblox_entities WHERE id=$1', [req.params.id]);
   if (!entity) return res.status(404).render('error', { user: req.session.user, code: 404, message: 'Entity not found in registry.' });
 
-  const [tags, auditHistory, caseNotes, snapshots, entitiesWithGroups] = await Promise.all([
+  const [tags, auditHistory, caseNotes, snapshots, rawLinks, entitiesWithGroups] = await Promise.all([
     db.all('SELECT * FROM entity_tags WHERE entity_id=$1 ORDER BY created_at DESC', [entity.id]),
     db.all('SELECT * FROM audit_logs WHERE target=$1 ORDER BY created_at DESC LIMIT 20', [entity.username]),
     db.all('SELECT * FROM entity_notes WHERE entity_id=$1 ORDER BY created_at DESC', [entity.id]),
     db.all('SELECT id, fetched_at, fetched_by, diff FROM entity_snapshots WHERE entity_id=$1 ORDER BY fetched_at DESC LIMIT 30', [entity.id]),
+    db.all(
+      `SELECT el.*,
+              a.id AS a_id, a.username AS a_username, a.display_name AS a_display, a.avatar_url AS a_avatar, a.severity AS a_severity, a.status AS a_status,
+              b.id AS b_id, b.username AS b_username, b.display_name AS b_display, b.avatar_url AS b_avatar, b.severity AS b_severity, b.status AS b_status
+       FROM entity_links el
+       JOIN roblox_entities a ON a.id = el.entity_id
+       JOIN roblox_entities b ON b.id = el.linked_entity_id
+       WHERE el.entity_id=$1 OR el.linked_entity_id=$1
+       ORDER BY el.created_at DESC`,
+      [entity.id]
+    ),
     // Only entities that have groups — much cheaper than SELECT * FROM all entities
     db.all(
       `SELECT id, username, display_name, avatar_url, severity, status,
@@ -188,6 +199,26 @@ router.get('/:id', requireAuth, async (req, res) => {
 
   entity.tags = tags;
   entity.profile = entity.profile_data;
+
+  // Normalise links so "other" is always the entity that isn't the current one
+  const links = rawLinks.map(function(l) {
+    const isSrc = l.entity_id === entity.id;
+    return {
+      id:         l.id,
+      link_type:  l.link_type,
+      notes:      l.notes,
+      created_by: l.created_by,
+      created_at: l.created_at,
+      other: {
+        id:           isSrc ? l.b_id       : l.a_id,
+        username:     isSrc ? l.b_username  : l.a_username,
+        display_name: isSrc ? l.b_display   : l.a_display,
+        avatar_url:   isSrc ? l.b_avatar    : l.a_avatar,
+        severity:     isSrc ? l.b_severity  : l.a_severity,
+        status:       isSrc ? l.b_status    : l.a_status,
+      },
+    };
+  });
 
   const myGroupIds = (entity.profile?.groups || []).map(g => g.group?.id).filter(Boolean);
   const sharedWith = [];
@@ -216,10 +247,12 @@ router.get('/:id', requireAuth, async (req, res) => {
     auditHistory,
     caseNotes,
     snapshots,
+    links,
     sharedWith,
     refreshDiff,
-    info: req.query.info || null,
-    added: req.query.added || null,
+    info:      req.query.info      || null,
+    added:     req.query.added     || null,
+    linkError: req.query.linkError || null,
     page: 'watchlist',
   });
 });
@@ -301,6 +334,92 @@ router.post('/:id/notes/delete', requireAuth, async (req, res) => {
     await db.run('DELETE FROM entity_notes WHERE id=$1', [note.id]);
   }
   res.redirect(`/watchlist/${req.params.id}#case-log`);
+});
+
+// ── Bulk actions (admin only) ─────────────────────────────────
+router.post('/bulk', requireAuth, async (req, res) => {
+  if (req.session.user.role !== 'admin') return res.status(403).end();
+  const ids = [].concat(req.body.ids || []).map(Number).filter(Boolean);
+  if (!ids.length) return res.redirect('/watchlist');
+
+  const { bulk_action, bulk_value } = req.body;
+
+  switch (bulk_action) {
+    case 'delete':
+      for (const id of ids) {
+        const e = await db.get('SELECT username, roblox_id FROM roblox_entities WHERE id=$1', [id]);
+        if (e) {
+          await db.run('DELETE FROM roblox_entities WHERE id=$1', [id]);
+          await logAudit(actor(req), 'DELETE_ENTITY', e.username, 'entity', `Bulk-deleted ${e.username}`, req.ip);
+        }
+      }
+      break;
+    case 'severity': {
+      const sev = ['LOW','MEDIUM','HIGH','CRITICAL'].includes(bulk_value) ? bulk_value : null;
+      if (sev) {
+        await db.run(`UPDATE roblox_entities SET severity=$1 WHERE id=ANY($2::int[])`, [sev, ids]);
+        await logAudit(actor(req), 'UPDATE_ENTITY', `${ids.length} entities`, 'entity', `Bulk severity → ${sev}`, req.ip);
+      }
+      break;
+    }
+    case 'status': {
+      const sts = ['ACTIVE','INACTIVE','ARCHIVED','BANNED'].includes(bulk_value) ? bulk_value : null;
+      if (sts) {
+        await db.run(`UPDATE roblox_entities SET status=$1 WHERE id=ANY($2::int[])`, [sts, ids]);
+        await logAudit(actor(req), 'UPDATE_ENTITY', `${ids.length} entities`, 'entity', `Bulk status → ${sts}`, req.ip);
+      }
+      break;
+    }
+    case 'tag': {
+      const tag = (bulk_value || '').trim().toUpperCase().slice(0, 30);
+      if (tag) {
+        for (const id of ids) {
+          const exists = await db.get('SELECT id FROM entity_tags WHERE entity_id=$1 AND tag=$2', [id, tag]);
+          if (!exists) await db.run('INSERT INTO entity_tags (entity_id, tag, created_by) VALUES ($1,$2,$3)', [id, tag, actor(req)]);
+        }
+        await logAudit(actor(req), 'UPDATE_ENTITY', `${ids.length} entities`, 'entity', `Bulk tag: ${tag}`, req.ip);
+      }
+      break;
+    }
+  }
+
+  res.redirect('/watchlist');
+});
+
+// ── Add entity link ───────────────────────────────────────────
+router.post('/:id/links', requireAuth, async (req, res) => {
+  const { identifier, link_type, notes } = req.body;
+  const entity = await db.get('SELECT * FROM roblox_entities WHERE id=$1', [req.params.id]);
+  if (!entity) return res.redirect('/watchlist');
+
+  // Find linked entity in the watchlist by username or numeric ID
+  const isNum = /^\d+$/.test(String(identifier || '').trim());
+  const linked = isNum
+    ? await db.get('SELECT * FROM roblox_entities WHERE roblox_id=$1 OR id=$1::int', [identifier.trim()])
+    : await db.get('SELECT * FROM roblox_entities WHERE LOWER(username)=LOWER($1)', [identifier.trim()]);
+
+  if (!linked) return res.redirect(`/watchlist/${entity.id}?linkError=notfound`);
+  if (linked.id === entity.id) return res.redirect(`/watchlist/${entity.id}?linkError=self`);
+
+  const exists = await db.get(
+    'SELECT id FROM entity_links WHERE (entity_id=$1 AND linked_entity_id=$2) OR (entity_id=$2 AND linked_entity_id=$1)',
+    [entity.id, linked.id]
+  );
+  if (exists) return res.redirect(`/watchlist/${entity.id}?linkError=exists`);
+
+  await db.run(
+    'INSERT INTO entity_links (entity_id, linked_entity_id, link_type, notes, created_by) VALUES ($1,$2,$3,$4,$5)',
+    [entity.id, linked.id, link_type || 'ASSOCIATE', notes || null, actor(req)]
+  );
+  await logAudit(actor(req), 'LINK_ENTITY', entity.username, 'entity',
+    `Linked ${entity.username} ↔ ${linked.username} as ${link_type}`, req.ip);
+  res.redirect(`/watchlist/${entity.id}#links`);
+});
+
+// ── Remove entity link ────────────────────────────────────────
+router.post('/:id/links/remove', requireAuth, async (req, res) => {
+  await db.run('DELETE FROM entity_links WHERE id=$1', [req.body.link_id]);
+  res.redirect(`/watchlist/${req.params.id}#links`);
 });
 
 // ── Add tag ───────────────────────────────────────────────────

@@ -340,6 +340,73 @@
     </div>
     <% } %>
 
+    <!-- Entity links -->
+    <div class="panel" id="links">
+      <div class="panel-header">
+        <span class="panel-title">ENTITY LINKS</span>
+        <% if (links && links.length > 0) { %><span class="govuk-tag govuk-tag--blue"><%= links.length %> LINKED</span><% } %>
+      </div>
+      <div class="panel-body">
+        <form action="/watchlist/<%= entity.id %>/links" method="POST" class="link-add-form">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+            <div style="flex:1;min-width:140px">
+              <label class="form-label-sm">ENTITY (USERNAME OR WATCHLIST ID)</label>
+              <input class="form-input-sm" type="text" name="identifier" placeholder="e.g. PlayerXYZ or #42" required>
+            </div>
+            <div>
+              <label class="form-label-sm">LINK TYPE</label>
+              <select class="form-input-sm" name="link_type">
+                <option value="ASSOCIATE">Associate</option>
+                <option value="KNOWN_CONTACT">Known Contact</option>
+                <option value="ALT_ACCOUNT">Alt Account</option>
+                <option value="SUSPECTED_ALT">Suspected Alt</option>
+                <option value="HANDLER">Handler</option>
+              </select>
+            </div>
+            <button class="btn btn-secondary btn-sm" type="submit">LINK</button>
+          </div>
+          <input class="form-input-sm" type="text" name="notes" placeholder="Notes (optional)…" style="margin-top:6px;width:100%">
+        </form>
+        <% if (linkError) { %>
+        <div style="font-size:11px;color:var(--red);margin-top:6px;font-family:var(--mono)">
+          <% if (linkError === 'notfound') { %>Entity not found in watchlist.<% } %>
+          <% if (linkError === 'exists') { %>Link already exists.<% } %>
+          <% if (linkError === 'self') { %>Cannot link an entity to itself.<% } %>
+        </div>
+        <% } %>
+      </div>
+      <% if (links && links.length > 0) { %>
+      <div class="panel-body--compact" style="border-top:1px solid var(--border)">
+        <% links.forEach(function(link) { %>
+        <div class="entity-row" style="position:relative">
+          <a href="/watchlist/<%= link.other.id %>" style="display:contents">
+            <div class="entity-avatar">
+              <% if (link.other.avatar_url) { %><img src="<%= link.other.avatar_url %>" alt=""><% } else { %><span><%= link.other.username.charAt(0).toUpperCase() %></span><% } %>
+            </div>
+            <div class="entity-info">
+              <div class="entity-username"><%= link.other.username %></div>
+              <div class="entity-meta">
+                <span class="govuk-tag govuk-tag--grey" style="font-size:9px"><%= link.link_type.replace(/_/g,' ') %></span>
+                <% if (link.notes) { %><span style="color:var(--mid-grey)"><%= link.notes %></span><% } %>
+                <span style="color:var(--mid-grey)">— <%= link.created_by %></span>
+              </div>
+            </div>
+            <div class="entity-badges">
+              <strong class="govuk-tag govuk-tag--sev-<%= link.other.severity.toLowerCase() %>"><%= link.other.severity %></strong>
+            </div>
+          </a>
+          <form action="/watchlist/<%= entity.id %>/links/remove" method="POST" style="margin-left:8px;flex-shrink:0">
+            <input type="hidden" name="link_id" value="<%= link.id %>">
+            <button type="submit" class="case-note-delete" title="Remove link" onclick="return confirm('Remove this link?')">&times;</button>
+          </form>
+        </div>
+        <% }); %>
+      </div>
+      <% } else { %>
+      <div class="empty-state" style="padding:10px 16px;font-size:12px">No entity links yet.</div>
+      <% } %>
+    </div>
+
     <!-- Tags -->
     <div class="panel">
       <div class="panel-header"><span class="panel-title">INTELLIGENCE TAGS</span></div>

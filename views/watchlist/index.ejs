@@ -20,27 +20,31 @@
     </div>
     <select name="severity" class="filter-select" style="width:auto">
       <option value="">ALL SEVERITIES</option>
-      <option value="CRITICAL" <%= filters.severity === 'CRITICAL' ? 'selected' : '' %>>CRITICAL</option>
-      <option value="HIGH"     <%= filters.severity === 'HIGH'     ? 'selected' : '' %>>HIGH</option>
-      <option value="MEDIUM"   <%= filters.severity === 'MEDIUM'   ? 'selected' : '' %>>MEDIUM</option>
-      <option value="LOW"      <%= filters.severity === 'LOW'      ? 'selected' : '' %>>LOW</option>
+      <% ['CRITICAL','HIGH','MEDIUM','LOW'].forEach(function(s) { %><option value="<%= s %>" <%= filters.severity === s ? 'selected' : '' %>><%= s %></option><% }); %>
     </select>
     <select name="status" class="filter-select" style="width:auto">
       <option value="">ALL STATUSES</option>
-      <option value="ACTIVE"   <%= filters.status === 'ACTIVE'   ? 'selected' : '' %>>ACTIVE</option>
-      <option value="INACTIVE" <%= filters.status === 'INACTIVE' ? 'selected' : '' %>>INACTIVE</option>
-      <option value="ARCHIVED" <%= filters.status === 'ARCHIVED' ? 'selected' : '' %>>ARCHIVED</option>
-      <option value="BANNED"   <%= filters.status === 'BANNED'   ? 'selected' : '' %>>BANNED</option>
+      <% ['ACTIVE','INACTIVE','ARCHIVED','BANNED'].forEach(function(s) { %><option value="<%= s %>" <%= filters.status === s ? 'selected' : '' %>><%= s %></option><% }); %>
     </select>
     <button type="submit" class="govuk-button govuk-button--secondary govuk-button--small">FILTER</button>
     <a href="/watchlist" class="govuk-button govuk-button--ghost govuk-button--small">CLEAR</a>
   </form>
 </div>
 
+<!-- Bulk form (wraps table so checkboxes submit together) -->
+<form id="bulk-form" action="/watchlist/bulk" method="POST">
+  <input type="hidden" name="bulk_action" id="bulk-action-input">
+  <input type="hidden" name="bulk_value"  id="bulk-value-input">
+
 <div class="govuk-table-wrapper">
   <table class="govuk-table">
     <thead class="govuk-table__head">
       <tr>
+        <% if (user.role === 'admin') { %>
+        <th class="govuk-table__header bulk-check-cell">
+          <input type="checkbox" class="bulk-checkbox bulk-check-all" title="Select all">
+        </th>
+        <% } %>
         <th class="govuk-table__header" style="width:54px">#</th>
         <th class="govuk-table__header">TARGET IDENTITY</th>
         <th class="govuk-table__header">CATEGORY / TAGS</th>
@@ -51,17 +55,16 @@
     </thead>
     <tbody class="govuk-table__body">
       <% if (entities.length === 0) { %>
-      <tr>
-        <td colspan="6" class="govuk-table__cell govuk-table__cell--empty">
-          NO ENTITY INDEXES DETECTED WITHIN QUERY PARAMETERS
-        </td>
-      </tr>
+      <tr><td colspan="<%= user.role === 'admin' ? 7 : 6 %>" class="govuk-table__cell govuk-table__cell--empty">NO ENTITY INDEXES DETECTED WITHIN QUERY PARAMETERS</td></tr>
       <% } else { %>
       <% entities.forEach(function(e) { %>
       <tr class="govuk-table__row entity-tr" data-href="/watchlist/<%= e.id %>">
-        <td class="govuk-table__cell">
-          <span class="entity-index"><%= String(e.id).padStart(4,'0') %></span>
+        <% if (user.role === 'admin') { %>
+        <td class="govuk-table__cell bulk-check-cell">
+          <input type="checkbox" class="bulk-checkbox bulk-check" name="ids" value="<%= e.id %>">
         </td>
+        <% } %>
+        <td class="govuk-table__cell"><span class="entity-index"><%= String(e.id).padStart(4,'0') %></span></td>
         <td class="govuk-table__cell">
           <div class="identity-cell">
             <div class="table-avatar">
@@ -77,24 +80,16 @@
           <span class="category-tag"><%= e.category %></span>
           <% if (e.tags && e.tags.length > 0) { %><% e.tags.slice(0,2).forEach(function(tag) { %><span class="mini-tag"><%= tag %></span><% }); %><% } %>
         </td>
-        <td class="govuk-table__cell">
-          <strong class="govuk-tag govuk-tag--sev-<%= e.severity.toLowerCase() %>"><%= e.severity %></strong>
-        </td>
-        <td class="govuk-table__cell">
-          <strong class="govuk-tag govuk-tag--status-<%= e.status.toLowerCase() %>"><%= e.status %></strong>
-        </td>
-        <td class="govuk-table__cell">
-          <a href="/watchlist/<%= e.id %>" class="table-action-btn">VIEW DOSSIER</a>
-        </td>
+        <td class="govuk-table__cell"><strong class="govuk-tag govuk-tag--sev-<%= e.severity.toLowerCase() %>"><%= e.severity %></strong></td>
+        <td class="govuk-table__cell"><strong class="govuk-tag govuk-tag--status-<%= e.status.toLowerCase() %>"><%= e.status %></strong></td>
+        <td class="govuk-table__cell"><a href="/watchlist/<%= e.id %>" class="table-action-btn">VIEW DOSSIER</a></td>
       </tr>
       <% }); %>
       <% } %>
     </tbody>
   </table>
   <div class="table-footer">
-    <span class="table-count">
-      Showing <%= offset + 1 %>–<%= Math.min(offset + limit, total) %> of <%= total %> entit<%= total !== 1 ? 'ies' : 'y' %>
-    </span>
+    <span class="table-count">Showing <%= offset + 1 %>–<%= Math.min(offset + limit, total) %> of <%= total %> entit<%= total !== 1 ? 'ies' : 'y' %></span>
     <div class="pagination">
       <% if (offset > 0) { %>
       <a href="/watchlist?page=<%= pageNum - 1 %>&q=<%= filters.q||'' %>&severity=<%= filters.severity||'' %>&status=<%= filters.status||'' %>" class="btn btn-ghost btn-sm">← PREV</a>
@@ -105,5 +100,41 @@
     </div>
   </div>
 </div>
+</form>
+
+<% if (user.role === 'admin') { %>
+<!-- Bulk action bar (slides up when items selected) -->
+<div class="bulk-bar" id="bulk-bar">
+  <span class="bulk-count" id="bulk-count">0 selected</span>
+  <div class="bulk-bar-divider"></div>
+
+  <div class="bulk-action-group">
+    <label class="bulk-action-label">SEVERITY</label>
+    <select class="bulk-inline-select" id="bulk-severity-select">
+      <% ['LOW','MEDIUM','HIGH','CRITICAL'].forEach(function(s) { %><option value="<%= s %>"><%= s %></option><% }); %>
+    </select>
+    <button class="btn btn-secondary btn-sm bulk-action-btn" data-action="severity">APPLY</button>
+  </div>
+
+  <div class="bulk-action-group">
+    <label class="bulk-action-label">STATUS</label>
+    <select class="bulk-inline-select" id="bulk-status-select">
+      <% ['ACTIVE','INACTIVE','ARCHIVED','BANNED'].forEach(function(s) { %><option value="<%= s %>"><%= s %></option><% }); %>
+    </select>
+    <button class="btn btn-secondary btn-sm bulk-action-btn" data-action="status">APPLY</button>
+  </div>
+
+  <div class="bulk-action-group">
+    <label class="bulk-action-label">TAG</label>
+    <input type="text" class="bulk-inline-input" id="bulk-tag-input" placeholder="TAG NAME" maxlength="30">
+    <button class="btn btn-secondary btn-sm bulk-action-btn" data-action="tag">ADD</button>
+  </div>
+
+  <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+    <button class="btn btn-danger btn-sm bulk-action-btn" data-action="delete">DELETE SELECTED</button>
+    <button class="btn btn-ghost btn-sm" id="bulk-clear-btn">CLEAR</button>
+  </div>
+</div>
+<% } %>
 
 <%- include('../partials/footer') %>
