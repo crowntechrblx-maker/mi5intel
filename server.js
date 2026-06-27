@@ -58,12 +58,12 @@ async function main() {
   const watchlistRoutes = require('./routes/watchlist');
   const adminRoutes   = require('./routes/admin');
   const groupsRoutes  = require('./routes/groups');
-  const { requireAuth, requireAdmin } = require('./middleware/auth');
+  const { requireAuth, requireAdmin, requireIp } = require('./middleware/auth');
   const db = require('./db/database');
 
   app.use('/', authRoutes);
   app.use('/watchlist', watchlistRoutes);
-  app.use('/admin', adminRoutes);
+  app.use('/admin', requireIp, adminRoutes);
   app.use('/groups', groupsRoutes);
 
   // Serve embed image as PNG (loginlogo.svg is actually a PNG binary)
@@ -155,7 +155,7 @@ async function main() {
   });
 
   // Audit logs
-  app.get('/audit', requireAuth, async (req, res) => {
+  app.get('/audit', requireIp, requireAuth, async (req, res) => {
     const { actor, action, target, page: pageNum } = req.query;
     const limit = 50;
     const offset = (parseInt(pageNum) - 1 || 0) * limit;
@@ -187,7 +187,7 @@ async function main() {
   });
 
   // Settings
-  app.get('/settings', requireAuth, (req, res) => {
+  app.get('/settings', requireIp, requireAuth, (req, res) => {
     res.render('settings', {
       user: req.session.user,
       page: 'settings',
@@ -204,22 +204,23 @@ async function main() {
     res.redirect('/settings?schedulerTriggered=1');
   });
 
-  app.post('/settings/password', requireAuth, async (req, res) => {
+  app.post('/settings/password', requireIp, requireAuth, async (req, res) => {
     const bcrypt = require('bcryptjs');
     const { current_password, new_password, confirm_password } = req.body;
+    const settle = (error, success) => res.render('settings', {
+      user: req.session.user, page: 'settings',
+      schedulerState: scheduler.getState(), error, success,
+    });
     const userRow = await db.get('SELECT * FROM admin_users WHERE id = $1', [req.session.user.id]);
-    if (!await bcrypt.compare(current_password, userRow.password_hash)) {
-      return res.render('settings', { user: req.session.user, page: 'settings', success: null, error: 'Current password is incorrect.' });
-    }
-    if (new_password !== confirm_password) {
-      return res.render('settings', { user: req.session.user, page: 'settings', success: null, error: 'New passwords do not match.' });
-    }
-    if (new_password.length < 8) {
-      return res.render('settings', { user: req.session.user, page: 'settings', success: null, error: 'Password must be at least 8 characters.' });
-    }
+    if (!await bcrypt.compare(current_password, userRow.password_hash))
+      return settle('Current password is incorrect.', null);
+    if (new_password !== confirm_password)
+      return settle('New passwords do not match.', null);
+    if (new_password.length < 8)
+      return settle('Password must be at least 8 characters.', null);
     const hash = await bcrypt.hash(new_password, 12);
     await db.run('UPDATE admin_users SET password_hash=$1 WHERE id=$2', [hash, req.session.user.id]);
-    res.render('settings', { user: req.session.user, page: 'settings', success: 'Password updated.', error: null });
+    settle(null, 'Password updated successfully.');
   });
 
   // 404

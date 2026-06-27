@@ -11,12 +11,16 @@ const ROBLOX_APIS = {
   accountinfo: 'https://accountinformation.roblox.com/v1',
 };
 
+function authHeaders() {
+  const cookie = process.env.ROBLOX_COOKIE;
+  const headers = { 'Accept': 'application/json' };
+  if (cookie) headers['Cookie'] = `.ROBLOSECURITY=${cookie}`;
+  return headers;
+}
+
 async function apiFetch(url) {
   try {
-    const res = await fetch(url, {
-      headers: { 'Accept': 'application/json' },
-      timeout: 10000,
-    });
+    const res = await fetch(url, { headers: authHeaders(), timeout: 10000 });
     if (!res.ok) return null;
     return await res.json();
   } catch {
@@ -28,7 +32,7 @@ async function apiPost(url, body) {
   try {
     const res = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
       timeout: 10000,
     });
