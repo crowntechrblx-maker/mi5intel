@@ -158,26 +158,9 @@ document.addEventListener('contextmenu', function(e) {
   e.preventDefault();
 });
 
-// ── Security: block common devtools keyboard shortcuts ─────────
-document.addEventListener('keydown', function(e) {
-  // F12
-  if (e.key === 'F12') { e.preventDefault(); return; }
-  // Ctrl+Shift+I / Ctrl+Shift+J / Ctrl+Shift+C  (devtools)
-  if (e.ctrlKey && e.shiftKey && ['i','I','j','J','c','C'].indexOf(e.key) !== -1) {
-    e.preventDefault(); return;
-  }
-  // Ctrl+U  (view source)
-  if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) {
-    e.preventDefault(); return;
-  }
-  // Ctrl+S  (save page)
-  if (e.ctrlKey && (e.key === 's' || e.key === 'S')) {
-    e.preventDefault(); return;
-  }
-});
-
-// ── Security: blur/blackout on focus loss ──────────────────────
+// ── Security: blackout overlay + keyboard/focus protection ──────
 (function() {
+  // Overlay built first so keydown handler can reference it immediately
   var overlay = document.createElement('div');
   overlay.id = 'focus-shield';
   overlay.style.cssText = [
@@ -193,18 +176,55 @@ document.addEventListener('keydown', function(e) {
     'cursor:default'
   ].join(';');
   overlay.innerHTML =
-    '<svg width="40" height="36" viewBox="0 0 110 96" fill="none" style="opacity:.25">' +
+    '<svg width="40" height="36" viewBox="0 0 110 96" fill="none" style="opacity:.2">' +
       '<polygon points="55,3 107,93 3,93" stroke="#fff" stroke-width="2.5" fill="none" stroke-linejoin="round"/>' +
     '</svg>' +
-    '<span style="color:#333;font-family:\'Courier New\',monospace;font-size:11px;letter-spacing:4px;text-transform:uppercase">Session Obscured</span>';
+    '<span style="color:#2a2a2a;font-family:\'Courier New\',monospace;font-size:11px;letter-spacing:4px;text-transform:uppercase">Session Obscured</span>';
   document.body.appendChild(overlay);
 
-  function hide()  { overlay.style.display = 'none'; }
-  function show()  { overlay.style.display = 'flex'; }
+  function hide() { overlay.style.display = 'none'; }
+  function show() { overlay.style.display = 'flex'; }
 
-  window.addEventListener('blur',   show);
-  window.addEventListener('focus',  hide);
+  // Flash black for 800ms — fires before any screenshot can capture the screen
+  var flashTimer = null;
+  function flash() {
+    show();
+    clearTimeout(flashTimer);
+    flashTimer = setTimeout(hide, 800);
+  }
+
+  // Focus loss → full blackout until window is focused again
+  window.addEventListener('blur', show);
+  window.addEventListener('focus', hide);
   document.addEventListener('visibilitychange', function() {
     document.hidden ? show() : hide();
+  });
+
+  // Keyboard interception
+  document.addEventListener('keydown', function(e) {
+    var k     = e.key;
+    var ctrl  = e.ctrlKey || e.metaKey;
+    var shift = e.shiftKey;
+
+    // Screenshot shortcuts — block AND flash black immediately
+    if (k === 'PrintScreen' || k === 'Print' || k === 'Snapshot') {
+      e.preventDefault(); flash(); return;
+    }
+    // Ctrl+Shift+S (Windows Snipping Tool / ShareX / Lightshot default)
+    if (ctrl && shift && (k === 's' || k === 'S')) {
+      e.preventDefault(); flash(); return;
+    }
+    // Ctrl+Shift+P (some capture tools)
+    if (ctrl && shift && (k === 'p' || k === 'P')) {
+      e.preventDefault(); flash(); return;
+    }
+
+    // DevTools — block AND flash
+    if (k === 'F12') { e.preventDefault(); flash(); return; }
+    if (ctrl && shift && 'iIjJcC'.indexOf(k) !== -1) { e.preventDefault(); flash(); return; }
+
+    // View source / save — block silently
+    if (ctrl && (k === 'u' || k === 'U')) { e.preventDefault(); return; }
+    if (ctrl && !shift && (k === 's' || k === 'S')) { e.preventDefault(); return; }
   });
 })();
