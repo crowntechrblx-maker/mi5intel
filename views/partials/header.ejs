@@ -4,131 +4,132 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= typeof pageTitle !== 'undefined' ? pageTitle + ' — ' : '' %>MI5 Intel Portal</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 </head>
 <body>
 
-<!-- ── MI5 Header ── -->
-<header class="govuk-header" role="banner">
-  <div class="govuk-header__container">
+<!-- ═══════════════════════════════════════
+     HEADER  grid-area: header (full width)
+     ═══════════════════════════════════════ -->
+<header class="site-header">
 
-    <a href="/" class="govuk-header__logotype" aria-label="MI5 Intel Portal — Home">
-      <!-- MI5 Triangle emblem -->
-      <svg class="mi5-logo" width="34" height="30" viewBox="0 0 110 96" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <polygon points="55,3 107,93 3,93" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
-        <line x1="14" y1="80" x2="96" y2="80" stroke="currentColor" stroke-width="1.5"/>
-        <line x1="32" y1="80" x2="32" y2="93" stroke="currentColor" stroke-width="1"/>
-        <line x1="78" y1="80" x2="78" y2="93" stroke="currentColor" stroke-width="1"/>
-        <text x="55" y="18" text-anchor="middle" font-size="7" fill="currentColor" font-weight="700" font-family="serif">I</text>
-        <ellipse cx="55" cy="28" rx="8.5" ry="5.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
-        <circle cx="55" cy="28" r="3" fill="currentColor"/>
-        <text x="55" y="44" text-anchor="middle" font-size="7.5" fill="currentColor" font-weight="700" font-family="serif" letter-spacing="2">EIIR</text>
-        <line x1="55" y1="47" x2="55" y2="56" stroke="currentColor" stroke-width="1.5"/>
-        <line x1="50" y1="51" x2="60" y2="51" stroke="currentColor" stroke-width="1.5"/>
-        <rect x="43" y="72" width="24" height="6" stroke="currentColor" stroke-width="1.2" fill="none"/>
-        <polyline points="43,72 43,63 48,68 52,58 55,65 58,58 62,68 67,63 67,72" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
-        <circle cx="43" cy="63" r="1.2" fill="currentColor"/>
-        <circle cx="55" cy="65" r="1.2" fill="currentColor"/>
-        <circle cx="67" cy="63" r="1.2" fill="currentColor"/>
-        <rect x="44" y="58" width="22" height="9" rx="1" stroke="currentColor" stroke-width="1" fill="#0b0c0c" stroke-dasharray="1.5 1"/>
-        <text x="55" y="65.5" text-anchor="middle" font-size="7" fill="currentColor" font-weight="700" font-family="serif" letter-spacing="1.5">007</text>
-        <text x="25" y="77" text-anchor="middle" font-size="6.5" fill="currentColor" font-weight="700" font-family="serif">U.</text>
-        <text x="85" y="77" text-anchor="middle" font-size="6.5" fill="currentColor" font-weight="700" font-family="serif">K.</text>
-        <text x="23" y="90" text-anchor="middle" font-size="5.5" fill="currentColor" font-weight="700" font-family="serif">M</text>
-        <text x="55" y="90" text-anchor="middle" font-size="5" fill="currentColor" font-weight="700" font-family="serif" letter-spacing="1.2">INTELLIGENCE</text>
-        <text x="87" y="90" text-anchor="middle" font-size="5.5" fill="currentColor" font-weight="700" font-family="serif">V</text>
-      </svg>
-      <div class="govuk-header__logotype-text">
-        <span class="govuk-header__logotype-dept">Military Intelligence Section 5</span>
-        <span class="govuk-header__logotype-name">Intel Portal</span>
-      </div>
-    </a>
-
-    <div class="govuk-header__divider" aria-hidden="true"></div>
-    <span class="govuk-header__service-name">CLASSIFIED SYSTEM</span>
-
-    <div class="govuk-header__right">
-      <span class="govuk-phase-tag">RESTRICTED</span>
-      <div class="header-user">
-        <div class="header-avatar"><%= user ? user.username.charAt(0).toUpperCase() : '?' %></div>
-      </div>
+  <a href="/" class="header-logo" aria-label="MI5 Intel Portal home">
+    <svg width="32" height="28" viewBox="0 0 110 96" fill="none" aria-hidden="true">
+      <polygon points="55,3 107,93 3,93" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
+      <line x1="14" y1="80" x2="96" y2="80" stroke="currentColor" stroke-width="1.5"/>
+      <line x1="32" y1="80" x2="32" y2="93" stroke="currentColor" stroke-width="1"/>
+      <line x1="78" y1="80" x2="78" y2="93" stroke="currentColor" stroke-width="1"/>
+      <text x="55" y="18" text-anchor="middle" font-size="7" fill="currentColor" font-weight="700" font-family="serif">I</text>
+      <ellipse cx="55" cy="28" rx="8.5" ry="5.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+      <circle cx="55" cy="28" r="3" fill="currentColor"/>
+      <text x="55" y="44" text-anchor="middle" font-size="7.5" fill="currentColor" font-weight="700" font-family="serif" letter-spacing="2">EIIR</text>
+      <line x1="55" y1="47" x2="55" y2="56" stroke="currentColor" stroke-width="1.5"/>
+      <line x1="50" y1="51" x2="60" y2="51" stroke="currentColor" stroke-width="1.5"/>
+      <rect x="43" y="72" width="24" height="6" stroke="currentColor" stroke-width="1.2" fill="none"/>
+      <polyline points="43,72 43,63 48,68 52,58 55,65 58,58 62,68 67,63 67,72" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+      <circle cx="43" cy="63" r="1.2" fill="currentColor"/>
+      <circle cx="55" cy="65" r="1.2" fill="currentColor"/>
+      <circle cx="67" cy="63" r="1.2" fill="currentColor"/>
+      <rect x="44" y="58" width="22" height="9" rx="1" stroke="currentColor" stroke-width="1" fill="#0b0c0c" stroke-dasharray="1.5 1"/>
+      <text x="55" y="65.5" text-anchor="middle" font-size="7" fill="currentColor" font-weight="700" font-family="serif" letter-spacing="1.5">007</text>
+      <text x="25" y="77" text-anchor="middle" font-size="6.5" fill="currentColor" font-weight="700" font-family="serif">U.</text>
+      <text x="85" y="77" text-anchor="middle" font-size="6.5" fill="currentColor" font-weight="700" font-family="serif">K.</text>
+      <text x="23" y="90" text-anchor="middle" font-size="5.5" fill="currentColor" font-weight="700" font-family="serif">M</text>
+      <text x="55" y="90" text-anchor="middle" font-size="5" fill="currentColor" font-weight="700" font-family="serif" letter-spacing="1.2">INTELLIGENCE</text>
+      <text x="87" y="90" text-anchor="middle" font-size="5.5" fill="currentColor" font-weight="700" font-family="serif">V</text>
+    </svg>
+    <div class="header-logo-text">
+      <span class="header-logo-dept">Military Intelligence Section 5</span>
+      <span class="header-logo-name">Intel Portal</span>
     </div>
+  </a>
+
+  <div class="header-divider" aria-hidden="true"></div>
+  <span class="header-service">CLASSIFIED SYSTEM</span>
+
+  <div class="header-right">
+    <span class="header-phase">RESTRICTED</span>
+    <div class="header-avatar" aria-hidden="true"><%= user ? user.username.charAt(0).toUpperCase() : '?' %></div>
   </div>
+
 </header>
 
-<!-- ── Service Navigation (sidebar) ── -->
-<nav class="govuk-service-nav" aria-label="Service navigation">
+<!-- ═══════════════════════════════════════
+     SIDEBAR  grid-area: sidebar (left col)
+     ═══════════════════════════════════════ -->
+<nav class="site-sidebar" aria-label="Main navigation">
 
-  <div class="govuk-service-nav__section">
-    <span class="govuk-service-nav__section-label">OPERATIONS</span>
+  <div class="sidebar-section">
+    <span class="sidebar-label">OPERATIONS</span>
 
-    <a href="/" class="govuk-service-nav__item <%= typeof page !== 'undefined' && page === 'dashboard' ? 'govuk-service-nav__item--active' : '' %>">
-      <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <a href="/" class="sidebar-link <%= typeof page !== 'undefined' && page === 'dashboard' ? 'active' : '' %>">
+      <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
         <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
       </svg>
       Intelligence Desk
     </a>
 
-    <a href="/watchlist" class="govuk-service-nav__item <%= typeof page !== 'undefined' && page === 'watchlist' ? 'govuk-service-nav__item--active' : '' %>">
-      <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <a href="/watchlist" class="sidebar-link <%= typeof page !== 'undefined' && page === 'watchlist' ? 'active' : '' %>">
+      <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
         <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
       </svg>
       Watchlist
     </a>
 
-    <a href="/network" class="govuk-service-nav__item <%= typeof page !== 'undefined' && page === 'network' ? 'govuk-service-nav__item--active' : '' %>">
-      <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <a href="/network" class="sidebar-link <%= typeof page !== 'undefined' && page === 'network' ? 'active' : '' %>">
+      <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
         <path fill-rule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
       </svg>
       Network View
     </a>
   </div>
 
-  <div class="govuk-service-nav__section">
-    <span class="govuk-service-nav__section-label">RECORDS</span>
+  <div class="sidebar-section">
+    <span class="sidebar-label">RECORDS</span>
 
-    <a href="/audit" class="govuk-service-nav__item <%= typeof page !== 'undefined' && page === 'audit' ? 'govuk-service-nav__item--active' : '' %>">
-      <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <a href="/audit" class="sidebar-link <%= typeof page !== 'undefined' && page === 'audit' ? 'active' : '' %>">
+      <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
         <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/>
       </svg>
       Audit Logs
     </a>
 
     <% if (user && user.role === 'admin') { %>
-    <a href="/admin" class="govuk-service-nav__item <%= typeof page !== 'undefined' && page === 'admin' ? 'govuk-service-nav__item--active' : '' %>">
-      <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <a href="/admin" class="sidebar-link <%= typeof page !== 'undefined' && page === 'admin' ? 'active' : '' %>">
+      <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
         <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/>
       </svg>
       User Management
     </a>
     <% } %>
 
-    <a href="/settings" class="govuk-service-nav__item <%= typeof page !== 'undefined' && page === 'settings' ? 'govuk-service-nav__item--active' : '' %>">
-      <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <a href="/settings" class="sidebar-link <%= typeof page !== 'undefined' && page === 'settings' ? 'active' : '' %>">
+      <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
         <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
       </svg>
       Settings
     </a>
   </div>
 
-  <div class="govuk-service-nav__footer">
-    <div class="nav-avatar"><%= user ? user.username.charAt(0).toUpperCase() : '?' %></div>
-    <div class="nav-user-info">
-      <span class="nav-user-name"><%= user ? (user.display_name || user.username) : 'Unknown' %></span>
-      <span class="nav-user-role"><%= user ? user.role.toUpperCase() : '' %></span>
+  <div class="sidebar-footer">
+    <div class="sidebar-avatar" aria-hidden="true"><%= user ? user.username.charAt(0).toUpperCase() : '?' %></div>
+    <div class="sidebar-user">
+      <span class="sidebar-username"><%= user ? (user.display_name || user.username) : 'Unknown' %></span>
+      <span class="sidebar-role"><%= user ? user.role : '' %></span>
     </div>
     <form action="/logout" method="POST">
-      <button type="submit" class="nav-logout-btn" title="Sign out">
+      <button type="submit" class="sidebar-logout" title="Sign out" aria-label="Sign out">
         <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
           <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"/>
         </svg>
       </button>
     </form>
   </div>
+
 </nav>
 
-<main class="govuk-main-wrapper" id="main-content" role="main">
+<!-- ═══════════════════════════════════════
+     MAIN  grid-area: main (right column)
+     ═══════════════════════════════════════ -->
+<main class="site-main" id="main-content" role="main">
