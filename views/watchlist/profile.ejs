@@ -265,19 +265,80 @@
     </div>
     <% } %>
 
-    <!-- Analyst notes -->
-    <div class="panel">
-      <div class="panel-header"><span class="panel-title">ANALYST NOTES</span></div>
+    <!-- Case log (replaces single notes textarea) -->
+    <div class="panel" id="case-log">
+      <div class="panel-header">
+        <span class="panel-title">CASE LOG</span>
+        <span class="govuk-tag govuk-tag--grey"><%= caseNotes.length %> ENTR<%= caseNotes.length !== 1 ? 'IES' : 'Y' %></span>
+      </div>
       <div class="panel-body">
-        <form action="/watchlist/<%= entity.id %>/update" method="POST">
-          <input type="hidden" name="severity" value="<%= entity.severity %>">
-          <input type="hidden" name="status" value="<%= entity.status %>">
-          <input type="hidden" name="category" value="<%= entity.category %>">
-          <textarea class="form-input form-textarea" name="notes" rows="5" placeholder="Enter intelligence notes, incident references, or context..."><%= entity.notes || '' %></textarea>
-          <button class="btn btn-secondary btn-sm" type="submit" style="margin-top:.5rem">SAVE NOTES</button>
+        <form action="/watchlist/<%= entity.id %>/notes" method="POST" class="note-add-form">
+          <textarea class="form-input form-textarea" name="note" rows="3" placeholder="Add a case note, incident reference, or intelligence update…" required></textarea>
+          <button class="btn btn-secondary btn-sm" type="submit" style="margin-top:.5rem">ADD ENTRY</button>
         </form>
       </div>
+      <% if (caseNotes.length > 0) { %>
+      <div class="panel-body--compact" style="border-top:1px solid var(--border);padding-top:0">
+        <% caseNotes.forEach(function(n) { %>
+        <div class="case-note">
+          <div class="case-note-meta">
+            <span class="case-note-author"><%= n.author %></span>
+            <span class="case-note-time"><%= new Date(n.created_at).toLocaleString('en-GB') %></span>
+            <% if (n.author === user.username || user.role === 'admin') { %>
+            <form action="/watchlist/<%= entity.id %>/notes/delete" method="POST" style="display:inline;margin-left:auto">
+              <input type="hidden" name="note_id" value="<%= n.id %>">
+              <button type="submit" class="case-note-delete" title="Delete note" onclick="return confirm('Delete this note?')">&times;</button>
+            </form>
+            <% } %>
+          </div>
+          <div class="case-note-body"><%= n.note %></div>
+        </div>
+        <% }); %>
+      </div>
+      <% } else { %>
+      <div class="empty-state" style="padding:12px 16px;font-size:12px">No case notes yet.</div>
+      <% } %>
     </div>
+
+    <!-- Threat timeline -->
+    <% if (snapshots && snapshots.length > 0) { %>
+    <div class="panel panel-collapsible panel-collapsible--collapsed" id="panel-timeline">
+      <button type="button" class="panel-header panel-toggle" data-panel="panel-timeline" aria-expanded="false">
+        <span class="panel-title">THREAT TIMELINE (<%= snapshots.length %> SNAPSHOTS)</span>
+        <span class="panel-chevron-wrap">
+          <svg class="panel-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        </span>
+      </button>
+      <div class="panel-body panel-body--compact panel-collapsible__body">
+        <% snapshots.forEach(function(snap, i) { %>
+        <div class="timeline-entry">
+          <div class="timeline-dot <%= snap.diff && Object.keys(snap.diff).length > 0 ? 'timeline-dot--changed' : '' %>"></div>
+          <div class="timeline-content">
+            <div class="timeline-header">
+              <span class="timeline-time"><%= new Date(snap.fetched_at).toLocaleString('en-GB') %></span>
+              <span class="timeline-by">by <%= snap.fetched_by %></span>
+              <% if (i === 0) { %><span class="govuk-tag govuk-tag--grey" style="font-size:9px">LATEST</span><% } %>
+            </div>
+            <% if (snap.diff && Object.keys(snap.diff).length > 0) { %>
+            <div class="timeline-changes">
+              <% Object.entries(snap.diff).forEach(function([field, val]) { %>
+              <span class="timeline-change">
+                <span class="timeline-field"><%= field %></span>
+                <span class="timeline-from"><%= val.from %></span>
+                <span class="timeline-arrow">→</span>
+                <span class="timeline-to"><%= val.to %></span>
+              </span>
+              <% }); %>
+            </div>
+            <% } else { %>
+            <div class="timeline-no-change">No changes detected</div>
+            <% } %>
+          </div>
+        </div>
+        <% }); %>
+      </div>
+    </div>
+    <% } %>
 
     <!-- Tags -->
     <div class="panel">

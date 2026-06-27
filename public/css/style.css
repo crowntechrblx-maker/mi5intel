@@ -549,6 +549,34 @@ button:focus-visible { outline: 3px solid var(--yellow); }
 .profile-left  { display: flex; flex-direction: column; gap: 0; }
 .profile-right { display: flex; flex-direction: column; gap: 0; }
 
+/* ── Case log ── */
+.note-add-form { display: flex; flex-direction: column; gap: 6px; }
+.case-note { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+.case-note:last-child { border-bottom: none; }
+.case-note-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; flex-wrap: wrap; }
+.case-note-author { font-size: 11px; font-weight: 600; color: var(--blue-light); font-family: var(--mono); text-transform: uppercase; }
+.case-note-time { font-size: 10px; color: var(--mid-grey); font-family: var(--mono); }
+.case-note-body { font-size: 13px; color: var(--white); line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+.case-note-delete { background: none; border: none; color: var(--mid-grey); cursor: pointer; font-size: 16px; line-height: 1; padding: 0 2px; margin-left: auto; }
+.case-note-delete:hover { color: var(--red); }
+
+/* ── Threat timeline ── */
+.timeline-entry { display: flex; gap: 12px; padding: 10px 16px; }
+.timeline-entry + .timeline-entry { border-top: 1px solid var(--border); }
+.timeline-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border-2); flex-shrink: 0; margin-top: 5px; }
+.timeline-dot--changed { background: var(--blue); box-shadow: 0 0 0 2px rgba(29,112,184,.3); }
+.timeline-content { flex: 1; min-width: 0; }
+.timeline-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
+.timeline-time { font-size: 11px; font-family: var(--mono); color: var(--grey); }
+.timeline-by { font-size: 10px; color: var(--mid-grey); }
+.timeline-changes { display: flex; flex-wrap: wrap; gap: 6px; }
+.timeline-change { display: inline-flex; align-items: center; gap: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 2px 7px; font-size: 11px; }
+.timeline-field { color: var(--mid-grey); font-family: var(--mono); text-transform: uppercase; font-size: 10px; }
+.timeline-from { color: #e08080; text-decoration: line-through; }
+.timeline-arrow { color: var(--dim-grey); }
+.timeline-to { color: #5cb88a; font-weight: 600; }
+.timeline-no-change { font-size: 11px; color: var(--mid-grey); font-style: italic; }
+
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }

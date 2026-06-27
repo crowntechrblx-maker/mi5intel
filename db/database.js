@@ -8,25 +8,21 @@ const pool = new Pool({
   connectionTimeoutMillis: 5000,
 });
 
-// Helper: single row or undefined
 async function get(sql, params = []) {
   const res = await pool.query(sql, params);
   return res.rows[0];
 }
 
-// Helper: all rows
 async function all(sql, params = []) {
   const res = await pool.query(sql, params);
   return res.rows;
 }
 
-// Helper: insert/update/delete — returns { lastInsertId, rowCount }
 async function run(sql, params = []) {
   const res = await pool.query(sql, params);
   return { lastInsertId: res.rows[0]?.id ?? null, rowCount: res.rowCount };
 }
 
-// Helper: raw exec (schema setup etc.)
 async function exec(sql) {
   await pool.query(sql);
 }
@@ -72,6 +68,23 @@ async function initSchema() {
       created_at TIMESTAMPTZ DEFAULT NOW()
     );
 
+    CREATE TABLE IF NOT EXISTS entity_notes (
+      id         SERIAL PRIMARY KEY,
+      entity_id  INTEGER NOT NULL REFERENCES roblox_entities(id) ON DELETE CASCADE,
+      author     TEXT NOT NULL,
+      note       TEXT NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS entity_snapshots (
+      id         SERIAL PRIMARY KEY,
+      entity_id  INTEGER NOT NULL REFERENCES roblox_entities(id) ON DELETE CASCADE,
+      fetched_by TEXT NOT NULL,
+      fetched_at TIMESTAMPTZ DEFAULT NOW(),
+      diff       JSONB,
+      snapshot   JSONB NOT NULL
+    );
+
     CREATE TABLE IF NOT EXISTS audit_logs (
       id          SERIAL PRIMARY KEY,
       action      TEXT NOT NULL,
@@ -90,7 +103,19 @@ async function initSchema() {
       PRIMARY KEY ("sid")
     );
 
-    CREATE INDEX IF NOT EXISTS "IDX_session_expire" ON "session" ("expire");
+    -- Indexes
+    CREATE INDEX IF NOT EXISTS "IDX_session_expire"       ON "session"         ("expire");
+    CREATE INDEX IF NOT EXISTS idx_entities_severity      ON roblox_entities   (severity);
+    CREATE INDEX IF NOT EXISTS idx_entities_status        ON roblox_entities   (status);
+    CREATE INDEX IF NOT EXISTS idx_entities_added_at      ON roblox_entities   (added_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_entities_username      ON roblox_entities   (username);
+    CREATE INDEX IF NOT EXISTS idx_audit_created_at       ON audit_logs        (created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_audit_actor            ON audit_logs        (actor);
+    CREATE INDEX IF NOT EXISTS idx_audit_action           ON audit_logs        (action);
+    CREATE INDEX IF NOT EXISTS idx_audit_target           ON audit_logs        (target);
+    CREATE INDEX IF NOT EXISTS idx_tags_entity_id         ON entity_tags       (entity_id);
+    CREATE INDEX IF NOT EXISTS idx_notes_entity_id        ON entity_notes      (entity_id);
+    CREATE INDEX IF NOT EXISTS idx_snapshots_entity_id    ON entity_snapshots  (entity_id, fetched_at DESC);
   `);
 }
 
