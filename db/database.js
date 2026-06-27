@@ -34,15 +34,14 @@ async function exec(sql) {
 async function initSchema() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS admin_users (
-      id         SERIAL PRIMARY KEY,
-      username   TEXT UNIQUE NOT NULL,
+      id            SERIAL PRIMARY KEY,
+      username      TEXT UNIQUE NOT NULL,
       password_hash TEXT NOT NULL,
       display_name  TEXT,
-      role       TEXT NOT NULL DEFAULT 'analyst'
-                 CHECK (role IN ('admin','analyst','viewer')),
-      last_login TIMESTAMPTZ,
-      created_at TIMESTAMPTZ DEFAULT NOW(),
-      created_by TEXT
+      role          TEXT NOT NULL DEFAULT 'analyst' CHECK (role IN ('admin','analyst','viewer')),
+      last_login    TIMESTAMPTZ,
+      created_at    TIMESTAMPTZ DEFAULT NOW(),
+      created_by    TEXT
     );
 
     CREATE TABLE IF NOT EXISTS roblox_entities (

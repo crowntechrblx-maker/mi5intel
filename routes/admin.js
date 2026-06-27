@@ -17,15 +17,22 @@ router.get('/', requireAdmin, async (req, res) => {
 });
 
 router.post('/users/add', requireAdmin, async (req, res) => {
-  const { username, password, display_name, role } = req.body;
+  const { username, password, display_name, email, auth_type, role } = req.body;
   const users = await getUsers();
+  const validAuthTypes = ['password', 'neon_auth', 'both'];
+  const authType = validAuthTypes.includes(auth_type) ? auth_type : 'password';
+  const needsPassword = authType === 'password' || authType === 'both';
 
-  if (!username || !password) {
-    return res.render('admin', { user: req.session.user, users, error: 'Username and password required.', success: null, page: 'admin' });
+  if (!username) {
+    return res.render('admin', { user: req.session.user, users, error: 'Username is required.', success: null, page: 'admin' });
   }
-  if (password.length < 8) {
+  if (needsPassword && (!password || password.length < 8)) {
     return res.render('admin', { user: req.session.user, users, error: 'Password must be at least 8 characters.', success: null, page: 'admin' });
   }
+  if (authType === 'neon_auth' && !email) {
+    return res.render('admin', { user: req.session.user, users, error: 'Email is required for Neon Auth accounts.', success: null, page: 'admin' });
+  }
+
   const existing = await db.get('SELECT id FROM admin_users WHERE LOWER(username)=LOWER($1)', [username.trim()]);
   if (existing) {
     return res.render('admin', { user: req.session.user, users, error: `Username "${username}" already exists.`, success: null, page: 'admin' });
@@ -33,12 +40,13 @@ router.post('/users/add', requireAdmin, async (req, res) => {
 
   const validRoles = ['admin', 'analyst', 'viewer'];
   const assignedRole = validRoles.includes(role) ? role : 'analyst';
-  const hash = await bcrypt.hash(password, 12);
+  const hash = needsPassword ? await bcrypt.hash(password, 12) : null;
+
   await db.run(
-    'INSERT INTO admin_users (username, password_hash, display_name, role, created_by) VALUES ($1,$2,$3,$4,$5)',
-    [username.trim(), hash, display_name?.trim() || username.trim(), assignedRole, actor(req)]
+    'INSERT INTO admin_users (username, password_hash, display_name, email, auth_type, role, created_by) VALUES ($1,$2,$3,$4,$5,$6,$7)',
+    [username.trim(), hash, display_name?.trim() || username.trim(), email?.trim() || null, authType, assignedRole, actor(req)]
   );
-  await logAudit(actor(req), 'CREATE_USER', username.trim(), 'admin', `Created with role: ${assignedRole}`, req.ip);
+  await logAudit(actor(req), 'CREATE_USER', username.trim(), 'admin', `Created with role: ${assignedRole}, auth: ${authType}`, req.ip);
 
   const updatedUsers = await getUsers();
   res.render('admin', { user: req.session.user, users: updatedUsers, error: null, success: `Operator "${username}" created.`, page: 'admin' });

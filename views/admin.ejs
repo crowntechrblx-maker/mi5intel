@@ -16,7 +16,7 @@
     <div class="panel-body">
       <form action="/admin/users/add" method="POST" class="intel-form">
         <div class="form-group-compact">
-          <label class="form-label-sm">USERNAME</label>
+          <label class="form-label-sm">USERNAME <span class="required">*</span></label>
           <input class="form-input-sm" type="text" name="username" required>
         </div>
         <div class="form-group-compact">
@@ -24,7 +24,7 @@
           <input class="form-input-sm" type="text" name="display_name">
         </div>
         <div class="form-group-compact">
-          <label class="form-label-sm">PASSWORD (min 8 chars)</label>
+          <label class="form-label-sm">PASSWORD <span class="required">*</span> <span class="form-hint-inline">(min 8 chars)</span></label>
           <input class="form-input-sm" type="password" name="password" minlength="8" required>
         </div>
         <div class="form-group-compact">
@@ -66,33 +66,31 @@
             </div>
           </td>
           <td><span class="role-badge role-<%= u.role %>"><%= u.role.toUpperCase() %></span></td>
-          <td class="mono text-muted"><%= u.last_login ? new Date(u.last_login).toLocaleString('en-GB') : 'Never' %></td>
-          <td class="mono text-muted"><%= new Date(u.created_at).toLocaleDateString('en-GB') %></td>
+          <td class="mono text-muted" style="font-size:10px"><%= u.last_login ? new Date(u.last_login).toLocaleString('en-GB') : 'Never' %></td>
+          <td class="mono text-muted" style="font-size:10px"><%= new Date(u.created_at).toLocaleDateString('en-GB') %></td>
           <td class="mono text-muted"><%= u.created_by || '—' %></td>
           <td>
             <div class="action-group">
-              <% if (u.id !== user.id) { %>
-              <!-- Change role -->
+              <% if (String(u.id) !== String(user.id)) { %>
               <form action="/admin/users/<%= u.id %>/change-role" method="POST" style="display:inline">
-                <select class="form-input-xs" name="role" onchange="this.form.submit()">
-                  <option value="viewer" <%= u.role === 'viewer' ? 'selected' : '' %>>VIEWER</option>
+                <select class="form-input-xs" name="role" onchange="this.form.submit()" title="Change role">
+                  <option value="viewer"  <%= u.role === 'viewer'  ? 'selected' : '' %>>VIEWER</option>
                   <option value="analyst" <%= u.role === 'analyst' ? 'selected' : '' %>>ANALYST</option>
-                  <option value="admin" <%= u.role === 'admin' ? 'selected' : '' %>>ADMIN</option>
+                  <option value="admin"   <%= u.role === 'admin'   ? 'selected' : '' %>>ADMIN</option>
                 </select>
               </form>
-              <!-- Delete -->
-              <form action="/admin/users/<%= u.id %>/delete" method="POST" style="display:inline" onsubmit="return confirm('Delete operator <%= u.username %>?')">
+              <form action="/admin/users/<%= u.id %>/delete" method="POST" style="display:inline"
+                    onsubmit="return confirm('Delete operator <%= u.username %>? This cannot be undone.')">
                 <button class="btn btn-danger btn-xs" type="submit">DELETE</button>
               </form>
               <% } else { %>
-              <span class="text-muted">YOU</span>
+              <span class="text-muted" style="font-size:11px">YOU</span>
               <% } %>
-              <!-- Reset password -->
               <button class="btn btn-secondary btn-xs" onclick="toggleReset('<%= u.id %>')">RESET PW</button>
             </div>
-            <div id="reset-<%= u.id %>" style="display:none;margin-top:.5rem">
-              <form action="/admin/users/<%= u.id %>/reset-password" method="POST" style="display:flex;gap:.5rem;align-items:center">
-                <input class="form-input-xs" type="password" name="new_password" placeholder="New password" minlength="8" required style="flex:1">
+            <div id="reset-<%= u.id %>" style="display:none;margin-top:.4rem">
+              <form action="/admin/users/<%= u.id %>/reset-password" method="POST" style="display:flex;gap:.4rem;align-items:center">
+                <input class="form-input-xs" type="password" name="new_password" placeholder="New password" minlength="8" required style="flex:1;min-width:120px">
                 <button class="btn btn-secondary btn-xs" type="submit">SET</button>
               </form>
             </div>

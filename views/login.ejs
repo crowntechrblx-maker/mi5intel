@@ -10,7 +10,7 @@
   <div class="auth-container">
     <div class="auth-header">
       <div class="gov-logo auth-logo">
-        <svg class="crown-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg class="crown-icon" viewBox="0 0 32 32" fill="none">
           <path d="M16 2L19 9H26L20.5 13.5L22.5 20.5L16 16.5L9.5 20.5L11.5 13.5L6 9H13L16 2Z" fill="currentColor"/>
           <rect x="6" y="22" width="20" height="3" rx="1" fill="currentColor"/>
           <rect x="4" y="26" width="24" height="3" rx="1" fill="currentColor"/>
@@ -27,27 +27,23 @@
       <h1 class="auth-title">OPERATOR AUTHENTICATION</h1>
       <p class="auth-subtitle">Authorised personnel only. All access is logged and monitored.</p>
 
-      <% if (typeof setupDone !== 'undefined' && setupDone) { %>
-      <div class="alert alert-success">Administrator account created. You may now sign in.</div>
+      <% if (setupDone) { %>
+        <div class="alert alert-success">Administrator account created. You may now sign in.</div>
       <% } %>
-
       <% if (error) { %>
-      <div class="alert alert-error"><%= error %></div>
+        <div class="alert alert-error"><%= error %></div>
       <% } %>
 
       <form action="/login" method="POST" class="auth-form">
         <input type="hidden" name="next" value="<%= next %>">
-
         <div class="form-group">
           <label class="form-label" for="username">OPERATOR ID</label>
           <input class="form-input" type="text" id="username" name="username" autocomplete="username" autofocus required>
         </div>
-
         <div class="form-group">
           <label class="form-label" for="password">ACCESS CODE</label>
           <input class="form-input" type="password" id="password" name="password" autocomplete="current-password" required>
         </div>
-
         <button class="btn btn-primary btn-full" type="submit">AUTHENTICATE &rarr;</button>
       </form>
     </div>
