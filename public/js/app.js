@@ -158,72 +158,70 @@ document.addEventListener('contextmenu', function(e) {
   e.preventDefault();
 });
 
-// ── Security: blackout overlay + keyboard/focus protection ──────
+// ── Security: blackout overlay + watermark stamp on screenshot ──
 (function() {
-  // Overlay built first so keydown handler can reference it immediately
+  var wm = document.getElementById('wm');
+
+  // Normal watermark: nearly invisible
+  if (wm) wm.style.opacity = '0.03';
+
+  // Overlay covers the page content
   var overlay = document.createElement('div');
   overlay.id = 'focus-shield';
-  overlay.style.cssText = [
-    'display:none',
-    'position:fixed',
-    'inset:0',
-    'background:#000',
-    'z-index:99999',
-    'align-items:center',
-    'justify-content:center',
-    'flex-direction:column',
-    'gap:12px',
-    'cursor:default'
-  ].join(';');
-  overlay.innerHTML =
-    '<svg width="40" height="36" viewBox="0 0 110 96" fill="none" style="opacity:.2">' +
-      '<polygon points="55,3 107,93 3,93" stroke="#fff" stroke-width="2.5" fill="none" stroke-linejoin="round"/>' +
-    '</svg>' +
-    '<span style="color:#2a2a2a;font-family:\'Courier New\',monospace;font-size:11px;letter-spacing:4px;text-transform:uppercase">Session Obscured</span>';
+  overlay.style.cssText = 'display:none;position:fixed;inset:0;background:#000;z-index:99998;cursor:default';
   document.body.appendChild(overlay);
 
-  function hide() { overlay.style.display = 'none'; }
-  function show() { overlay.style.display = 'flex'; }
+  // Watermark sits above the overlay so it stamps any screenshot
+  if (wm) wm.style.zIndex = '99999';
 
-  // Flash black for 800ms — fires before any screenshot can capture the screen
+  function wmStamp() {
+    if (wm) {
+      wm.style.transition = 'opacity 0s';
+      wm.style.opacity = '0.72';
+    }
+  }
+  function wmReset() {
+    if (wm) {
+      wm.style.transition = 'opacity 2s ease';
+      wm.style.opacity = '0.03';
+    }
+  }
+
+  function hide() {
+    overlay.style.display = 'none';
+    wmReset();
+  }
+  function show() {
+    overlay.style.display = 'block';
+    wmStamp();
+  }
+
   var flashTimer = null;
   function flash() {
     show();
     clearTimeout(flashTimer);
-    flashTimer = setTimeout(hide, 800);
+    flashTimer = setTimeout(hide, 900);
   }
 
-  // Focus loss → full blackout until window is focused again
+  // Win+Shift+S and any focus loss triggers blur
   window.addEventListener('blur', show);
   window.addEventListener('focus', hide);
   document.addEventListener('visibilitychange', function() {
     document.hidden ? show() : hide();
   });
 
-  // Keyboard interception
   document.addEventListener('keydown', function(e) {
-    var k     = e.key;
-    var ctrl  = e.ctrlKey || e.metaKey;
+    var k    = e.key;
+    var ctrl = e.ctrlKey || e.metaKey;
     var shift = e.shiftKey;
 
-    // Screenshot shortcuts — block AND flash black immediately
     if (k === 'PrintScreen' || k === 'Print' || k === 'Snapshot') {
       e.preventDefault(); flash(); return;
     }
-    // Ctrl+Shift+S (Windows Snipping Tool / ShareX / Lightshot default)
-    if (ctrl && shift && (k === 's' || k === 'S')) {
-      e.preventDefault(); flash(); return;
-    }
-    // Ctrl+Shift+P (some capture tools)
-    if (ctrl && shift && (k === 'p' || k === 'P')) {
-      e.preventDefault(); flash(); return;
-    }
-
-    // DevTools — block AND flash
+    if (ctrl && shift && (k === 's' || k === 'S')) { e.preventDefault(); flash(); return; }
+    if (ctrl && shift && (k === 'p' || k === 'P')) { e.preventDefault(); flash(); return; }
     if (k === 'F12') { e.preventDefault(); flash(); return; }
     if (ctrl && shift && 'iIjJcC'.indexOf(k) !== -1) { e.preventDefault(); flash(); return; }
-
-    // View source / save — block silently
     if (ctrl && (k === 'u' || k === 'U')) { e.preventDefault(); return; }
     if (ctrl && !shift && (k === 's' || k === 'S')) { e.preventDefault(); return; }
   });

@@ -169,11 +169,13 @@ router.get('/:id', requireAuth, async (req, res) => {
   const entity = await db.get('SELECT * FROM roblox_entities WHERE id=$1', [req.params.id]);
   if (!entity) return res.status(404).render('error', { user: req.session.user, code: 404, message: 'Entity not found in registry.' });
 
-  const [tags, auditHistory, caseNotes, snapshots, rawLinks, entitiesWithGroups] = await Promise.all([
+  const [tags, auditHistory, caseNotes, snapshots, aliases, groupEvents, rawLinks, entitiesWithGroups] = await Promise.all([
     db.all('SELECT * FROM entity_tags WHERE entity_id=$1 ORDER BY created_at DESC', [entity.id]),
     db.all('SELECT * FROM audit_logs WHERE target=$1 ORDER BY created_at DESC LIMIT 20', [entity.username]),
     db.all('SELECT * FROM entity_notes WHERE entity_id=$1 ORDER BY created_at DESC', [entity.id]),
     db.all('SELECT id, fetched_at, fetched_by, diff FROM entity_snapshots WHERE entity_id=$1 ORDER BY fetched_at DESC LIMIT 30', [entity.id]),
+    db.all('SELECT * FROM entity_aliases WHERE entity_id=$1 ORDER BY detected_at DESC', [entity.id]),
+    db.all('SELECT * FROM group_events WHERE entity_id=$1 ORDER BY detected_at DESC LIMIT 50', [entity.id]),
     db.all(
       `SELECT el.*,
               a.id AS a_id, a.username AS a_username, a.display_name AS a_display, a.avatar_url AS a_avatar, a.severity AS a_severity, a.status AS a_status,
@@ -247,6 +249,8 @@ router.get('/:id', requireAuth, async (req, res) => {
     auditHistory,
     caseNotes,
     snapshots,
+    aliases,
+    groupEvents,
     links,
     sharedWith,
     refreshDiff,

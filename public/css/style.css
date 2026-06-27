@@ -212,6 +212,8 @@ body {
 .btn-ghost { background: transparent; color: var(--grey); border-color: transparent; }
 .btn-ghost:hover { background: rgba(255,255,255,.04); color: var(--white); }
 
+.btn-warning { background: #f47738; color: #0b0c0c; border-color: #f47738; box-shadow: 0 2px 0 #b85c2a; }
+.btn-warning:hover { background: #d4601a; border-color: #d4601a; color: #fff; }
 .btn-danger, .govuk-button--warning {
   background: var(--red); color: var(--white); border-color: var(--red);
   box-shadow: 0 2px 0 var(--red-dark);

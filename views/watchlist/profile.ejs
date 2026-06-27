@@ -265,6 +265,46 @@
     </div>
     <% } %>
 
+    <!-- Username aliases -->
+    <% if (aliases && aliases.length) { %>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">USERNAME HISTORY (<%= aliases.length %>)</span></div>
+      <div class="panel-body--compact">
+        <% aliases.forEach(function(a) { %>
+        <div class="case-note" style="border-left:2px solid var(--yellow)">
+          <div class="case-note-meta">
+            <span class="case-note-author" style="color:var(--yellow)">ALIAS DETECTED</span>
+            <span class="case-note-time"><%= new Date(a.detected_at).toLocaleString('en-GB') %></span>
+          </div>
+          <div class="case-note-body mono">
+            <span style="color:var(--mid-grey)"><%= a.old_username %></span>
+            <span style="margin:0 .5rem;color:var(--border)">→</span>
+            <span style="color:var(--white)"><%= a.new_username %></span>
+          </div>
+        </div>
+        <% }); %>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Group membership events -->
+    <% if (groupEvents && groupEvents.length) { %>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">GROUP ACTIVITY (<%= groupEvents.length %>)</span></div>
+      <div class="panel-body--compact">
+        <% groupEvents.forEach(function(e) { %>
+        <div class="case-note" style="border-left:2px solid <%= e.event_type === 'JOINED' ? 'var(--green)' : 'var(--red)' %>">
+          <div class="case-note-meta">
+            <span class="case-note-author" style="color:<%= e.event_type === 'JOINED' ? 'var(--green)' : 'var(--red)' %>"><%= e.event_type %></span>
+            <span class="case-note-time"><%= new Date(e.detected_at).toLocaleString('en-GB') %></span>
+          </div>
+          <div class="case-note-body"><%= e.group_name || e.group_id %></div>
+        </div>
+        <% }); %>
+      </div>
+    </div>
+    <% } %>
+
     <!-- Case log (replaces single notes textarea) -->
     <div class="panel" id="case-log">
       <div class="panel-header">

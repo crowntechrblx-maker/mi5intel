@@ -42,6 +42,27 @@ async function initSchema() {
     );
     ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS permissions JSONB NOT NULL DEFAULT '[]'::jsonb;
     ALTER TABLE admin_users DROP CONSTRAINT IF EXISTS admin_users_role_check;
+    ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS suspended BOOLEAN NOT NULL DEFAULT FALSE;
+
+    CREATE TABLE IF NOT EXISTS entity_aliases (
+      id         SERIAL PRIMARY KEY,
+      entity_id  INTEGER NOT NULL REFERENCES roblox_entities(id) ON DELETE CASCADE,
+      old_username TEXT NOT NULL,
+      new_username TEXT NOT NULL,
+      detected_at  TIMESTAMPTZ DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS idx_aliases_entity_id ON entity_aliases (entity_id);
+
+    CREATE TABLE IF NOT EXISTS group_events (
+      id         SERIAL PRIMARY KEY,
+      entity_id  INTEGER NOT NULL REFERENCES roblox_entities(id) ON DELETE CASCADE,
+      group_id   TEXT NOT NULL,
+      group_name TEXT,
+      event_type TEXT NOT NULL CHECK (event_type IN ('JOINED','LEFT')),
+      detected_at TIMESTAMPTZ DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS idx_group_events_entity ON group_events (entity_id);
+    CREATE INDEX IF NOT EXISTS idx_group_events_group  ON group_events (group_id);
 
     CREATE TABLE IF NOT EXISTS roblox_entities (
       id           SERIAL PRIMARY KEY,

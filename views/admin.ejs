@@ -141,9 +141,9 @@
         <tr>
           <td>
             <div style="display:flex;align-items:center;gap:.5rem">
-              <div class="user-avatar-sm"><%= u.username.charAt(0).toUpperCase() %></div>
+              <div class="user-avatar-sm" style="<%= u.suspended ? 'opacity:.4' : '' %>"><%= u.username.charAt(0).toUpperCase() %></div>
               <div>
-                <div class="table-username"><%= u.display_name || u.username %></div>
+                <div class="table-username"><%= u.display_name || u.username %><% if (u.suspended) { %> <span class="govuk-tag govuk-tag--red" style="font-size:8px;vertical-align:middle">SUSPENDED</span><% } %></div>
                 <div class="table-meta">@<%= u.username %></div>
               </div>
             </div>
@@ -164,6 +164,13 @@
                        value="<%= u.role %>" style="width:90px" title="Role title — type anything"
                        autocomplete="off">
                 <button class="btn btn-secondary btn-xs" type="submit">SET</button>
+              </form>
+              <form action="/admin/users/<%= u.id %>/suspend" method="POST" style="display:inline">
+                <input type="hidden" name="action" value="<%= u.suspended ? 'unsuspend' : 'suspend' %>">
+                <button class="btn <%= u.suspended ? 'btn-secondary' : 'btn-warning' %> btn-xs" type="submit"
+                  onclick="return confirm('<%= u.suspended ? 'Reinstate' : 'Suspend' %> <%= u.username %>?')">
+                  <%= u.suspended ? 'REINSTATE' : 'SUSPEND' %>
+                </button>
               </form>
               <form action="/admin/users/<%= u.id %>/delete" method="POST" style="display:inline"
                     onsubmit="return confirm('Delete operator <%= u.username %>? This cannot be undone.')">
@@ -226,6 +233,37 @@
       </tbody>
     </table>
   </div>
+</div>
+
+<!-- Operator Activity Summary -->
+<div class="panel" style="margin-top:16px">
+  <div class="panel-header"><span class="panel-title">OPERATOR ACTIVITY</span></div>
+  <table class="registry-table">
+    <thead>
+      <tr>
+        <th>OPERATOR</th>
+        <th>ACTIONS (7 DAYS)</th>
+        <th>ACTIONS (30 DAYS)</th>
+        <th>LAST ACTION</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (activityStats && activityStats.length) { %>
+      <% activityStats.forEach(function(s) { %>
+      <tr>
+        <td class="mono"><%= s.actor %></td>
+        <td><%= s.actions_7d %></td>
+        <td><%= s.actions_30d %></td>
+        <td class="mono text-muted" style="font-size:10px">
+          <%= s.last_action ? new Date(s.last_action).toLocaleString('en-GB') : '—' %>
+        </td>
+      </tr>
+      <% }); %>
+      <% } else { %>
+      <tr><td colspan="4" class="text-muted" style="padding:12px 16px;font-size:12px">No activity recorded yet.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
 </div>
 
 <script>

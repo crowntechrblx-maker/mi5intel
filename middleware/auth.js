@@ -20,15 +20,34 @@ function requireIp(req, res, next) {
   });
 }
 
+const SESSION_TIMEOUT_MS = (parseInt(process.env.SESSION_TIMEOUT_MINUTES) || 60) * 60 * 1000;
+
 function requireAuth(req, res, next) {
   if (!req.session?.user) {
     return res.redirect('/login?next=' + encodeURIComponent(req.originalUrl));
+  }
+  // Session idle timeout
+  const now = Date.now();
+  if (req.session.lastActivity && (now - req.session.lastActivity) > SESSION_TIMEOUT_MS) {
+    return req.session.destroy(() => {
+      res.redirect('/login?timeout=1');
+    });
+  }
+  req.session.lastActivity = now;
+  // Suspended account check
+  if (req.session.user.suspended) {
+    return req.session.destroy(() => {
+      res.redirect('/login?suspended=1');
+    });
   }
   next();
 }
 
 function requireAdmin(req, res, next) {
   if (!req.session?.user) return res.redirect('/login');
+  if (req.session.user.suspended) {
+    return req.session.destroy(() => res.redirect('/login?suspended=1'));
+  }
   if (req.session.user.role !== 'admin') {
     return res.status(403).render('error', { user: req.session.user, code: 403, message: 'ACCESS DENIED — Administrator clearance required.' });
   }

@@ -40,6 +40,11 @@ async function runRefresh() {
       candidates.push(...rows);
     }
 
+    // Load monitored group IDs for join/leave detection
+    const monitoredGroups = await db.all('SELECT group_id, group_name FROM groups_of_interest');
+    const monitoredIds = new Set(monitoredGroups.map(g => String(g.group_id)));
+    const monitoredNameMap = Object.fromEntries(monitoredGroups.map(g => [String(g.group_id), g.group_name]));
+
     for (const entity of candidates) {
       const oldP = entity.profile_data || {};
       const newP = await fullProfileFetch(entity.roblox_id);
@@ -53,10 +58,44 @@ async function runRefresh() {
           diff[label] = { from: oldP[key] ?? '—', to: newP[key] ?? '—' };
         }
       }
-      if ((oldP.groups || []).length !== (newP.groups || []).length)
-        diff['Groups'] = { from: (oldP.groups||[]).length, to: (newP.groups||[]).length };
       if (!!oldP.is_banned !== !!newP.is_banned)
         diff['Banned'] = { from: oldP.is_banned ? 'Yes':'No', to: newP.is_banned ? 'Yes':'No' };
+
+      // Username alias detection
+      if (oldP.username && oldP.username !== newP.username) {
+        diff['Username'] = { from: oldP.username, to: newP.username };
+        await db.run(
+          'INSERT INTO entity_aliases (entity_id, old_username, new_username) VALUES ($1,$2,$3)',
+          [entity.id, oldP.username, newP.username]
+        );
+      }
+
+      // Group join/leave detection (monitored groups only)
+      const oldGroupIds = new Set((oldP.groups || []).map(g => String(g.group?.id)));
+      const newGroupIds = new Set((newP.groups || []).map(g => String(g.group?.id)));
+
+      for (const gid of newGroupIds) {
+        if (!oldGroupIds.has(gid) && monitoredIds.has(gid)) {
+          await db.run(
+            'INSERT INTO group_events (entity_id, group_id, group_name, event_type) VALUES ($1,$2,$3,$4)',
+            [entity.id, gid, monitoredNameMap[gid] || gid, 'JOINED']
+          );
+          diff[`Group:${gid}`] = { from: 'Not member', to: `Joined ${monitoredNameMap[gid] || gid}` };
+        }
+      }
+      for (const gid of oldGroupIds) {
+        if (!newGroupIds.has(gid) && monitoredIds.has(gid)) {
+          await db.run(
+            'INSERT INTO group_events (entity_id, group_id, group_name, event_type) VALUES ($1,$2,$3,$4)',
+            [entity.id, gid, monitoredNameMap[gid] || gid, 'LEFT']
+          );
+          diff[`Group:${gid}`] = { from: `Member of ${monitoredNameMap[gid] || gid}`, to: 'Left' };
+        }
+      }
+
+      // Track total group count change
+      if (oldGroupIds.size !== newGroupIds.size)
+        diff['Groups'] = { from: oldGroupIds.size, to: newGroupIds.size };
 
       const hasDiff = Object.keys(diff).length > 0;
 
