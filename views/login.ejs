@@ -14,10 +14,9 @@
       background: #000;
       color: #fff;
       font-family: 'Courier New', Courier, monospace;
-      overflow-x: hidden;
     }
 
-    /* ── Scanline overlay ── */
+    /* subtle scanline */
     body::before {
       content: '';
       position: fixed;
@@ -25,81 +24,80 @@
       background: repeating-linear-gradient(
         0deg,
         transparent,
-        transparent 2px,
-        rgba(255,255,255,0.015) 2px,
-        rgba(255,255,255,0.015) 4px
+        transparent 3px,
+        rgba(255,255,255,0.012) 3px,
+        rgba(255,255,255,0.012) 4px
       );
       pointer-events: none;
-      z-index: 999;
+      z-index: 9999;
     }
 
-    /* ── Layout ── */
-    .terminal-wrap {
+    /* ── outer wrapper ── */
+    .page {
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 48px 24px 80px;
-      position: relative;
+      padding: 48px 20px 96px;
     }
 
-    /* ── Header: crest + title side by side ── */
-    .terminal-header {
+    /* ── top identity row: crest + title ── */
+    .identity {
       display: flex;
       align-items: center;
-      gap: 40px;
-      margin-bottom: 56px;
+      gap: 36px;
       width: 100%;
-      max-width: 760px;
+      max-width: 680px;
+      margin-bottom: 52px;
     }
 
-    /* ── Crest ── */
-    .terminal-crest {
+    .crest-img {
       flex-shrink: 0;
-      width: 140px;
-      height: 140px;
-      opacity: 0.92;
+      width: 160px;
+      height: 160px;
+      object-fit: contain;
+      /* render white — the PNG is white on transparent/white bg */
+      filter: invert(0) brightness(1);
     }
 
-    /* ── Title block ── */
-    .terminal-title-block {
+    .title-block {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 4px;
     }
-    .terminal-service {
-      font-size: 11px;
+    .title-eyebrow {
+      font-size: 10px;
       letter-spacing: 4px;
-      color: #888;
+      color: #555;
       text-transform: uppercase;
     }
-    .terminal-title {
-      font-size: clamp(22px, 4vw, 34px);
+    .title-main {
+      font-size: clamp(24px, 3.8vw, 36px);
       font-weight: 700;
       letter-spacing: 8px;
       text-transform: uppercase;
+      line-height: 1.15;
       color: #fff;
-      line-height: 1.1;
     }
-    .terminal-divider {
+    .title-rule {
+      margin-top: 10px;
       width: 100%;
       height: 1px;
-      background: #333;
-      margin-top: 10px;
+      background: #222;
     }
 
-    /* ── Form card ── */
-    .terminal-card {
+    /* ── login box ── */
+    .box {
       width: 100%;
-      max-width: 480px;
-      border: 1px solid #222;
-      background: #030303;
-      padding: 36px 40px;
+      max-width: 460px;
+      background: #040404;
+      border: 1px solid #1c1c1c;
+      padding: 34px 38px 38px;
     }
 
-    .terminal-card.shake {
-      animation: shake 0.42s cubic-bezier(.36,.07,.19,.97) both;
+    .box.shake {
+      animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
     }
     @keyframes shake {
       10%, 90% { transform: translateX(-2px); }
@@ -108,238 +106,122 @@
       40%, 60% { transform: translateX(6px); }
     }
 
-    .terminal-form-title {
-      font-size: 11px;
+    .box-heading {
+      font-size: 9px;
       letter-spacing: 4px;
+      color: #444;
+      text-transform: uppercase;
+      padding-bottom: 14px;
+      border-bottom: 1px solid #111;
+      margin-bottom: 26px;
+    }
+
+    /* alerts */
+    .alert {
+      font-size: 11px;
+      letter-spacing: 1px;
+      padding: 9px 12px;
+      border-left: 2px solid;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .alert strong {
+      display: block;
+      font-size: 9px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+    .alert--error   { border-color: #7a0000; color: #cc4444; background: rgba(120,0,0,0.06); }
+    .alert--success { border-color: #004e2a; color: #2e8b57; background: rgba(0,78,42,0.07); }
+
+    /* fields */
+    .field { margin-bottom: 22px; }
+    .field label {
+      display: block;
+      font-size: 9px;
+      letter-spacing: 3px;
       color: #555;
       text-transform: uppercase;
-      margin-bottom: 28px;
-      border-bottom: 1px solid #1a1a1a;
-      padding-bottom: 14px;
+      margin-bottom: 9px;
     }
-
-    /* ── Alerts ── */
-    .terminal-alert {
-      font-size: 12px;
-      letter-spacing: 1px;
-      padding: 10px 14px;
-      border-left: 3px solid;
-      margin-bottom: 20px;
-    }
-    .terminal-alert--error {
-      border-color: #c00;
-      background: rgba(200,0,0,0.06);
-      color: #e05555;
-    }
-    .terminal-alert--success {
-      border-color: #005930;
-      background: rgba(0,89,48,0.08);
-      color: #3d9970;
-    }
-    .terminal-alert-label {
-      font-weight: 700;
-      display: block;
-      margin-bottom: 3px;
-      font-size: 10px;
-      letter-spacing: 3px;
-    }
-
-    /* ── Form fields ── */
-    .terminal-field {
-      margin-bottom: 22px;
-    }
-    .terminal-label {
-      display: block;
-      font-size: 10px;
-      letter-spacing: 3px;
-      color: #666;
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-    .terminal-input {
+    .field input {
       width: 100%;
-      background: #000;
-      border: none;
-      border-bottom: 1px solid #333;
-      color: #fff;
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 15px;
-      padding: 8px 0;
-      outline: none;
-      transition: border-color 0.2s;
-      letter-spacing: 2px;
-    }
-    .terminal-input:focus {
-      border-bottom-color: #fff;
-    }
-    .terminal-input::placeholder {
-      color: #2a2a2a;
-    }
-
-    /* cursor blink on focused input */
-    .terminal-input:focus {
-      caret-color: #fff;
-    }
-
-    /* ── Submit button ── */
-    .terminal-submit {
-      width: 100%;
-      margin-top: 8px;
       background: transparent;
-      border: 1px solid #444;
+      border: none;
+      border-bottom: 1px solid #2a2a2a;
       color: #fff;
       font-family: 'Courier New', Courier, monospace;
-      font-size: 11px;
+      font-size: 14px;
+      letter-spacing: 3px;
+      padding: 7px 0;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .field input:focus  { border-bottom-color: #fff; }
+    .field input::placeholder { color: #1e1e1e; }
+
+    /* submit */
+    .btn {
+      display: block;
+      width: 100%;
+      margin-top: 6px;
+      background: transparent;
+      border: 1px solid #333;
+      color: #fff;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 10px;
       letter-spacing: 5px;
       text-transform: uppercase;
       padding: 13px;
       cursor: pointer;
-      transition: background 0.15s, border-color 0.15s, color 0.15s;
+      transition: background 0.14s, border-color 0.14s, color 0.14s;
     }
-    .terminal-submit:hover {
-      background: #fff;
-      border-color: #fff;
-      color: #000;
-    }
-    .terminal-submit:active {
-      background: #ccc;
-    }
+    .btn:hover  { background: #fff; border-color: #fff; color: #000; }
+    .btn:active { background: #ccc; }
 
-    /* ── Bottom warning ── */
-    .terminal-warning {
+    /* ── pinned footer ── */
+    .warning {
       position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
+      bottom: 0; left: 0; right: 0;
+      padding: 12px 24px;
       background: #000;
-      border-top: 1px solid #111;
-      padding: 14px 32px;
-      font-size: 10px;
-      color: #333;
+      border-top: 1px solid #0e0e0e;
+      font-size: 9.5px;
+      color: #2d2d2d;
       letter-spacing: 1.5px;
       text-align: center;
-      line-height: 1.6;
+      line-height: 1.7;
     }
   </style>
 </head>
 <body>
 
-<div class="terminal-wrap">
+<div class="page">
 
-  <!-- ─── Crest + Title ─── -->
-  <div class="terminal-header">
-
-    <!-- Government Crest -->
-    <svg class="terminal-crest" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <!-- Outer ring -->
-      <circle cx="100" cy="100" r="96" stroke="#fff" stroke-width="1.2" fill="none" opacity="0.9"/>
-      <circle cx="100" cy="100" r="88" stroke="#fff" stroke-width="0.5" fill="none" opacity="0.3"/>
-
-      <!-- Wreath — left side -->
-      <g stroke="#fff" stroke-width="1" fill="none" opacity="0.75">
-        <ellipse cx="22" cy="100" rx="6" ry="10" transform="rotate(-20 22 100)"/>
-        <ellipse cx="28" cy="78"  rx="6" ry="10" transform="rotate(-40 28 78)"/>
-        <ellipse cx="40" cy="60"  rx="6" ry="10" transform="rotate(-60 40 60)"/>
-        <ellipse cx="57" cy="46"  rx="6" ry="10" transform="rotate(-78 57 46)"/>
-        <ellipse cx="24" cy="122" rx="6" ry="10" transform="rotate(0 24 122)"/>
-        <ellipse cx="32" cy="144" rx="6" ry="10" transform="rotate(20 32 144)"/>
-        <ellipse cx="46" cy="160" rx="6" ry="10" transform="rotate(40 46 160)"/>
-        <ellipse cx="64" cy="171" rx="6" ry="10" transform="rotate(60 64 171)"/>
-      </g>
-      <!-- Wreath — right side (mirror) -->
-      <g stroke="#fff" stroke-width="1" fill="none" opacity="0.75">
-        <ellipse cx="178" cy="100" rx="6" ry="10" transform="rotate(20 178 100)"/>
-        <ellipse cx="172" cy="78"  rx="6" ry="10" transform="rotate(40 172 78)"/>
-        <ellipse cx="160" cy="60"  rx="6" ry="10" transform="rotate(60 160 60)"/>
-        <ellipse cx="143" cy="46"  rx="6" ry="10" transform="rotate(78 143 46)"/>
-        <ellipse cx="176" cy="122" rx="6" ry="10" transform="rotate(0 176 122)"/>
-        <ellipse cx="168" cy="144" rx="6" ry="10" transform="rotate(-20 168 144)"/>
-        <ellipse cx="154" cy="160" rx="6" ry="10" transform="rotate(-40 154 160)"/>
-        <ellipse cx="136" cy="171" rx="6" ry="10" transform="rotate(-60 136 171)"/>
-      </g>
-
-      <!-- Crown base -->
-      <g stroke="#fff" fill="none">
-        <!-- Crown bottom band -->
-        <rect x="68" y="42" width="64" height="8" rx="1" stroke-width="1.2"/>
-        <!-- Crown arches -->
-        <path d="M68 42 Q72 24 80 20 Q88 36 96 38" stroke-width="1.2"/>
-        <path d="M96 38 Q100 26 100 20 Q100 26 104 38" stroke-width="1.2"/>
-        <path d="M104 38 Q112 36 120 20 Q128 24 132 42" stroke-width="1.2"/>
-        <!-- Crown orbs -->
-        <circle cx="68"  cy="42" r="4" fill="#fff" stroke="none"/>
-        <circle cx="80"  cy="20" r="4" fill="#fff" stroke="none"/>
-        <circle cx="100" cy="20" r="5" fill="#fff" stroke="none"/>
-        <circle cx="120" cy="20" r="4" fill="#fff" stroke="none"/>
-        <circle cx="132" cy="42" r="4" fill="#fff" stroke="none"/>
-      </g>
-
-      <!-- Shield body -->
-      <path d="M76 60 L76 108 Q76 124 100 134 Q124 124 124 108 L124 60 Z"
-            stroke="#fff" stroke-width="1.3" fill="none"/>
-
-      <!-- Shield quartering cross -->
-      <line x1="100" y1="60" x2="100" y2="134" stroke="#fff" stroke-width="0.8" opacity="0.5"/>
-      <line x1="76"  y1="97" x2="124" y2="97"  stroke="#fff" stroke-width="0.8" opacity="0.5"/>
-
-      <!-- Top-left: three lions passant (simplified) -->
-      <g fill="#fff" opacity="0.85">
-        <path d="M81 64 Q85 62 87 65 Q88 68 85 70 Q82 70 81 68 Z" />
-        <path d="M81 72 Q85 70 87 73 Q88 76 85 78 Q82 78 81 76 Z" />
-        <path d="M81 80 Q85 78 87 81 Q88 84 85 86 Q82 86 81 84 Z" />
-      </g>
-      <!-- Top-right: rampant lion (simplified) -->
-      <g fill="none" stroke="#fff" stroke-width="1" opacity="0.85">
-        <path d="M109 64 Q112 60 116 63 Q118 68 115 72 Q112 74 110 70 Q108 66 109 64 Z"/>
-        <line x1="113" y1="72" x2="113" y2="88"/>
-        <line x1="109" y1="78" x2="117" y2="78"/>
-      </g>
-      <!-- Bottom-left: harp (simplified) -->
-      <g stroke="#fff" stroke-width="1" fill="none" opacity="0.85">
-        <path d="M84 100 Q83 118 88 126 Q91 128 91 120 L91 100 Z"/>
-        <line x1="84" y1="100" x2="91" y2="100"/>
-        <path d="M84 100 Q88 94 91 100"/>
-      </g>
-      <!-- Bottom-right: fleur-de-lis (simplified) -->
-      <g fill="#fff" opacity="0.85">
-        <ellipse cx="113" cy="110" rx="2" ry="6"/>
-        <ellipse cx="108" cy="108" rx="3" ry="2"/>
-        <ellipse cx="118" cy="108" rx="3" ry="2"/>
-        <rect    x="112" y="116" width="2" height="8"/>
-      </g>
-
-      <!-- Motto banner -->
-      <path id="motto-arc" d="M 44 158 A 64 64 0 0 0 156 158" fill="none"/>
-      <text font-size="9" fill="#fff" opacity="0.6" font-family="Georgia, serif" font-weight="700" letter-spacing="3">
-        <textPath href="#motto-arc" startOffset="8%">DIEU ET MON DROIT</textPath>
-      </text>
-
-      <!-- Centre dot / seal -->
-      <circle cx="100" cy="100" r="3" fill="#fff" opacity="0.2"/>
-    </svg>
-
-    <!-- Title block -->
-    <div class="terminal-title-block">
-      <span class="terminal-service">Government Secure Terminal</span>
-      <div class="terminal-title">MI5 Computer<br>Terminal</div>
-      <div class="terminal-divider"></div>
+  <!-- ── Crest + title ── -->
+  <div class="identity">
+    <img class="crest-img" src="/favicon.svg" alt="MI5 Government Crest">
+    <div class="title-block">
+      <span class="title-eyebrow">Government Secure Terminal</span>
+      <div class="title-main">MI5 Computer<br>Terminal</div>
+      <div class="title-rule"></div>
     </div>
   </div>
 
-  <!-- ─── Login Card ─── -->
-  <div class="terminal-card <%= error ? 'shake' : '' %>">
-    <div class="terminal-form-title">Operator Authentication Required</div>
+  <!-- ── Auth box ── -->
+  <div class="box <%= error ? 'shake' : '' %>">
+    <div class="box-heading">Operator Authentication Required</div>
 
     <% if (setupDone) { %>
-    <div class="terminal-alert terminal-alert--success">
-      <span class="terminal-alert-label">System</span>
+    <div class="alert alert--success">
+      <strong>System</strong>
       Administrator account created. You may now authenticate.
     </div>
     <% } %>
-
     <% if (error) { %>
-    <div class="terminal-alert terminal-alert--error">
-      <span class="terminal-alert-label">Access Denied</span>
+    <div class="alert alert--error">
+      <strong>Access Denied</strong>
       <%= error %>
     </div>
     <% } %>
@@ -347,26 +229,25 @@
     <form action="/login" method="POST">
       <input type="hidden" name="next" value="<%= next %>">
 
-      <div class="terminal-field">
-        <label class="terminal-label" for="username">Operator ID</label>
-        <input class="terminal-input" type="text" id="username" name="username"
-               autocomplete="username" autofocus required placeholder="_ _ _ _ _ _">
+      <div class="field">
+        <label for="username">Operator ID</label>
+        <input type="text" id="username" name="username"
+               autocomplete="username" autofocus required placeholder="______">
       </div>
 
-      <div class="terminal-field">
-        <label class="terminal-label" for="password">Access Code</label>
-        <input class="terminal-input" type="password" id="password" name="password"
-               autocomplete="current-password" required placeholder="_ _ _ _ _ _">
+      <div class="field">
+        <label for="password">Access Code</label>
+        <input type="password" id="password" name="password"
+               autocomplete="current-password" required placeholder="______">
       </div>
 
-      <button class="terminal-submit" type="submit">Authenticate &rarr;</button>
+      <button class="btn" type="submit">Authenticate &rarr;</button>
     </form>
   </div>
 
 </div>
 
-<!-- ─── Footer Warning ─── -->
-<p class="terminal-warning">
+<p class="warning">
   Warning: you are logging into a Government Terminal which may contain information for authorised people only.<br>
   Any unauthorised attempts to gain access to this system may result in legal action being taken.
 </p>

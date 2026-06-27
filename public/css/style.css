@@ -617,3 +617,8 @@ button:focus-visible { outline: 3px solid var(--yellow); }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--mid-grey); }
+
+/* ── Security: block printing / save-as-PDF ─────────────────── */
+@media print {
+  html, body { display: none !important; }
+}

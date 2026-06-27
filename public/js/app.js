@@ -151,3 +151,60 @@ document.querySelectorAll('.panel-collapsible--collapsed .panel-chevron').forEac
     });
   });
 })();
+
+
+// ── Security: right-click disable ─────────────────────────────
+document.addEventListener('contextmenu', function(e) {
+  e.preventDefault();
+});
+
+// ── Security: block common devtools keyboard shortcuts ─────────
+document.addEventListener('keydown', function(e) {
+  // F12
+  if (e.key === 'F12') { e.preventDefault(); return; }
+  // Ctrl+Shift+I / Ctrl+Shift+J / Ctrl+Shift+C  (devtools)
+  if (e.ctrlKey && e.shiftKey && ['i','I','j','J','c','C'].indexOf(e.key) !== -1) {
+    e.preventDefault(); return;
+  }
+  // Ctrl+U  (view source)
+  if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) {
+    e.preventDefault(); return;
+  }
+  // Ctrl+S  (save page)
+  if (e.ctrlKey && (e.key === 's' || e.key === 'S')) {
+    e.preventDefault(); return;
+  }
+});
+
+// ── Security: blur/blackout on focus loss ──────────────────────
+(function() {
+  var overlay = document.createElement('div');
+  overlay.id = 'focus-shield';
+  overlay.style.cssText = [
+    'display:none',
+    'position:fixed',
+    'inset:0',
+    'background:#000',
+    'z-index:99999',
+    'align-items:center',
+    'justify-content:center',
+    'flex-direction:column',
+    'gap:12px',
+    'cursor:default'
+  ].join(';');
+  overlay.innerHTML =
+    '<svg width="40" height="36" viewBox="0 0 110 96" fill="none" style="opacity:.25">' +
+      '<polygon points="55,3 107,93 3,93" stroke="#fff" stroke-width="2.5" fill="none" stroke-linejoin="round"/>' +
+    '</svg>' +
+    '<span style="color:#333;font-family:\'Courier New\',monospace;font-size:11px;letter-spacing:4px;text-transform:uppercase">Session Obscured</span>';
+  document.body.appendChild(overlay);
+
+  function hide()  { overlay.style.display = 'none'; }
+  function show()  { overlay.style.display = 'flex'; }
+
+  window.addEventListener('blur',   show);
+  window.addEventListener('focus',  hide);
+  document.addEventListener('visibilitychange', function() {
+    document.hidden ? show() : hide();
+  });
+})();
