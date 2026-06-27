@@ -1,11 +1,11 @@
-<%- include('partials/header', { pageTitle: 'Intelligence Desk' }) %>
+<%- include('partials/header', { pageTitle: 'Intelligence Desk', page: 'dashboard' }) %>
 
-<div class="page-header">
+<div class="govuk-page-header">
   <div>
-    <h1 class="page-title">INTELLIGENCE DESK</h1>
-    <p class="page-subtitle">Overview of entity registry and recent activity</p>
+    <span class="govuk-caption-m">HM GOVERNMENT INTELLIGENCE DATABASE</span>
+    <h1 class="govuk-heading-xl">Intelligence Desk</h1>
   </div>
-  <a href="/watchlist/add" class="btn btn-primary">+ REGISTER NEW ENTITY</a>
+  <a href="/watchlist/add" class="govuk-button govuk-button--primary">+ Register Entity</a>
 </div>
 
 <div class="stats-grid">
@@ -28,12 +28,12 @@
 </div>
 
 <div class="dashboard-grid">
-  <div class="panel">
-    <div class="panel-header">
-      <span class="panel-title">RECENTLY REGISTERED ENTITIES</span>
-      <a href="/watchlist" class="panel-link">VIEW ALL &rarr;</a>
+  <div class="govuk-panel">
+    <div class="govuk-panel__header">
+      <span class="govuk-panel__title">RECENTLY REGISTERED ENTITIES</span>
+      <a href="/watchlist" class="govuk-panel__link">VIEW ALL &rarr;</a>
     </div>
-    <div class="panel-body">
+    <div class="govuk-panel__body govuk-panel__body--flush">
       <% if (recent.length === 0) { %>
         <div class="empty-state">No entities registered yet. <a href="/watchlist/add">Register the first entity.</a></div>
       <% } else { %>
@@ -48,11 +48,11 @@
           </div>
           <div class="entity-info">
             <div class="entity-username"><%= e.username %></div>
-            <div class="entity-meta"><%= e.display_name || '' %> &bull; RBX: <%= e.roblox_id %></div>
+            <div class="entity-meta"><%= e.display_name || '' %><% if (e.display_name) { %> &bull; <% } %>RBX: <%= e.roblox_id %></div>
           </div>
           <div class="entity-badges">
-            <span class="severity-badge severity-<%= e.severity.toLowerCase() %>"><%= e.severity %></span>
-            <span class="status-badge status-<%= e.status.toLowerCase() %>"><%= e.status %></span>
+            <strong class="govuk-tag govuk-tag--sev-<%= e.severity.toLowerCase() %>"><%= e.severity %></strong>
+            <strong class="govuk-tag govuk-tag--status-<%= e.status.toLowerCase() %>"><%= e.status %></strong>
           </div>
         </a>
         <% }); %>
@@ -60,12 +60,12 @@
     </div>
   </div>
 
-  <div class="panel">
-    <div class="panel-header">
-      <span class="panel-title">RECENT AUDIT ACTIVITY</span>
-      <a href="/audit" class="panel-link">VIEW ALL &rarr;</a>
+  <div class="govuk-panel">
+    <div class="govuk-panel__header">
+      <span class="govuk-panel__title">RECENT AUDIT ACTIVITY</span>
+      <a href="/audit" class="govuk-panel__link">VIEW ALL &rarr;</a>
     </div>
-    <div class="panel-body">
+    <div class="govuk-panel__body govuk-panel__body--flush">
       <% if (recentLogs.length === 0) { %>
         <div class="empty-state">No audit events recorded.</div>
       <% } else { %>

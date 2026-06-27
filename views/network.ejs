@@ -1,11 +1,11 @@
-<%- include('partials/header', { pageTitle: 'Network View' }) %>
+<%- include('partials/header', { pageTitle: 'Network View', page: 'network' }) %>
 
-<div class="page-header">
+<div class="govuk-page-header">
   <div>
-    <h1 class="page-title">NETWORK VIEW</h1>
-    <p class="page-subtitle">Visual entity grid — <%= entities.length %> registered entities</p>
+    <span class="govuk-caption-m">SURVEILLANCE GRID</span>
+    <h1 class="govuk-heading-xl">Network View</h1>
   </div>
-  <a href="/watchlist/add" class="btn btn-primary">+ REGISTER ENTITY</a>
+  <a href="/watchlist/add" class="govuk-button govuk-button--primary">+ Register Entity</a>
 </div>
 
 <% if (entities.length === 0) { %>

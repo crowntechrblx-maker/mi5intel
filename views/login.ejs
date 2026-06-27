@@ -4,23 +4,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Authentication — HM Intelligence Database</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body class="auth-body">
   <div class="auth-container">
     <div class="auth-header">
-      <div class="gov-logo auth-logo">
-        <svg class="crown-icon" viewBox="0 0 32 32" fill="none">
-          <path d="M16 2L19 9H26L20.5 13.5L22.5 20.5L16 16.5L9.5 20.5L11.5 13.5L6 9H13L16 2Z" fill="currentColor"/>
-          <rect x="6" y="22" width="20" height="3" rx="1" fill="currentColor"/>
-          <rect x="4" y="26" width="24" height="3" rx="1" fill="currentColor"/>
+      <div class="auth-crown">
+        <svg style="width:44px;height:44px;color:var(--govuk-green)" viewBox="0 0 132 97" focusable="false" aria-hidden="true">
+          <path fill="currentColor" d="M25 30.2c3.5 1.5 7.7-.2 9.1-3.7 1.5-3.6-.2-7.8-3.9-9.2-3.6-1.4-7.6.3-9.1 3.9-1.4 3.5.3 7.5 3.9 9zm40.9 0c3.6-1.4 5.3-5.4 3.9-9s-5.5-5.3-9.1-3.9c-3.6 1.4-5.3 5.4-3.9 9 1.4 3.6 5.5 5.3 9.1 3.9zm-24-3.6c-.3 3.8 2.8 7.1 6.7 7.4 3.8.3 7.1-2.8 7.4-6.6.3-3.8-2.8-7.1-6.7-7.4-3.8-.3-7.1 2.8-7.4 6.6zm-6.6 30.8L30 55c-1.8 0-3.2-1.4-3.2-3.2l-.1-6.1c0-1.8 1.4-3.2 3.2-3.2H44c1.8 0 3.2 1.4 3.2 3.2l.1 6.1c0 1.8-1.4 3.2-3.2 3.2H35.3zm40.9 0L66 55c-1.8 0-3.2-1.4-3.2-3.2l-.1-6.1c0-1.8 1.4-3.2 3.2-3.2h13.1c1.8 0 3.2 1.4 3.2 3.2l.1 6.1c0 1.8-1.4 3.2-3.2 3.2H76.2zm-33 18.2l-7.5 9.7c-4.7 1.4-9.6.3-13.1-3.2-3.5-3.5-4.6-8.5-3.1-13.1l9.5-7.8v14.4h14.2zm25.9 0L99 75.6c.8 4.6-.8 9.4-4.2 12.8-3.4 3.4-8.2 5-12.8 4.2L75 84v-14.4h14.4zm-13.4 0H59.2V57.8h21.6v18.2h-1.3zM0 30.2l3.1 3.2c0-4.1 3.3-7.4 7.4-7.4s7.4 3.3 7.4 7.4-3.3 7.4-7.4 7.4l-3.1-3.2C3.3 41 0 44.3 0 48.4s3.3 7.4 7.4 7.4h4.7l3.1 3.2H0V97h132V59l-11.4-3.2 3.1-3.2h4.7c4.1 0 7.4-3.3 7.4-7.4s-3.3-7.4-7.4-7.4l-3.1 3.2c4.1 0 7.4 3.3 7.4 7.4s-3.3 7.4-7.4 7.4-7.4-3.3-7.4-7.4l3.1-3.2H132V30.2L66 0 0 30.2z"/>
         </svg>
-        <div class="gov-text">
-          <span class="gov-dept">HM GOVERNMENT</span>
-          <span class="gov-name">Intelligence Database</span>
-        </div>
       </div>
-      <div class="classification-badge">RESTRICTED — INTERNAL ONLY</div>
+      <span class="auth-gov-dept">HM Government</span>
+      <span class="auth-service-name">Intelligence Database</span>
+      <div style="margin-top:8px">
+        <span class="govuk-phase-tag">RESTRICTED — INTERNAL ONLY</span>
+      </div>
     </div>
 
     <div class="auth-card">
@@ -28,23 +29,29 @@
       <p class="auth-subtitle">Authorised personnel only. All access is logged and monitored.</p>
 
       <% if (setupDone) { %>
-        <div class="alert alert-success">Administrator account created. You may now sign in.</div>
+        <div class="govuk-notification-banner govuk-notification-banner--success" style="margin-bottom:1rem">
+          <div class="govuk-notification-banner__header">SUCCESS</div>
+          <div class="govuk-notification-banner__content">Administrator account created. You may now sign in.</div>
+        </div>
       <% } %>
       <% if (error) { %>
-        <div class="alert alert-error"><%= error %></div>
+        <div class="govuk-notification-banner govuk-notification-banner--error" style="margin-bottom:1rem">
+          <div class="govuk-notification-banner__header">ACCESS DENIED</div>
+          <div class="govuk-notification-banner__content"><%= error %></div>
+        </div>
       <% } %>
 
       <form action="/login" method="POST" class="auth-form">
         <input type="hidden" name="next" value="<%= next %>">
-        <div class="form-group">
-          <label class="form-label" for="username">OPERATOR ID</label>
-          <input class="form-input" type="text" id="username" name="username" autocomplete="username" autofocus required>
+        <div class="govuk-form-group">
+          <label class="govuk-label" for="username">OPERATOR ID</label>
+          <input class="govuk-input" type="text" id="username" name="username" autocomplete="username" autofocus required>
         </div>
-        <div class="form-group">
-          <label class="form-label" for="password">ACCESS CODE</label>
-          <input class="form-input" type="password" id="password" name="password" autocomplete="current-password" required>
+        <div class="govuk-form-group">
+          <label class="govuk-label" for="password">ACCESS CODE</label>
+          <input class="govuk-input" type="password" id="password" name="password" autocomplete="current-password" required>
         </div>
-        <button class="btn btn-primary btn-full" type="submit">AUTHENTICATE &rarr;</button>
+        <button class="govuk-button govuk-button--primary govuk-button--full" type="submit">AUTHENTICATE &rarr;</button>
       </form>
     </div>
 

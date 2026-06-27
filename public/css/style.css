@@ -1,177 +1,299 @@
 /* ============================================================
-   HM GOVERNMENT INTELLIGENCE DATABASE — STYLESHEET
+   HM GOVERNMENT INTELLIGENCE DATABASE
+   GOV.UK Design System — Dark Intelligence Theme
    ============================================================ */
 
+/* ── Fonts ─────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* ── Design Tokens ─────────────────────────────────────────── */
 :root {
-  --bg:           #070b12;
-  --bg-card:      #0d1420;
-  --bg-sidebar:   #080d17;
-  --bg-hover:     #111c2e;
-  --bg-active:    #0f1e35;
-  --border:       #1a2840;
-  --border-light: #223050;
+  /* GOV.UK official palette — adapted for dark */
+  --govuk-green:        #00703c;
+  --govuk-green-hover:  #005a30;
+  --govuk-red:          #d4351c;
+  --govuk-yellow:       #ffdd00;
+  --govuk-blue:         #1d70b8;
+  --govuk-blue-light:   #5694ca;
 
-  --text:         #d8dde8;
-  --text-muted:   #5a6a82;
-  --text-dim:     #3a4a5c;
+  /* Page chrome */
+  --bg:                 #0d1017;
+  --bg-surface:         #111827;
+  --bg-surface-2:       #1a2235;
+  --bg-header:          #080b11;
+  --bg-hover:           #1c2740;
+  --bg-active:          #162036;
 
-  --green:        #00c853;
-  --green-dark:   #009640;
-  --green-glow:   rgba(0, 200, 83, 0.15);
+  /* Borders */
+  --border:             #2a3650;
+  --border-mid:         #3a4f6a;
+  --border-light:       #1e2d45;
 
-  --red:          #d32f2f;
-  --red-dark:     #b71c1c;
-  --orange:       #e65100;
-  --yellow:       #f57f17;
+  /* Typography */
+  --text:               #f0f4f8;
+  --text-secondary:     #8fa3bc;
+  --text-muted:         #526070;
+  --text-dim:           #374050;
 
-  --sev-low:      #1b5e20;
-  --sev-low-text: #69f0ae;
-  --sev-med:      #e65100;
-  --sev-med-text: #ffcc80;
-  --sev-high:     #b71c1c;
-  --sev-high-text:#ef9a9a;
-  --sev-crit-bg:  #4a0000;
-  --sev-crit-text:#ff5252;
+  /* Accent — GOV.UK green */
+  --accent:             #00703c;
+  --accent-hover:       #005a30;
 
-  --sidebar-width: 210px;
-  --radius: 4px;
-  --font: -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
-  --mono: 'Courier New', 'Lucida Console', monospace;
+  /* GOV.UK Tag colour palette — dark-adapted */
+  --tag-grey-bg:    rgba(72,73,73,.25);    --tag-grey-text:    #c8cacc;  --tag-grey-border:    #484949;
+  --tag-green-bg:   rgba(15,122,82,.2);    --tag-green-text:   #69c4a4;  --tag-green-border:   #0f7a52;
+  --tag-teal-bg:    rgba(21,129,135,.2);   --tag-teal-text:    #5dc4c9;  --tag-teal-border:    #158187;
+  --tag-blue-bg:    rgba(29,112,184,.2);   --tag-blue-text:    #74ade0;  --tag-blue-border:    #1d70b8;
+  --tag-purple-bg:  rgba(84,49,159,.2);    --tag-purple-text:  #a98cd8;  --tag-purple-border:  #54319f;
+  --tag-red-bg:     rgba(202,53,53,.2);    --tag-red-text:     #e88080;  --tag-red-border:     #ca3535;
+  --tag-orange-bg:  rgba(244,119,56,.2);   --tag-orange-text:  #f4a07c;  --tag-orange-border:  #f47738;
+  --tag-yellow-bg:  rgba(255,221,0,.15);   --tag-yellow-text:  #e8cc00;  --tag-yellow-border:  #ffdd00;
+  --tag-magenta-bg: rgba(202,53,124,.2);   --tag-magenta-text: #e880b6;  --tag-magenta-border: #ca357c;
+
+  /* Spacing scale (5px unit — GOV.UK standard) */
+  --s1:  5px;   --s2:  10px;  --s3:  15px;  --s4:  20px;
+  --s5:  25px;  --s6:  30px;  --s8:  40px;  --s9:  45px;
+  --s10: 50px;  --s12: 60px;
+
+  /* Layout */
+  --sidebar-w:  220px;
+  --header-h:   60px;
+  --radius:     2px;
+  --radius-md:  4px;
+
+  /* Typography */
+  --font:   "Inter", "GDS Transport", arial, sans-serif;
+  --mono:   "Courier New", "Lucida Console", monospace;
 }
 
+/* ── Reset ──────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-html { font-size: 14px; }
-
-body {
-  font-family: var(--font);
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  display: flex;
+html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+a { color: var(--govuk-blue-light); text-decoration: underline; }
+a:hover { color: #82c1f0; }
+a:focus-visible {
+  outline: 3px solid var(--govuk-yellow);
+  outline-offset: 0;
+  background: var(--govuk-yellow);
+  color: #0b0c0c;
+  text-decoration: none;
 }
 
-a { color: var(--green); text-decoration: none; }
-a:hover { text-decoration: underline; }
-
-/* ============================================================
-   SIDEBAR
-   ============================================================ */
-
-.sidebar {
-  width: var(--sidebar-width);
-  min-height: 100vh;
-  background: var(--bg-sidebar);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
+/* ── GOV.UK Header ──────────────────────────────────────────── */
+.govuk-header {
+  background: var(--bg-header);
+  border-bottom: 4px solid var(--accent);
   position: fixed;
-  top: 0; left: 0; bottom: 0;
-  z-index: 100;
-}
-
-.sidebar-header {
-  padding: 1.1rem 1rem 0.75rem;
-  border-bottom: 1px solid var(--border);
-}
-
-.gov-logo {
+  top: 0; left: 0; right: 0;
+  height: var(--header-h);
+  z-index: 200;
   display: flex;
   align-items: center;
-  gap: 0.55rem;
-  margin-bottom: 0.6rem;
 }
 
-.crown-icon {
-  width: 26px; height: 26px;
-  color: var(--green);
+.govuk-header__container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--s4);
+  width: 100%;
+  gap: var(--s4);
+}
+
+.govuk-header__logotype {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  text-decoration: none;
+  color: var(--text);
   flex-shrink: 0;
 }
 
-.gov-text {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.2;
+.govuk-header__logotype:hover { color: var(--text); text-decoration: none; }
+
+.crown-icon {
+  width: 28px; height: 28px;
+  color: var(--accent);
+  flex-shrink: 0;
 }
 
-.gov-dept {
+.govuk-header__logotype-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.govuk-header__logotype-dept {
   font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.govuk-header__logotype-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.01em;
+}
+
+.govuk-header__divider {
+  width: 1px;
+  height: 32px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+.govuk-header__service-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.govuk-header__service-name:hover { color: var(--text); text-decoration: none; }
+
+.govuk-header__right {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  margin-left: auto;
+}
+
+.govuk-phase-tag {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 3px 8px;
+  background: var(--tag-red-bg);
+  border: 1px solid var(--tag-red-border);
+  color: var(--tag-red-text);
+  border-radius: var(--radius);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.header-avatar {
+  width: 28px; height: 28px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+  font-size: 11px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.header-logout {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  font-family: var(--font);
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.header-logout:hover { border-color: var(--govuk-red); color: var(--govuk-red); }
+
+/* ── Sidebar / Service navigation ───────────────────────────── */
+.govuk-service-nav {
+  width: var(--sidebar-w);
+  background: var(--bg-header);
+  border-right: 1px solid var(--border);
+  position: fixed;
+  top: var(--header-h);
+  left: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.govuk-service-nav__section {
+  padding: var(--s3) 0 var(--s2);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.govuk-service-nav__section:last-of-type { border-bottom: none; }
+
+.govuk-service-nav__section-label {
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.12em;
   color: var(--text-muted);
   text-transform: uppercase;
+  padding: 0 var(--s4) var(--s1);
+  font-family: var(--mono);
 }
 
-.gov-name {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text);
-  letter-spacing: 0.02em;
-}
-
-.classification-badge {
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: var(--text-muted);
-  border: 1px solid var(--border-light);
-  padding: 2px 6px;
-  border-radius: 2px;
-  display: inline-block;
-}
-
-.sidebar-nav {
-  flex: 1;
-  padding: 0.5rem 0;
-  overflow-y: auto;
-}
-
-.nav-item {
+.govuk-service-nav__item {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.55rem 1rem;
-  font-size: 12px;
+  gap: var(--s2);
+  padding: var(--s2) var(--s4);
+  font-size: 13px;
   font-weight: 500;
-  color: var(--text-muted);
-  letter-spacing: 0.02em;
+  color: var(--text-secondary);
   text-decoration: none;
-  transition: background 0.15s, color 0.15s;
-  border-left: 2px solid transparent;
+  transition: background 0.12s, color 0.12s;
+  border-left: 3px solid transparent;
+  position: relative;
 }
 
-.nav-item svg {
+.govuk-service-nav__item svg {
   width: 16px; height: 16px;
   flex-shrink: 0;
-  opacity: 0.7;
+  opacity: 0.6;
 }
 
-.nav-item:hover {
+.govuk-service-nav__item:hover {
   background: var(--bg-hover);
   color: var(--text);
   text-decoration: none;
 }
 
-.nav-item.active {
+.govuk-service-nav__item:hover svg { opacity: 1; }
+
+.govuk-service-nav__item--active {
   background: var(--bg-active);
-  color: var(--green);
-  border-left-color: var(--green);
+  color: var(--text);
+  border-left-color: var(--accent);
+  font-weight: 600;
 }
 
-.nav-item.active svg { opacity: 1; }
+.govuk-service-nav__item--active svg { opacity: 1; color: var(--accent); }
 
-.sidebar-user {
-  padding: 0.75rem 1rem;
+.govuk-service-nav__footer {
+  margin-top: auto;
+  padding: var(--s3) var(--s4);
   border-top: 1px solid var(--border);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--s2);
 }
 
-.user-avatar-sm {
-  width: 28px; height: 28px;
-  background: var(--green-dark);
-  color: #000;
+.nav-avatar {
+  width: 30px; height: 30px;
+  background: var(--accent);
+  color: #fff;
   font-weight: 700;
   font-size: 12px;
   display: flex; align-items: center; justify-content: center;
@@ -179,347 +301,501 @@ a:hover { text-decoration: underline; }
   flex-shrink: 0;
 }
 
-.user-info {
+.nav-user-info {
   flex: 1;
-  display: flex;
-  flex-direction: column;
   min-width: 0;
 }
 
-.user-name {
+.nav-user-name {
   font-size: 11px;
   font-weight: 600;
   color: var(--text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: block;
 }
 
-.user-role {
-  font-size: 9px;
+.nav-user-role {
+  font-size: 10px;
   color: var(--text-muted);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
+  display: block;
+  font-family: var(--mono);
 }
 
-.logout-form { margin: 0; }
-
-.logout-btn {
+.nav-logout-btn {
   background: none;
   border: 1px solid var(--border);
   color: var(--text-muted);
   cursor: pointer;
-  padding: 4px;
+  padding: 4px 6px;
   border-radius: var(--radius);
   display: flex; align-items: center;
-  transition: border-color 0.15s, color 0.15s;
+  transition: all 0.12s;
+  flex-shrink: 0;
 }
 
-.logout-btn svg { width: 14px; height: 14px; }
+.nav-logout-btn svg { width: 14px; height: 14px; }
+.nav-logout-btn:hover { border-color: var(--govuk-red); color: var(--govuk-red); }
 
-.logout-btn:hover { border-color: var(--red); color: var(--red); }
-
-/* ============================================================
-   MAIN CONTENT
-   ============================================================ */
-
-.main-content {
-  margin-left: var(--sidebar-width);
-  flex: 1;
-  padding: 2rem 2.5rem;
+/* ── Main content area ─────────────────────────────────────── */
+.govuk-main-wrapper {
+  margin-left: var(--sidebar-w);
+  padding-top: calc(var(--header-h) + var(--s6));
+  padding-bottom: var(--s12);
+  padding-left: var(--s8);
+  padding-right: var(--s8);
   min-height: 100vh;
-  max-width: 1400px;
+  max-width: 1200px;
 }
 
-.page-header {
+/* ── Page header ───────────────────────────────────────────── */
+.govuk-page-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 1.75rem;
-  gap: 1rem;
+  margin-bottom: var(--s6);
+  gap: var(--s4);
+  padding-bottom: var(--s4);
+  border-bottom: 1px solid var(--border);
 }
 
-.page-title {
-  font-size: 22px;
+.govuk-heading-xl {
+  font-size: 26px;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  color: #eef2ff;
-  text-transform: uppercase;
   line-height: 1.2;
-}
-
-.page-subtitle {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-top: 0.3rem;
-  letter-spacing: 0.02em;
-}
-
-.header-actions {
-  display: flex;
-  gap: 0.5rem;
-  flex-shrink: 0;
-}
-
-/* ============================================================
-   BUTTONS
-   ============================================================ */
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.5rem 1rem;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  border-radius: var(--radius);
-  border: 1px solid transparent;
-  cursor: pointer;
-  text-decoration: none;
-  transition: all 0.15s;
-  white-space: nowrap;
-}
-
-.btn:hover { text-decoration: none; }
-
-.btn-primary {
-  background: var(--green);
-  color: #000;
-  border-color: var(--green);
-}
-.btn-primary:hover { background: #00e65c; border-color: #00e65c; color: #000; }
-
-.btn-secondary {
-  background: transparent;
+  letter-spacing: -0.01em;
   color: var(--text);
-  border-color: var(--border-light);
-}
-.btn-secondary:hover { background: var(--bg-hover); border-color: var(--text-muted); color: var(--text); }
-
-.btn-ghost {
-  background: transparent;
-  color: var(--text-muted);
-  border-color: transparent;
-}
-.btn-ghost:hover { background: var(--bg-hover); color: var(--text); }
-
-.btn-danger {
-  background: var(--red-dark);
-  color: #fff;
-  border-color: var(--red-dark);
-}
-.btn-danger:hover { background: var(--red); border-color: var(--red); }
-
-.btn-sm { padding: 0.3rem 0.7rem; font-size: 11px; }
-.btn-xs { padding: 0.2rem 0.5rem; font-size: 10px; }
-.btn-full { width: 100%; justify-content: center; }
-
-/* ============================================================
-   ALERTS
-   ============================================================ */
-
-.alert {
-  padding: 0.65rem 1rem;
-  border-radius: var(--radius);
-  font-size: 12px;
-  border: 1px solid;
-  margin-bottom: 1rem;
+  margin-bottom: var(--s1);
 }
 
-.alert-error { background: rgba(183,28,28,0.15); border-color: var(--red); color: #ff8a80; }
-.alert-success { background: rgba(0,150,64,0.15); border-color: var(--green-dark); color: var(--sev-low-text); }
-.alert-info { background: rgba(13,60,100,0.3); border-color: #1565c0; color: #82b1ff; }
-
-/* ============================================================
-   PANELS
-   ============================================================ */
-
-.panel {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  margin-bottom: 1rem;
-  overflow: hidden;
-}
-
-.panel-danger { border-color: var(--red-dark); }
-
-.panel-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.7rem 1rem;
-  border-bottom: 1px solid var(--border);
-  background: rgba(0,0,0,0.2);
-}
-
-.panel-title {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: var(--text-muted);
-  text-transform: uppercase;
-}
-
-.panel-link {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  color: var(--green);
-  text-decoration: none;
-}
-
-.panel-body {
-  padding: 1rem;
-}
-
-.panel-body--compact {
-  padding: 0;
-}
-
-/* ============================================================
-   STATS
-   ============================================================ */
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.stat-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.1rem 1.25rem;
-}
-
-.stat-card--critical { border-color: var(--sev-crit-bg); }
-.stat-card--high { border-color: #5c1a1a; }
-.stat-card--active { border-color: var(--sev-low); }
-
-.stat-value {
-  font-size: 32px;
-  font-weight: 700;
-  color: #fff;
-  line-height: 1;
-  margin-bottom: 0.3rem;
-}
-
-.stat-card--critical .stat-value { color: var(--sev-crit-text); }
-.stat-card--high .stat-value { color: var(--sev-high-text); }
-.stat-card--active .stat-value { color: var(--sev-low-text); }
-
-.stat-label {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  color: var(--text-muted);
-  text-transform: uppercase;
-}
-
-/* ============================================================
-   DASHBOARD GRID
-   ============================================================ */
-
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-
-.entity-row {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.65rem;
-  border-bottom: 1px solid var(--border);
-  text-decoration: none;
-  transition: background 0.15s;
-  color: var(--text);
-}
-
-.entity-row:last-child { border-bottom: none; }
-.entity-row:hover { background: var(--bg-hover); text-decoration: none; color: var(--text); }
-
-.entity-avatar {
-  width: 36px; height: 36px;
-  border-radius: var(--radius);
-  overflow: hidden;
-  background: var(--bg-hover);
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  font-weight: 700;
-  color: var(--green);
-  font-size: 14px;
-}
-
-.entity-avatar img { width: 100%; height: 100%; object-fit: cover; }
-
-.entity-info { flex: 1; min-width: 0; }
-
-.entity-username {
+.govuk-caption-m {
   font-size: 13px;
-  font-weight: 600;
-  color: var(--text);
+  color: var(--text-secondary);
+  margin-bottom: var(--s1);
+  display: block;
 }
 
-.entity-meta {
-  font-size: 11px;
-  color: var(--text-muted);
-}
-
-.entity-badges {
+.govuk-page-header__actions {
   display: flex;
-  gap: 0.35rem;
+  gap: var(--s2);
   flex-shrink: 0;
-}
-
-/* ============================================================
-   AUDIT ROWS
-   ============================================================ */
-
-.audit-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.45rem 0.65rem;
-  border-bottom: 1px solid var(--border);
-  font-size: 11px;
+  align-items: flex-start;
   flex-wrap: wrap;
 }
 
-.audit-row:last-child { border-bottom: none; }
+/* ── Notification banners ──────────────────────────────────── */
+.govuk-notification-banner {
+  border: 2px solid;
+  padding: var(--s3) var(--s4);
+  margin-bottom: var(--s4);
+  border-radius: var(--radius);
+}
 
-.audit-action-badge {
-  font-size: 10px;
+.govuk-notification-banner--success {
+  border-color: var(--govuk-green);
+  background: rgba(15, 122, 82, 0.1);
+}
+
+.govuk-notification-banner--error {
+  border-color: var(--govuk-red);
+  background: rgba(202, 53, 53, 0.1);
+}
+
+.govuk-notification-banner--info {
+  border-color: var(--govuk-blue);
+  background: rgba(29, 112, 184, 0.1);
+}
+
+.govuk-notification-banner__header {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  font-family: var(--mono);
+}
+
+.govuk-notification-banner--success .govuk-notification-banner__header { color: var(--tag-green-text); }
+.govuk-notification-banner--error .govuk-notification-banner__header { color: var(--tag-red-text); }
+.govuk-notification-banner--info .govuk-notification-banner__header { color: var(--tag-blue-text); }
+
+.govuk-notification-banner__content {
+  font-size: 13px;
+  color: var(--text);
+}
+
+/* ── Buttons ───────────────────────────────────────────────── */
+.govuk-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s1);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 8px 16px;
+  border-radius: var(--radius);
+  border: 2px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+.govuk-button:hover { text-decoration: none; }
+
+.govuk-button:focus-visible {
+  outline: 3px solid var(--govuk-yellow);
+  outline-offset: 0;
+}
+
+.govuk-button--primary {
+  background: var(--govuk-green);
+  color: #ffffff;
+  border-color: var(--govuk-green);
+  box-shadow: 0 2px 0 var(--govuk-green-hover);
+}
+
+.govuk-button--primary:hover {
+  background: var(--govuk-green-hover);
+  border-color: var(--govuk-green-hover);
+  color: #ffffff;
+  box-shadow: 0 2px 0 #004225;
+}
+
+.govuk-button--secondary {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--border-mid);
+}
+
+.govuk-button--secondary:hover {
+  background: var(--bg-hover);
+  border-color: var(--text-secondary);
+  color: var(--text);
+}
+
+.govuk-button--warning {
+  background: var(--govuk-red);
+  color: #ffffff;
+  border-color: var(--govuk-red);
+  box-shadow: 0 2px 0 #a82b16;
+}
+
+.govuk-button--warning:hover {
+  background: #b82e18;
+  border-color: #b82e18;
+  color: #ffffff;
+}
+
+.govuk-button--ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border-color: transparent;
+}
+
+.govuk-button--ghost:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.govuk-button--small { font-size: 12px; padding: 5px 12px; }
+.govuk-button--xs    { font-size: 11px; padding: 3px 8px; }
+.govuk-button--full  { width: 100%; justify-content: center; }
+
+/* Legacy button aliases */
+.btn, .btn-primary, .btn-secondary, .btn-ghost, .btn-danger {
+  display: inline-flex; align-items: center; gap: var(--s1);
+  font-family: var(--font); font-size: 13px; font-weight: 600;
+  letter-spacing: 0.03em; padding: 8px 16px;
+  border-radius: var(--radius); border: 2px solid transparent;
+  cursor: pointer; text-decoration: none;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+  white-space: nowrap; line-height: 1.4;
+}
+.btn:hover, .btn-primary:hover { text-decoration: none; }
+.btn-primary { background: var(--govuk-green); color: #fff; border-color: var(--govuk-green); box-shadow: 0 2px 0 var(--govuk-green-hover); }
+.btn-primary:hover { background: var(--govuk-green-hover); border-color: var(--govuk-green-hover); color: #fff; }
+.btn-secondary { border-color: var(--border-mid); }
+.btn-secondary:hover { background: var(--bg-hover); border-color: var(--text-secondary); color: var(--text); }
+.btn-ghost:hover { background: var(--bg-hover); color: var(--text); }
+.btn-danger { background: var(--govuk-red); color: #fff; border-color: var(--govuk-red); }
+.btn-danger:hover { background: #b82e18; border-color: #b82e18; }
+
+/* ── GOV.UK Tags ───────────────────────────────────────────── */
+.govuk-tag {
+  display: inline-block;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.06em;
-  padding: 2px 6px;
-  border-radius: 2px;
-  background: var(--bg-hover);
-  color: var(--text-muted);
-  flex-shrink: 0;
+  padding: 3px 8px;
+  border-radius: var(--radius);
   text-transform: uppercase;
+  border: 1px solid;
+  line-height: 1.3;
 }
 
-.audit-actor { color: var(--green); font-weight: 600; }
-.audit-target { color: var(--text); }
-.audit-time { color: var(--text-muted); margin-left: auto; font-size: 10px; font-family: var(--mono); }
+.govuk-tag--grey    { background: var(--tag-grey-bg);    color: var(--tag-grey-text);    border-color: var(--tag-grey-border); }
+.govuk-tag--green   { background: var(--tag-green-bg);   color: var(--tag-green-text);   border-color: var(--tag-green-border); }
+.govuk-tag--teal    { background: var(--tag-teal-bg);    color: var(--tag-teal-text);    border-color: var(--tag-teal-border); }
+.govuk-tag--blue    { background: var(--tag-blue-bg);    color: var(--tag-blue-text);    border-color: var(--tag-blue-border); }
+.govuk-tag--purple  { background: var(--tag-purple-bg);  color: var(--tag-purple-text);  border-color: var(--tag-purple-border); }
+.govuk-tag--red     { background: var(--tag-red-bg);     color: var(--tag-red-text);     border-color: var(--tag-red-border); }
+.govuk-tag--orange  { background: var(--tag-orange-bg);  color: var(--tag-orange-text);  border-color: var(--tag-orange-border); }
+.govuk-tag--yellow  { background: var(--tag-yellow-bg);  color: var(--tag-yellow-text);  border-color: var(--tag-yellow-border); }
+.govuk-tag--magenta { background: var(--tag-magenta-bg); color: var(--tag-magenta-text); border-color: var(--tag-magenta-border); }
 
-/* ============================================================
-   FILTER BAR
-   ============================================================ */
-
-.filter-bar {
-  margin-bottom: 1rem;
+/* Severity → tag mapping */
+.govuk-tag--sev-low      { background: var(--tag-green-bg);  color: var(--tag-green-text);  border-color: var(--tag-green-border); }
+.govuk-tag--sev-medium   { background: var(--tag-orange-bg); color: var(--tag-orange-text); border-color: var(--tag-orange-border); }
+.govuk-tag--sev-high     { background: var(--tag-red-bg);    color: var(--tag-red-text);    border-color: var(--tag-red-border); }
+.govuk-tag--sev-critical {
+  background: rgba(120, 0, 0, 0.35);
+  color: #ff6b6b;
+  border-color: #8b0000;
+  animation: critical-pulse 2s ease-in-out infinite;
 }
+
+@keyframes critical-pulse {
+  0%, 100% { box-shadow: none; }
+  50% { box-shadow: 0 0 8px rgba(255, 107, 107, 0.35); }
+}
+
+/* Status → tag mapping */
+.govuk-tag--status-active   { background: var(--tag-green-bg);  color: var(--tag-green-text);  border-color: var(--tag-green-border); }
+.govuk-tag--status-inactive { background: var(--tag-grey-bg);   color: var(--tag-grey-text);   border-color: var(--tag-grey-border); }
+.govuk-tag--status-archived { background: var(--tag-grey-bg);   color: var(--text-muted);       border-color: var(--border); }
+.govuk-tag--status-banned   { background: var(--tag-red-bg);    color: var(--tag-red-text);    border-color: var(--tag-red-border); }
+
+/* Legacy tag aliases */
+.severity-badge { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; padding: 3px 8px; border-radius: var(--radius); text-transform: uppercase; border: 1px solid; }
+.severity-low      { background: var(--tag-green-bg);  color: var(--tag-green-text);  border: 1px solid var(--tag-green-border); display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; padding: 3px 8px; border-radius: var(--radius); text-transform: uppercase; }
+.severity-medium   { background: var(--tag-orange-bg); color: var(--tag-orange-text); border: 1px solid var(--tag-orange-border); display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; padding: 3px 8px; border-radius: var(--radius); text-transform: uppercase; }
+.severity-high     { background: var(--tag-red-bg);    color: var(--tag-red-text);    border: 1px solid var(--tag-red-border);    display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; padding: 3px 8px; border-radius: var(--radius); text-transform: uppercase; }
+.severity-critical { background: rgba(120,0,0,.35); color: #ff6b6b; border: 1px solid #8b0000; display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; padding: 3px 8px; border-radius: var(--radius); text-transform: uppercase; animation: critical-pulse 2s ease-in-out infinite; }
+.status-badge { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; padding: 3px 8px; border-radius: var(--radius); text-transform: uppercase; border: 1px solid; }
+.status-active   { background: var(--tag-green-bg);  color: var(--tag-green-text);  border-color: var(--tag-green-border); }
+.status-inactive { background: var(--tag-grey-bg);   color: var(--tag-grey-text);   border-color: var(--tag-grey-border); }
+.status-archived { background: var(--tag-grey-bg);   color: var(--text-muted);       border-color: var(--border); }
+.status-banned   { background: var(--tag-red-bg);    color: var(--tag-red-text);    border-color: var(--tag-red-border); }
+
+/* ── GOV.UK Table ──────────────────────────────────────────── */
+.govuk-table-wrapper {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.govuk-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.govuk-table__head {
+  background: rgba(0,0,0,.25);
+  border-bottom: 2px solid var(--border-mid);
+}
+
+.govuk-table__header {
+  padding: 12px 16px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  text-align: left;
+  text-transform: uppercase;
+  font-family: var(--mono);
+  white-space: nowrap;
+}
+
+.govuk-table__cell {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 13px;
+  vertical-align: middle;
+}
+
+.govuk-table__body .govuk-table__row:last-child .govuk-table__cell {
+  border-bottom: none;
+}
+
+.govuk-table__body .govuk-table__row {
+  transition: background 0.1s;
+  cursor: pointer;
+}
+
+.govuk-table__body .govuk-table__row:hover { background: var(--bg-hover); }
+
+.govuk-table__cell--empty {
+  text-align: center;
+  padding: 40px 16px !important;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  font-family: var(--mono);
+  cursor: default;
+}
+
+/* Legacy table aliases */
+.registry-table-wrap { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
+.registry-table { width: 100%; border-collapse: collapse; }
+.registry-table thead tr { background: rgba(0,0,0,.25); border-bottom: 2px solid var(--border-mid); }
+.registry-table th { padding: 12px 16px; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: var(--text-muted); text-align: left; text-transform: uppercase; font-family: var(--mono); white-space: nowrap; }
+.registry-table td { padding: 12px 16px; border-bottom: 1px solid var(--border-light); font-size: 13px; vertical-align: middle; }
+.registry-table tbody tr:last-child td { border-bottom: none; }
+.registry-table tbody tr { transition: background 0.1s; cursor: pointer; }
+.registry-table tbody tr:hover { background: var(--bg-hover); }
+.empty-row { text-align: center !important; padding: 40px 16px !important; font-size: 12px; letter-spacing: 0.08em; color: var(--text-dim); font-family: var(--mono); cursor: default; }
+
+/* ── GOV.UK Summary List ───────────────────────────────────── */
+.govuk-summary-list {
+  width: 100%;
+  border: none;
+  margin: 0;
+}
+
+.govuk-summary-list__row {
+  display: grid;
+  grid-template-columns: 200px 1fr auto;
+  gap: 0 var(--s4);
+  padding: var(--s3) 0;
+  border-bottom: 1px solid var(--border);
+  align-items: start;
+}
+
+.govuk-summary-list__row:last-child { border-bottom: none; }
+
+.govuk-summary-list__key {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 0;
+  letter-spacing: 0.01em;
+  font-family: var(--mono);
+  text-transform: uppercase;
+  font-size: 11px;
+}
+
+.govuk-summary-list__value {
+  font-size: 14px;
+  color: var(--text);
+  padding: 0;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.govuk-summary-list__actions {
+  font-size: 12px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* ── GOV.UK Form ───────────────────────────────────────────── */
+.govuk-form-group {
+  margin-bottom: var(--s4);
+}
+
+.govuk-form-group:last-child { margin-bottom: 0; }
+
+.govuk-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  font-family: var(--mono);
+}
+
+.govuk-hint {
+  display: block;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.govuk-input {
+  width: 100%;
+  padding: 9px 12px;
+  background: rgba(0,0,0,.3);
+  border: 2px solid var(--border-mid);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 14px;
+  font-family: var(--font);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  line-height: 1.4;
+}
+
+.govuk-input:focus {
+  border-color: var(--govuk-yellow);
+  box-shadow: inset 0 0 0 2px var(--govuk-yellow);
+  outline: 3px solid var(--govuk-yellow);
+  outline-offset: 0;
+}
+
+.govuk-input::placeholder { color: var(--text-dim); }
+
+.govuk-select {
+  padding: 9px 12px;
+  background: rgba(0,0,0,.3);
+  border: 2px solid var(--border-mid);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 14px;
+  font-family: var(--font);
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.govuk-select:focus {
+  border-color: var(--govuk-yellow);
+  outline: 3px solid var(--govuk-yellow);
+  outline-offset: 0;
+}
+
+.govuk-textarea {
+  resize: vertical;
+  min-height: 80px;
+  font-family: var(--font);
+}
+
+/* Form layout helpers */
+.govuk-grid-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s4); }
+.govuk-grid-row--thirds { grid-template-columns: 1fr 1fr 1fr; }
+
+/* Legacy form aliases */
+.form-group { margin-bottom: var(--s4); }
+.form-label { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 6px; font-family: var(--mono); }
+.form-input { width: 100%; padding: 9px 12px; background: rgba(0,0,0,.3); border: 2px solid var(--border-mid); border-radius: var(--radius); color: var(--text); font-size: 14px; font-family: var(--font); outline: none; transition: border-color 0.15s; line-height: 1.4; }
+.form-input:focus { border-color: var(--govuk-yellow); outline: 3px solid var(--govuk-yellow); outline-offset: 0; }
+.form-input::placeholder { color: var(--text-dim); }
+.form-textarea { resize: vertical; min-height: 80px; font-family: var(--font); }
+.form-hint { display: block; font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+.form-hint-inline { font-weight: 400; font-size: 10px; color: var(--text-dim); text-transform: none; letter-spacing: 0; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s4); }
+.form-actions { display: flex; gap: var(--s3); align-items: center; padding-top: var(--s4); margin-top: var(--s2); border-top: 1px solid var(--border); }
+.required { color: var(--govuk-red); }
+.form-group-compact { margin-bottom: var(--s3); }
+.form-label-sm { display: block; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: var(--text-secondary); margin-bottom: 4px; text-transform: uppercase; font-family: var(--mono); }
+.form-input-sm { width: 100%; padding: 7px 10px; background: rgba(0,0,0,.3); border: 2px solid var(--border-mid); border-radius: var(--radius); color: var(--text); font-size: 13px; outline: none; font-family: var(--font); }
+.form-input-sm:focus { border-color: var(--govuk-yellow); outline: 2px solid var(--govuk-yellow); }
+.form-input-xs { padding: 4px 8px; background: rgba(0,0,0,.3); border: 1px solid var(--border-mid); border-radius: var(--radius); color: var(--text); font-size: 11px; outline: none; font-family: var(--font); }
+
+/* ── Filter bar ────────────────────────────────────────────── */
+.filter-bar { margin-bottom: var(--s4); }
 
 .filter-form {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--s2);
   align-items: center;
   flex-wrap: wrap;
 }
@@ -531,880 +807,384 @@ a:hover { text-decoration: underline; }
 }
 
 .search-icon {
-  position: absolute;
-  left: 0.65rem;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 14px; height: 14px;
-  color: var(--text-muted);
-  pointer-events: none;
+  position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+  width: 14px; height: 14px; color: var(--text-muted); pointer-events: none;
 }
 
 .search-input {
-  width: 100%;
-  padding: 0.5rem 0.75rem 0.5rem 2.2rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text);
-  font-size: 13px;
-  outline: none;
-  transition: border-color 0.15s;
+  width: 100%; padding: 9px 12px 9px 34px;
+  background: rgba(0,0,0,.3); border: 2px solid var(--border-mid);
+  border-radius: var(--radius); color: var(--text); font-size: 13px;
+  font-family: var(--font); outline: none; transition: border-color 0.15s;
 }
 
-.search-input:focus { border-color: var(--green); }
+.search-input:focus { border-color: var(--govuk-yellow); outline: 3px solid var(--govuk-yellow); outline-offset: 0; }
 .search-input::placeholder { color: var(--text-dim); }
 
 .filter-select {
-  padding: 0.5rem 0.75rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  outline: none;
-  cursor: pointer;
+  padding: 9px 12px; background: rgba(0,0,0,.3); border: 2px solid var(--border-mid);
+  border-radius: var(--radius); color: var(--text); font-size: 12px; font-weight: 600;
+  letter-spacing: 0.04em; outline: none; cursor: pointer; font-family: var(--font);
 }
 
-.filter-select:focus { border-color: var(--green); }
+.filter-select:focus { border-color: var(--govuk-yellow); outline: 3px solid var(--govuk-yellow); outline-offset: 0; }
 
-/* ============================================================
-   REGISTRY TABLE
-   ============================================================ */
-
-.registry-table-wrap {
-  background: var(--bg-card);
+/* ── Panels / Cards ────────────────────────────────────────── */
+.govuk-panel {
+  background: var(--bg-surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--s4);
   overflow: hidden;
 }
 
-.registry-table {
-  width: 100%;
-  border-collapse: collapse;
-}
+.govuk-panel--danger { border-color: var(--govuk-red); }
 
-.registry-table thead tr {
-  background: rgba(0,0,0,0.3);
-  border-bottom: 1px solid var(--border);
-}
-
-.registry-table th {
-  padding: 0.65rem 1rem;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: var(--text-muted);
-  text-align: left;
-  text-transform: uppercase;
-  font-family: var(--mono);
-  white-space: nowrap;
-}
-
-.registry-table td {
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border);
-  font-size: 12px;
-  vertical-align: middle;
-}
-
-.registry-table tbody tr:last-child td { border-bottom: none; }
-
-.registry-table tbody tr {
-  transition: background 0.1s;
-  cursor: pointer;
-}
-
-.registry-table tbody tr:hover { background: var(--bg-hover); }
-
-.empty-row {
-  text-align: center !important;
-  padding: 2.5rem !important;
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  color: var(--text-dim);
-  font-family: var(--mono);
-  cursor: default;
-}
-
-.entity-index {
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--text-muted);
-}
-
-.identity-cell {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-
-.table-avatar {
-  width: 32px; height: 32px;
-  border-radius: 3px;
-  overflow: hidden;
-  background: var(--bg-hover);
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--green);
-}
-
-.table-avatar img { width: 100%; height: 100%; object-fit: cover; }
-
-.table-username { font-size: 13px; font-weight: 600; color: var(--text); }
-.table-meta { font-size: 10px; color: var(--text-muted); font-family: var(--mono); }
-
-.category-tag {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  padding: 2px 6px;
-  border-radius: 2px;
-  background: rgba(255,255,255,0.05);
-  color: var(--text-muted);
-  text-transform: uppercase;
-}
-
-.mini-tag {
-  font-size: 9px;
-  padding: 1px 5px;
-  border-radius: 2px;
-  background: rgba(0,200,83,0.1);
-  color: var(--green);
-  margin-left: 3px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-}
-
-.table-action-btn {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  padding: 4px 10px;
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius);
-  color: var(--text-muted);
-  background: transparent;
-  text-decoration: none;
-  transition: all 0.15s;
-  white-space: nowrap;
-}
-
-.table-action-btn:hover {
-  border-color: var(--green);
-  color: var(--green);
-  text-decoration: none;
-}
-
-.table-footer {
+.govuk-panel__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.65rem 1rem;
-  font-size: 11px;
-  color: var(--text-muted);
-  letter-spacing: 0.05em;
-  font-family: var(--mono);
-}
-
-.pagination { display: flex; gap: 0.5rem; }
-
-/* ============================================================
-   SEVERITY & STATUS BADGES
-   ============================================================ */
-
-.severity-badge {
-  display: inline-block;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  padding: 2px 7px;
-  border-radius: 2px;
-  text-transform: uppercase;
-}
-
-.severity-low    { background: rgba(27,94,32,0.3); color: var(--sev-low-text); border: 1px solid var(--sev-low); }
-.severity-medium { background: rgba(230,81,0,0.2); color: var(--sev-med-text); border: 1px solid var(--sev-med); }
-.severity-high   { background: rgba(183,28,28,0.3); color: var(--sev-high-text); border: 1px solid var(--sev-high); }
-.severity-critical { background: rgba(74,0,0,0.5); color: var(--sev-crit-text); border: 1px solid #7f0000; animation: pulse-red 2s infinite; }
-
-@keyframes pulse-red {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255,82,82,0); }
-  50% { box-shadow: 0 0 6px 2px rgba(255,82,82,0.3); }
-}
-
-.status-badge {
-  display: inline-block;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  padding: 2px 7px;
-  border-radius: 2px;
-  text-transform: uppercase;
-}
-
-.status-active   { background: rgba(0,100,0,0.2); color: #69f0ae; border: 1px solid #2e7d32; }
-.status-inactive { background: rgba(255,255,255,0.05); color: #90a4ae; border: 1px solid #455a64; }
-.status-archived { background: rgba(255,255,255,0.03); color: #546e7a; border: 1px solid #37474f; }
-.status-banned   { background: rgba(183,28,28,0.2); color: #ef9a9a; border: 1px solid #b71c1c; }
-
-/* ============================================================
-   FORM STYLES
-   ============================================================ */
-
-.form-panel {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.5rem;
-  max-width: 800px;
-}
-
-.intel-form { display: flex; flex-direction: column; gap: 0; }
-
-.form-section {
-  padding-bottom: 1.25rem;
-  margin-bottom: 1.25rem;
+  padding: var(--s3) var(--s4);
   border-bottom: 1px solid var(--border);
+  background: rgba(0,0,0,.2);
 }
 
-.form-section:last-of-type { border-bottom: none; margin-bottom: 0; }
-
-.section-title {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: var(--green);
-  text-transform: uppercase;
-  margin-bottom: 1rem;
-  font-family: var(--mono);
-}
-
-.section-hint {
+.govuk-panel__title {
   font-size: 11px;
-  color: var(--text-muted);
-  margin-bottom: 0.75rem;
-  margin-top: -0.5rem;
-}
-
-.form-group { margin-bottom: 1rem; }
-.form-group:last-child { margin-bottom: 0; }
-
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-
-.form-label {
-  display: block;
-  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.1em;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  margin-bottom: 0.4rem;
-  font-family: var(--mono);
-}
-
-.required { color: var(--sev-crit-text); }
-.form-hint-inline { font-weight: 400; font-size: 10px; color: var(--text-dim); text-transform: none; letter-spacing: 0; }
-
-.form-input {
-  width: 100%;
-  padding: 0.55rem 0.75rem;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text);
-  font-size: 13px;
-  font-family: var(--font);
-  outline: none;
-  transition: border-color 0.15s;
-}
-
-.form-input:focus { border-color: var(--green); box-shadow: 0 0 0 2px var(--green-glow); }
-.form-input::placeholder { color: var(--text-dim); }
-
-.form-textarea { resize: vertical; min-height: 80px; font-family: var(--font); }
-
-.form-hint {
-  display: block;
-  font-size: 11px;
-  color: var(--text-muted);
-  margin-top: 0.35rem;
-}
-
-.form-actions {
-  display: flex;
-  gap: 0.75rem;
-  align-items: center;
-  padding-top: 1rem;
-  margin-top: 0.5rem;
-  border-top: 1px solid var(--border);
-}
-
-.form-group-compact { margin-bottom: 0.65rem; }
-
-.form-label-sm {
-  display: block;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: var(--text-muted);
-  margin-bottom: 0.3rem;
+  color: var(--text-secondary);
   text-transform: uppercase;
   font-family: var(--mono);
 }
 
-.form-input-sm {
-  width: 100%;
-  padding: 0.4rem 0.6rem;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text);
-  font-size: 12px;
-  outline: none;
-}
-
-.form-input-sm:focus { border-color: var(--green); }
-
-.form-input-xs {
-  padding: 0.2rem 0.4rem;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text);
+.govuk-panel__link {
   font-size: 11px;
-  outline: none;
-}
-
-/* ============================================================
-   PROFILE PAGE
-   ============================================================ */
-
-.profile-grid {
-  display: grid;
-  grid-template-columns: 260px 1fr;
-  gap: 1rem;
-  align-items: start;
-}
-
-.avatar-section {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  padding: 1rem 1rem 0;
-}
-
-.profile-avatar {
-  width: 180px;
-  height: 180px;
-  object-fit: cover;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  display: block;
-  margin: 0 auto;
-}
-
-.profile-avatar--head { width: 100px; height: 100px; }
-
-.profile-avatar-placeholder {
-  width: 120px; height: 120px;
-  background: var(--bg-hover);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 48px;
-  font-weight: 700;
-  color: var(--green);
-  margin: 0 auto;
-}
-
-.banned-overlay {
-  position: absolute;
-  top: 1rem; left: 50%;
-  transform: translateX(-50%);
-  background: var(--red-dark);
-  color: #fff;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  padding: 3px 8px;
-  border-radius: 2px;
-  white-space: nowrap;
-}
-
-.profile-identity {
-  text-align: center;
-  padding: 0.75rem 1rem 0;
-}
-
-.profile-username {
-  font-size: 18px;
-  font-weight: 700;
-  color: #fff;
-}
-
-.profile-displayname {
-  font-size: 13px;
-  color: var(--text-muted);
-  margin-top: 0.2rem;
-}
-
-.profile-id {
-  font-size: 11px;
-  font-family: var(--mono);
-  color: var(--text-muted);
-  margin-top: 0.2rem;
-}
-
-.profile-created {
-  font-size: 11px;
-  color: var(--text-dim);
-  margin-top: 0.2rem;
-}
-
-.profile-badges-row {
-  display: flex;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-}
-
-.stat-row-mini {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  border-top: 1px solid var(--border);
-  padding: 0.75rem 0.5rem;
-}
-
-.mini-stat {
-  text-align: center;
-}
-
-.mini-stat-val {
-  font-size: 16px;
-  font-weight: 700;
-  color: #fff;
-}
-
-.mini-stat-lbl {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: var(--text-muted);
-}
-
-.profile-section {
-  padding: 0.75rem 1rem;
-  border-top: 1px solid var(--border);
-}
-
-.section-label {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: var(--text-muted);
-  margin-bottom: 0.5rem;
-}
-
-.badge-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.3rem;
-}
-
-.roblox-badge {
-  font-size: 10px;
-  padding: 2px 6px;
-  background: rgba(255,193,7,0.1);
-  border: 1px solid rgba(255,193,7,0.3);
-  color: #ffd54f;
-  border-radius: 2px;
   font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--govuk-blue-light);
+  text-decoration: none;
 }
 
-.bio-text {
-  font-size: 13px;
-  color: var(--text-muted);
-  line-height: 1.6;
-  white-space: pre-wrap;
-  word-break: break-word;
+.govuk-panel__link:hover { text-decoration: underline; }
+
+.govuk-panel__body { padding: var(--s4); }
+.govuk-panel__body--flush { padding: 0; }
+
+/* Legacy panel aliases */
+.panel { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: var(--s4); overflow: hidden; }
+.panel-danger { border-color: var(--govuk-red); }
+.panel-header { display: flex; align-items: center; justify-content: space-between; padding: var(--s3) var(--s4); border-bottom: 1px solid var(--border); background: rgba(0,0,0,.2); }
+.panel-title { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: var(--text-secondary); text-transform: uppercase; font-family: var(--mono); }
+.panel-link { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: var(--govuk-blue-light); text-decoration: none; }
+.panel-body { padding: var(--s4); }
+.panel-body--compact { padding: 0; }
+.section-title { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: var(--tag-teal-text); text-transform: uppercase; margin-bottom: var(--s4); font-family: var(--mono); }
+.section-hint { font-size: 12px; color: var(--text-muted); margin-bottom: var(--s3); margin-top: calc(-1 * var(--s2)); }
+
+/* ── Stats grid ────────────────────────────────────────────── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--s4);
+  margin-bottom: var(--s6);
 }
 
-.username-history {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-}
-
-.past-username {
-  font-size: 12px;
-  font-family: var(--mono);
-  padding: 3px 8px;
-  background: var(--bg-hover);
+.stat-card {
+  background: var(--bg-surface);
   border: 1px solid var(--border);
-  border-radius: 2px;
-  color: var(--text-muted);
+  border-radius: var(--radius-md);
+  padding: var(--s4) var(--s5);
+  border-top: 3px solid var(--border);
 }
 
-.group-row {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.65rem 1rem;
-  border-bottom: 1px solid var(--border);
-}
+.stat-card--critical { border-top-color: #8b0000; }
+.stat-card--high     { border-top-color: var(--govuk-red); }
+.stat-card--active   { border-top-color: var(--govuk-green); }
 
-.group-row:last-child { border-bottom: none; }
-
-.group-icon {
-  width: 32px; height: 32px;
-  background: var(--bg-hover);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 11px;
+.stat-value {
+  font-size: 36px;
   font-weight: 700;
-  color: var(--text-muted);
-  flex-shrink: 0;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: var(--s1);
+  font-variant-numeric: tabular-nums;
 }
 
-.group-count-badge { font-size: 9px; color: var(--green); }
+.stat-card--critical .stat-value { color: #ff6b6b; }
+.stat-card--high     .stat-value { color: var(--tag-red-text); }
+.stat-card--active   .stat-value { color: var(--tag-green-text); }
 
-.group-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.stat-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-family: var(--mono);
+}
+
+/* ── Dashboard grid ────────────────────────────────────────── */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s4);
+}
+
+/* ── Entity row (in panels) ────────────────────────────────── */
+.entity-row {
+  display: flex; align-items: center; gap: var(--s3);
+  padding: 10px var(--s4); border-bottom: 1px solid var(--border-light);
+  text-decoration: none; transition: background 0.1s; color: var(--text);
+}
+.entity-row:last-child { border-bottom: none; }
+.entity-row:hover { background: var(--bg-hover); text-decoration: none; color: var(--text); }
+
+.entity-avatar {
+  width: 38px; height: 38px; border-radius: var(--radius-md);
+  overflow: hidden; background: var(--bg-surface-2);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-weight: 700; color: var(--govuk-green); font-size: 14px;
+  border: 1px solid var(--border);
+}
+.entity-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.entity-info { flex: 1; min-width: 0; }
+.entity-username { font-size: 14px; font-weight: 600; color: var(--text); }
+.entity-meta { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+.entity-badges { display: flex; gap: var(--s1); flex-shrink: 0; }
+
+/* ── Audit rows ────────────────────────────────────────────── */
+.audit-row {
+  display: flex; align-items: center; gap: var(--s2);
+  padding: 8px var(--s4); border-bottom: 1px solid var(--border-light);
+  font-size: 12px; flex-wrap: wrap;
+}
+.audit-row:last-child { border-bottom: none; }
+.audit-action-badge {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+  padding: 2px 7px; border-radius: var(--radius);
+  background: var(--bg-surface-2); color: var(--text-muted);
+  flex-shrink: 0; text-transform: uppercase; border: 1px solid var(--border);
+}
+.audit-actor { color: var(--tag-green-text); font-weight: 600; }
+.audit-target { color: var(--text); }
+.audit-time { color: var(--text-muted); margin-left: auto; font-size: 10px; font-family: var(--mono); }
+
+/* ── Table identity cell ───────────────────────────────────── */
+.identity-cell { display: flex; align-items: center; gap: var(--s2); }
+.table-avatar {
+  width: 34px; height: 34px; border-radius: var(--radius);
+  overflow: hidden; background: var(--bg-surface-2);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-size: 13px; font-weight: 700; color: var(--govuk-green);
+  border: 1px solid var(--border);
+}
+.table-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.table-username { font-size: 14px; font-weight: 600; color: var(--text); }
+.table-meta { font-size: 11px; color: var(--text-muted); font-family: var(--mono); margin-top: 1px; }
+.entity-index { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
+.category-tag { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; padding: 2px 7px; border-radius: var(--radius); background: rgba(255,255,255,.04); color: var(--text-muted); text-transform: uppercase; border: 1px solid var(--border); }
+.mini-tag { font-size: 9px; padding: 1px 5px; border-radius: var(--radius); background: var(--tag-teal-bg); color: var(--tag-teal-text); margin-left: 3px; font-weight: 600; letter-spacing: 0.06em; border: 1px solid var(--tag-teal-border); }
+.table-action-btn { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; padding: 5px 10px; border: 1px solid var(--border-mid); border-radius: var(--radius); color: var(--text-secondary); background: transparent; text-decoration: none; transition: all 0.12s; white-space: nowrap; }
+.table-action-btn:hover { border-color: var(--govuk-green); color: var(--govuk-green); text-decoration: none; }
+.table-footer { display: flex; align-items: center; justify-content: space-between; padding: 10px var(--s4); font-size: 11px; color: var(--text-muted); font-family: var(--mono); border-top: 1px solid var(--border-light); background: rgba(0,0,0,.1); }
+.table-count { letter-spacing: 0.05em; }
+.pagination { display: flex; gap: var(--s2); }
+
+/* ── Profile page ──────────────────────────────────────────── */
+.profile-grid { display: grid; grid-template-columns: 280px 1fr; gap: var(--s4); align-items: start; }
+.profile-left {}
+.profile-right {}
+
+.avatar-section { display: flex; justify-content: center; padding: var(--s4) var(--s4) 0; }
+.profile-avatar { width: 190px; height: 190px; object-fit: cover; border-radius: var(--radius-md); border: 1px solid var(--border); display: block; margin: 0 auto; }
+.profile-avatar--head { width: 110px; height: 110px; }
+.profile-avatar-placeholder { width: 130px; height: 130px; background: var(--bg-surface-2); border: 1px solid var(--border); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 52px; font-weight: 700; color: var(--govuk-green); margin: 0 auto; }
+
+.banned-overlay { position: absolute; top: var(--s4); left: 50%; transform: translateX(-50%); background: var(--govuk-red); color: #fff; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; padding: 3px 9px; border-radius: var(--radius); white-space: nowrap; }
+
+.avatar-section { position: relative; }
+
+.profile-identity { text-align: center; padding: var(--s3) var(--s4) 0; }
+.profile-username { font-size: 20px; font-weight: 700; color: var(--text); }
+.profile-displayname { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+.profile-id { font-size: 11px; font-family: var(--mono); color: var(--text-muted); margin-top: 3px; }
+.profile-created { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+.profile-badges-row { display: flex; justify-content: center; gap: var(--s1); padding: var(--s3) var(--s4); flex-wrap: wrap; }
+
+.stat-row-mini { display: grid; grid-template-columns: repeat(3,1fr); border-top: 1px solid var(--border); }
+.mini-stat { text-align: center; padding: var(--s3) var(--s2); }
+.mini-stat-val { font-size: 18px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+.mini-stat-lbl { font-size: 9px; font-weight: 700; letter-spacing: 0.08em; color: var(--text-muted); font-family: var(--mono); }
+
+.profile-section { padding: var(--s3) var(--s4); border-top: 1px solid var(--border); }
+.section-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: var(--s2); font-family: var(--mono); text-transform: uppercase; }
+
+.roblox-badge { font-size: 10px; padding: 2px 7px; background: rgba(255,193,7,.1); border: 1px solid rgba(255,193,7,.25); color: #ffd54f; border-radius: var(--radius); font-weight: 600; }
+.badge-list { display: flex; flex-wrap: wrap; gap: var(--s1); }
+
+.bio-text { font-size: 14px; color: var(--text-secondary); line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
+
+.username-history { display: flex; flex-wrap: wrap; gap: var(--s1); }
+.past-username { font-size: 12px; font-family: var(--mono); padding: 3px 8px; background: var(--bg-surface-2); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text-secondary); }
+
+.group-row { display: flex; align-items: center; gap: var(--s3); padding: 10px var(--s4); border-bottom: 1px solid var(--border-light); }
+.group-row:last-child { border-bottom: none; }
+.group-icon { width: 34px; height: 34px; background: var(--bg-surface-2); border: 1px solid var(--border); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--text-muted); flex-shrink: 0; }
+.group-count-badge { font-size: 10px; color: var(--tag-green-text); }
+.group-name { font-size: 14px; font-weight: 600; color: var(--text); }
 .group-meta { font-size: 11px; color: var(--text-muted); }
 
-.friends-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-}
-
-.friend-chip {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 3px 8px;
-  background: var(--bg-hover);
-  border: 1px solid var(--border);
-  border-radius: 2px;
-  font-size: 11px;
-  color: var(--text-muted);
-}
-
+.friends-grid { display: flex; flex-wrap: wrap; gap: var(--s1); }
+.friend-chip { display: flex; align-items: center; gap: var(--s1); padding: 3px 9px; background: var(--bg-surface-2); border: 1px solid var(--border); border-radius: var(--radius); font-size: 11px; color: var(--text-muted); }
 .friend-chip--more { color: var(--text-dim); border-style: dashed; }
-.friend-initial { font-weight: 700; color: var(--green); font-size: 11px; }
-.friend-name { font-size: 11px; }
+.friend-initial { font-weight: 700; color: var(--govuk-green); }
 
-.game-row {
+.game-row { display: flex; align-items: center; justify-content: space-between; padding: 10px var(--s4); border-bottom: 1px solid var(--border-light); }
+.game-row:last-child { border-bottom: none; }
+.game-name { font-size: 14px; font-weight: 600; color: var(--text); }
+.game-meta { font-size: 11px; color: var(--text-muted); }
+
+.tag-pill { display: inline-flex; align-items: center; gap: var(--s1); padding: 3px 9px; background: var(--tag-teal-bg); border: 1px solid var(--tag-teal-border); border-radius: var(--radius); font-size: 11px; font-weight: 700; color: var(--tag-teal-text); letter-spacing: 0.05em; margin-right: var(--s1); margin-bottom: var(--s1); }
+.tag-remove { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 14px; line-height: 1; padding: 0; transition: color 0.1s; }
+.tag-remove:hover { color: var(--govuk-red); }
+.tag-add-form { display: flex; gap: var(--s2); align-items: center; }
+.tags-row { display: flex; flex-wrap: wrap; }
+
+.update-form { padding: var(--s3) var(--s4); }
+.profile-meta { font-size: 11px; color: var(--text-dim); margin-top: var(--s3); font-family: var(--mono); text-align: right; }
+.danger-text { font-size: 13px; color: var(--text-secondary); margin-bottom: var(--s3); }
+.form-panel { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--s6); }
+.intel-form { display: flex; flex-direction: column; }
+.form-section { padding-bottom: var(--s5); margin-bottom: var(--s5); border-bottom: 1px solid var(--border); }
+.form-section:last-of-type { border-bottom: none; margin-bottom: 0; }
+
+/* ── Admin grid ────────────────────────────────────────────── */
+.admin-grid { display: grid; grid-template-columns: 280px 1fr; gap: var(--s4); align-items: start; }
+.role-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; padding: 3px 8px; border-radius: var(--radius); text-transform: uppercase; border: 1px solid; }
+.role-admin   { background: var(--tag-orange-bg); color: var(--tag-orange-text); border-color: var(--tag-orange-border); }
+.role-analyst { background: var(--tag-blue-bg);   color: var(--tag-blue-text);   border-color: var(--tag-blue-border); }
+.role-viewer  { background: var(--tag-grey-bg);   color: var(--tag-grey-text);   border-color: var(--tag-grey-border); }
+.action-group { display: flex; gap: var(--s1); align-items: center; flex-wrap: wrap; }
+
+/* ── Network grid ──────────────────────────────────────────── */
+.network-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px,1fr)); gap: var(--s3); }
+.network-card { background: var(--bg-surface); border: 1px solid var(--border); border-top-width: 3px; border-radius: var(--radius-md); padding: var(--s4) var(--s3); text-align: center; text-decoration: none; transition: background 0.12s; display: block; }
+.network-card:hover { background: var(--bg-hover); text-decoration: none; }
+.severity-border-low      { border-top-color: var(--govuk-green); }
+.severity-border-medium   { border-top-color: var(--tag-orange-border); }
+.severity-border-high     { border-top-color: var(--govuk-red); }
+.severity-border-critical { border-top-color: #8b0000; }
+.network-avatar { position: relative; width: 68px; height: 68px; margin: 0 auto var(--s2); border-radius: var(--radius-md); overflow: hidden; background: var(--bg-surface-2); display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 700; color: var(--govuk-green); border: 1px solid var(--border); }
+.network-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.network-status-dot { position: absolute; bottom: 3px; right: 3px; width: 9px; height: 9px; border-radius: 50%; border: 1px solid var(--bg-surface); }
+.status-dot-active   { background: var(--govuk-green); }
+.status-dot-inactive { background: #546e7a; }
+.status-dot-banned   { background: var(--govuk-red); }
+.status-dot-archived { background: #37474f; }
+.network-username { font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.network-id { font-size: 10px; font-family: var(--mono); color: var(--text-muted); }
+.network-badges { margin-top: var(--s1); }
+
+/* ── Batch results ─────────────────────────────────────────── */
+.batch-results {}
+.batch-summary { display: flex; gap: var(--s3); margin: var(--s3) 0 var(--s5); flex-wrap: wrap; }
+.batch-stat { font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: var(--radius); letter-spacing: 0.06em; border: 1px solid; }
+.batch-added   { background: var(--tag-green-bg);  color: var(--tag-green-text);  border-color: var(--tag-green-border); }
+.batch-exists  { background: var(--tag-grey-bg);   color: var(--tag-grey-text);   border-color: var(--tag-grey-border); }
+.batch-error   { background: var(--tag-red-bg);    color: var(--tag-red-text);    border-color: var(--tag-red-border); }
+
+/* ── Auth page ─────────────────────────────────────────────── */
+.auth-body { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: var(--bg); flex-direction: column; }
+.auth-container { width: 100%; max-width: 440px; padding: var(--s8) var(--s4); }
+.auth-header { text-align: center; margin-bottom: var(--s6); }
+.auth-logo { justify-content: center; margin-bottom: var(--s3); }
+.auth-crown { display: flex; align-items: center; justify-content: center; gap: var(--s2); margin-bottom: var(--s4); }
+.auth-crown svg { width: 40px; height: 40px; color: var(--govuk-green); }
+.auth-gov-dept { font-size: 10px; font-weight: 700; letter-spacing: 0.14em; color: var(--text-secondary); text-transform: uppercase; display: block; margin-bottom: 2px; }
+.auth-service-name { font-size: 22px; font-weight: 700; color: var(--text); display: block; }
+.auth-phase-tag { display: inline-block; margin-top: var(--s2); }
+.auth-card { background: var(--bg-surface); border: 1px solid var(--border); border-top: 3px solid var(--govuk-green); border-radius: var(--radius-md); padding: var(--s6); margin-bottom: var(--s3); }
+.auth-title { font-size: 18px; font-weight: 700; letter-spacing: 0.04em; color: var(--text); margin-bottom: var(--s2); }
+.auth-subtitle { font-size: 13px; color: var(--text-secondary); margin-bottom: var(--s5); line-height: 1.5; }
+.auth-form { display: flex; flex-direction: column; gap: var(--s4); }
+.auth-footer { font-size: 11px; color: var(--text-dim); text-align: center; }
+
+/* ── Alerts (legacy) ───────────────────────────────────────── */
+.alert { padding: 10px var(--s4); border-radius: var(--radius); font-size: 13px; border: 1px solid; margin-bottom: var(--s4); }
+.alert-error   { background: var(--tag-red-bg);   border-color: var(--tag-red-border);   color: var(--tag-red-text); }
+.alert-success { background: var(--tag-green-bg); border-color: var(--tag-green-border); color: var(--tag-green-text); }
+.alert-info    { background: var(--tag-blue-bg);  border-color: var(--tag-blue-border);  color: var(--tag-blue-text); }
+
+/* ── Utilities ─────────────────────────────────────────────── */
+.mono { font-family: var(--mono) !important; }
+.text-muted { color: var(--text-muted) !important; }
+.empty-state { text-align: center; padding: var(--s8) var(--s4); color: var(--text-dim); font-size: 13px; letter-spacing: 0.04em; }
+.empty-state-full { display: flex; align-items: center; justify-content: center; min-height: 200px; color: var(--text-muted); font-size: 13px; }
+.gov-logo { display: flex; align-items: center; gap: var(--s2); }
+.gov-dept { font-size: 9px; font-weight: 700; letter-spacing: 0.14em; color: var(--text-secondary); text-transform: uppercase; }
+.gov-name { font-size: 13px; font-weight: 700; color: var(--text); }
+.gov-text { display: flex; flex-direction: column; line-height: 1.2; }
+
+/* ── Legacy page header aliases ────────────────────────────── */
+/* Pages that haven't been migrated yet still use these classes */
+.page-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  padding: 0.65rem 1rem;
+  margin-bottom: var(--s6);
+  gap: var(--s4);
+  padding-bottom: var(--s4);
   border-bottom: 1px solid var(--border);
 }
 
-.game-row:last-child { border-bottom: none; }
+.page-header .header-actions { display: flex; gap: var(--s2); flex-shrink: 0; flex-wrap: wrap; }
 
-.game-name { font-size: 13px; font-weight: 600; color: var(--text); }
-.game-meta { font-size: 11px; color: var(--text-muted); }
-
-.tag-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 3px 8px;
-  background: rgba(0,200,83,0.08);
-  border: 1px solid rgba(0,200,83,0.3);
-  border-radius: 2px;
-  font-size: 11px;
+.page-title {
+  font-size: 26px;
   font-weight: 700;
-  color: var(--green);
-  letter-spacing: 0.05em;
-  margin-right: 0.3rem;
-  margin-bottom: 0.3rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  margin-bottom: var(--s1);
 }
 
-.tag-remove {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  font-size: 14px;
-  line-height: 1;
-  padding: 0;
-  transition: color 0.1s;
-}
-
-.tag-remove:hover { color: var(--red); }
-
-.tag-add-form {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-}
-
-.update-form { padding: 0.75rem; }
-
-.profile-meta {
-  font-size: 11px;
-  color: var(--text-dim);
-  margin-top: 0.75rem;
-  font-family: var(--mono);
-  text-align: right;
-}
-
-.danger-text {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-bottom: 0.75rem;
-}
-
-/* ============================================================
-   ADMIN
-   ============================================================ */
-
-.admin-grid {
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 1rem;
-  align-items: start;
-}
-
-.role-badge {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  padding: 2px 7px;
-  border-radius: 2px;
-  text-transform: uppercase;
-}
-
-.role-admin   { background: rgba(230,81,0,0.2); color: #ffab40; border: 1px solid #bf360c; }
-.role-analyst { background: rgba(0,100,200,0.2); color: #82b1ff; border: 1px solid #0d47a1; }
-.role-viewer  { background: rgba(255,255,255,0.05); color: #90a4ae; border: 1px solid #37474f; }
-
-.action-group { display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; }
-
-/* ============================================================
-   NETWORK VIEW
-   ============================================================ */
-
-.network-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 0.75rem;
-}
-
-.network-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1rem 0.75rem;
-  text-align: center;
-  text-decoration: none;
-  transition: background 0.15s, border-color 0.15s;
+.page-subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
   display: block;
 }
 
-.network-card:hover { background: var(--bg-hover); text-decoration: none; }
-
-.severity-border-low      { border-top: 2px solid var(--sev-low); }
-.severity-border-medium   { border-top: 2px solid var(--sev-med); }
-.severity-border-high     { border-top: 2px solid var(--sev-high); }
-.severity-border-critical { border-top: 2px solid #7f0000; }
-
-.network-avatar {
-  position: relative;
-  width: 64px; height: 64px;
-  margin: 0 auto 0.5rem;
-  border-radius: var(--radius);
-  overflow: hidden;
-  background: var(--bg-hover);
+/* Legacy user avatar */
+.user-avatar-sm {
+  width: 28px; height: 28px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+  font-size: 11px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--green);
-}
-
-.network-avatar img { width: 100%; height: 100%; object-fit: cover; }
-
-.network-status-dot {
-  position: absolute;
-  bottom: 3px; right: 3px;
-  width: 8px; height: 8px;
   border-radius: 50%;
-  border: 1px solid var(--bg-card);
+  flex-shrink: 0;
 }
 
-.status-dot-active   { background: var(--green); }
-.status-dot-inactive { background: #546e7a; }
-.status-dot-banned   { background: var(--red); }
-.status-dot-archived { background: #37474f; }
-
-.network-username {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.network-id {
+/* Classification badge (login page legacy) */
+.classification-badge {
+  display: inline-block;
   font-size: 10px;
-  font-family: var(--mono);
-  color: var(--text-muted);
-}
-
-.network-badges { margin-top: 0.4rem; }
-
-/* ============================================================
-   BATCH RESULTS
-   ============================================================ */
-
-.batch-results { }
-
-.batch-summary {
-  display: flex;
-  gap: 0.75rem;
-  margin: 0.75rem 0 1.25rem;
-}
-
-.batch-stat {
-  font-size: 12px;
   font-weight: 700;
-  padding: 4px 12px;
-  border-radius: 2px;
-  letter-spacing: 0.06em;
-}
-
-.batch-added   { background: rgba(0,100,0,0.2); color: var(--sev-low-text); border: 1px solid var(--sev-low); }
-.batch-exists  { background: rgba(255,255,255,0.05); color: #90a4ae; border: 1px solid #455a64; }
-.batch-error   { background: rgba(183,28,28,0.2); color: #ef9a9a; border: 1px solid #b71c1c; }
-
-/* ============================================================
-   AUTH PAGE
-   ============================================================ */
-
-.auth-body {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  background: var(--bg);
-  margin: 0;
-}
-
-.auth-container {
-  width: 100%;
-  max-width: 420px;
-  padding: 2rem;
-}
-
-.auth-header {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.auth-logo { justify-content: center; margin-bottom: 0.75rem; }
-
-.auth-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
+  letter-spacing: 0.1em;
+  padding: 3px 9px;
+  background: var(--tag-red-bg);
+  border: 1px solid var(--tag-red-border);
+  color: var(--tag-red-text);
   border-radius: var(--radius);
-  padding: 2rem;
-  margin-bottom: 1rem;
-}
-
-.auth-title {
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: #eef2ff;
-  margin-bottom: 0.5rem;
-}
-
-.auth-subtitle {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-bottom: 1.5rem;
-}
-
-.auth-form { display: flex; flex-direction: column; gap: 1rem; }
-
-.auth-footer {
-  font-size: 11px;
-  color: var(--text-dim);
-  text-align: center;
-}
-
-.auth-section {
-  margin-bottom: 1.25rem;
-}
-
-.auth-section-label {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: var(--green);
   text-transform: uppercase;
-  margin-bottom: 0.75rem;
-  font-family: var(--mono);
+  margin-top: var(--s2);
 }
 
-.auth-divider {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin: 1.25rem 0;
-  color: var(--text-dim);
-  font-size: 11px;
-}
-
-.auth-divider::before,
-.auth-divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--border);
-}
-
-/* ============================================================
-   UTILITIES
-   ============================================================ */
-
-.mono { font-family: var(--mono); }
-.text-muted { color: var(--text-muted) !important; }
-
-.empty-state {
-  text-align: center;
-  padding: 2rem;
-  color: var(--text-dim);
-  font-size: 12px;
-  letter-spacing: 0.06em;
-}
-
-.empty-state-full {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 200px;
-  color: var(--text-muted);
-  font-size: 13px;
-}
-
-/* ============================================================
-   SCROLLBAR
-   ============================================================ */
-
-::-webkit-scrollbar { width: 6px; height: 6px; }
+/* ── Scrollbar ─────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
