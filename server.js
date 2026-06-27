@@ -32,6 +32,7 @@ async function main() {
     res.locals.appEnv      = process.env.NODE_ENV === 'production' ? 'PROD' : 'DEV';
     res.locals.buildDate   = '27 Jun 2026';
     res.locals.clientIp    = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || '—';
+    res.locals.baseUrl     = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
     next();
   });
 
@@ -64,6 +65,13 @@ async function main() {
   app.use('/watchlist', watchlistRoutes);
   app.use('/admin', adminRoutes);
   app.use('/groups', groupsRoutes);
+
+  // Serve embed image as PNG (loginlogo.svg is actually a PNG binary)
+  app.get('/og-image.png', (req, res) => {
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.sendFile(path.join(__dirname, 'public', 'loginlogo.svg'));
+  });
 
   // Public status page — no auth required
   app.get('/status', async (req, res) => {

@@ -10,20 +10,21 @@
   <meta name="robots" content="noindex, nofollow">
 
   <!-- Open Graph (Discord, Slack, iMessage, etc.) -->
-  <meta property="og:type"        content="website">
-  <meta property="og:site_name"   content="MI5 Intel Portal">
-  <meta property="og:title"       content="<%= typeof pageTitle !== 'undefined' && pageTitle ? pageTitle + ' — MI5 Intel Portal' : 'MI5 Intel Portal' %>">
-  <meta property="og:description" content="Military Intelligence Section 5 — Classified Roblox threat intelligence platform. RESTRICTED — AUTHORISED PERSONNEL ONLY.">
-  <meta property="og:image"       content="<%= process.env.BASE_URL || '' %>/og-image.svg">
-  <meta property="og:image:type"  content="image/svg+xml">
+  <meta property="og:type"         content="website">
+  <meta property="og:site_name"    content="MI5 Intel Portal">
+  <meta property="og:url"          content="<%= baseUrl %>">
+  <meta property="og:title"        content="<%= typeof pageTitle !== 'undefined' && pageTitle ? pageTitle + ' — MI5 Intel Portal' : 'MI5 Intel Portal' %>">
+  <meta property="og:description"  content="Military Intelligence Section 5 — Classified Roblox threat intelligence platform. RESTRICTED — AUTHORISED PERSONNEL ONLY.">
+  <meta property="og:image"        content="<%= baseUrl %>/og-image.png">
+  <meta property="og:image:type"   content="image/png">
   <meta property="og:image:width"  content="1200">
   <meta property="og:image:height" content="630">
 
   <!-- Twitter / X Card -->
-  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:card"        content="summary">
   <meta name="twitter:title"       content="<%= typeof pageTitle !== 'undefined' && pageTitle ? pageTitle + ' — MI5 Intel Portal' : 'MI5 Intel Portal' %>">
   <meta name="twitter:description" content="Military Intelligence Section 5 — Classified Roblox threat intelligence platform.">
-  <meta name="twitter:image"       content="<%= process.env.BASE_URL || '' %>/og-image.svg">
+  <meta name="twitter:image"       content="<%= baseUrl %>/og-image.png">
 
   <!-- Discord embed accent colour (left-border stripe) -->
   <meta name="theme-color" content="#1d70b8">
