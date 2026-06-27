@@ -667,3 +667,71 @@ button:focus-visible { outline: 3px solid var(--yellow); }
 }
 .role-card-perms li { padding: 0; }
 .role-card-perms li:first-child { color: #b1b4b6; }
+
+/* ── Site footer bar ─────────────────────────────────────────── */
+.site-footer-bar {
+  grid-area: main;           /* sits inside main col so sidebar stays clear */
+  border-top: 1px solid #1e1f20;
+  margin-top: auto;
+  background: #0b0c0c;
+}
+
+.footer-classification {
+  background: #0f0f10;
+  border-bottom: 1px solid #1a1b1c;
+  padding: 5px 0;
+  text-align: center;
+}
+.footer-class-text {
+  font-size: 9px;
+  letter-spacing: 4px;
+  color: #3d4144;
+  text-transform: uppercase;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.footer-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 24px;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* quick nav */
+.footer-nav { display: flex; align-items: center; gap: .35rem; flex-wrap: wrap; }
+.footer-nav-link {
+  font-size: 11px;
+  color: #505a5f;
+  text-decoration: none;
+  letter-spacing: .5px;
+  transition: color .15s;
+}
+.footer-nav-link:hover { color: #b1b4b6; }
+.footer-nav-sep { color: #2e2f30; font-size: 11px; }
+
+/* build info */
+.footer-build { display: flex; align-items: center; gap: .4rem; flex-shrink: 0; }
+.footer-build-item { display: flex; align-items: center; gap: .3rem; }
+.footer-build-label {
+  font-size: 8px;
+  letter-spacing: 2px;
+  color: #2e2f30;
+  text-transform: uppercase;
+  font-family: 'Courier New', Courier, monospace;
+}
+.footer-build-val {
+  font-size: 10px;
+  color: #3d4144;
+  font-family: 'Courier New', Courier, monospace;
+}
+.footer-build-sep { color: #1e1f20; font-size: 11px; }
+
+/* env badge colour */
+.footer-env-PROD { color: #d4351c !important; }
+.footer-env-DEV  { color: #4c6272 !important; }
+
+/* status link in footer */
+.footer-nav-link--status { color: #00703c !important; }
+.footer-nav-link--status:hover { color: #00a550 !important; }

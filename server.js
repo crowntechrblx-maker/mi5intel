@@ -25,6 +25,15 @@ async function main() {
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
 
+  // Inject footer globals into every view
+  const { version } = require('./package.json');
+  app.use((req, res, next) => {
+    res.locals.appVersion  = version;
+    res.locals.appEnv      = process.env.NODE_ENV === 'production' ? 'PROD' : 'DEV';
+    res.locals.buildDate   = '27 Jun 2026';
+    next();
+  });
+
   app.use(session({
     store: new pgSession({ pool, tableName: 'session' }),
     secret: process.env.SESSION_SECRET || 'dev-secret-change-me',
@@ -37,6 +46,8 @@ async function main() {
       sameSite: 'lax',
     },
   }));
+
+  app.set('startTime', Date.now());
 
   const scheduler     = require('./services/scheduler');
   scheduler.start();
@@ -52,6 +63,47 @@ async function main() {
   app.use('/watchlist', watchlistRoutes);
   app.use('/admin', adminRoutes);
   app.use('/groups', groupsRoutes);
+
+  // Public status page — no auth required
+  app.get('/status', async (req, res) => {
+    const { version } = require('./package.json');
+    const startTime = app.get('startTime');
+    const uptimeMs = Date.now() - startTime;
+
+    // DB health check
+    let dbOk = false;
+    let dbLatency = null;
+    try {
+      const t0 = Date.now();
+      await db.get('SELECT 1');
+      dbLatency = Date.now() - t0;
+      dbOk = true;
+    } catch (_) {}
+
+    // Counts
+    let counts = { entities: 0, groups: 0, users: 0, notes: 0 };
+    try {
+      const [e, g, u, n] = await Promise.all([
+        db.get('SELECT COUNT(*) AS c FROM roblox_entities'),
+        db.get('SELECT COUNT(*) AS c FROM groups_of_interest'),
+        db.get('SELECT COUNT(*) AS c FROM admin_users'),
+        db.get('SELECT COUNT(*) AS c FROM entity_notes'),
+      ]);
+      counts = { entities: +e.c, groups: +g.c, users: +u.c, notes: +n.c };
+    } catch (_) {}
+
+    res.render('status', {
+      version,
+      env:         process.env.NODE_ENV === 'production' ? 'PRODUCTION' : 'DEVELOPMENT',
+      buildDate:   '27 Jun 2026',
+      uptimeMs,
+      dbOk,
+      dbLatency,
+      counts,
+      scheduler:   scheduler.getState(),
+      generatedAt: new Date(),
+    });
+  });
 
   // Dashboard
   app.get('/', requireAuth, async (req, res) => {

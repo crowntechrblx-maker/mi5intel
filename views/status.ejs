@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="refresh" content="30">
+  <title>System Status — MI5 Intel Portal</title>
+  <link rel="icon" href="/favicon.svg" type="image/png">
+  <meta name="robots" content="noindex, nofollow">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green:  #00703c;
+      --red:    #d4351c;
+      --yellow: #f47738;
+      --blue:   #1d70b8;
+      --bg:     #0b0c0c;
+      --surface:#111213;
+      --border: #1e2021;
+      --muted:  #505a5f;
+      --dim:    #2e3033;
+      --text:   #b1b4b6;
+      --white:  #f3f2f1;
+    }
+
+    html, body {
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 13px;
+    }
+
+    /* scanline */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,0.01) 3px, rgba(255,255,255,0.01) 4px);
+      pointer-events: none; z-index: 9999;
+    }
+
+    /* ── layout ── */
+    .page { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+
+    /* ── top bar ── */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 40px; padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap; gap: 12px;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 14px; }
+    .topbar-logo { width: 44px; height: 44px; object-fit: contain; opacity: .85; }
+    .topbar-titles {}
+    .topbar-eyebrow { font-size: 9px; letter-spacing: 4px; color: var(--muted); text-transform: uppercase; }
+    .topbar-name    { font-size: 17px; font-weight: 700; letter-spacing: 4px; color: var(--white); text-transform: uppercase; }
+    .topbar-right   { display: flex; align-items: center; gap: 10px; }
+    .back-link {
+      font-size: 10px; letter-spacing: 3px; color: var(--muted); text-decoration: none;
+      text-transform: uppercase; padding: 6px 12px; border: 1px solid var(--border);
+      transition: color .15s, border-color .15s;
+    }
+    .back-link:hover { color: var(--white); border-color: var(--muted); }
+
+    /* ── overall status hero ── */
+    .hero {
+      display: flex; align-items: center; gap: 14px;
+      padding: 20px 24px; border: 1px solid var(--border);
+      background: var(--surface); margin-bottom: 28px;
+    }
+    .hero-dot {
+      width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
+      box-shadow: 0 0 8px currentColor;
+    }
+    .hero-dot--ok     { background: var(--green); color: var(--green); }
+    .hero-dot--warn   { background: var(--yellow); color: var(--yellow); }
+    .hero-dot--error  { background: var(--red);   color: var(--red); }
+    .hero-label { font-size: 14px; font-weight: 700; letter-spacing: 3px; color: var(--white); text-transform: uppercase; }
+    .hero-sub   { font-size: 10px; color: var(--muted); letter-spacing: 1px; margin-top: 2px; }
+    .hero-ts    { margin-left: auto; font-size: 10px; color: var(--dim); letter-spacing: 1px; text-align: right; line-height: 1.6; }
+
+    /* ── section ── */
+    .section { margin-bottom: 28px; }
+    .section-title {
+      font-size: 9px; letter-spacing: 4px; color: var(--muted);
+      text-transform: uppercase; margin-bottom: 10px;
+      padding-bottom: 6px; border-bottom: 1px solid var(--border);
+    }
+
+    /* ── service rows ── */
+    .service-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; background: var(--surface);
+      border: 1px solid var(--border); border-top: none;
+    }
+    .service-row:first-of-type { border-top: 1px solid var(--border); }
+    .service-row-left  { display: flex; align-items: center; gap: 12px; }
+    .service-row-right { display: flex; align-items: center; gap: 16px; font-size: 10px; color: var(--muted); letter-spacing: 1px; }
+    .svc-name { font-size: 12px; color: var(--white); letter-spacing: 1px; }
+    .svc-desc { font-size: 10px; color: var(--muted); margin-top: 1px; letter-spacing: .5px; }
+
+    /* status pill */
+    .pill {
+      font-size: 9px; font-weight: 700; letter-spacing: 2px;
+      padding: 3px 8px; text-transform: uppercase;
+    }
+    .pill--ok    { color: var(--green);  background: rgba(0,112,60,.12);  border: 1px solid rgba(0,112,60,.3); }
+    .pill--warn  { color: var(--yellow); background: rgba(244,119,56,.1); border: 1px solid rgba(244,119,56,.3); }
+    .pill--error { color: var(--red);    background: rgba(212,53,28,.1);  border: 1px solid rgba(212,53,28,.3); }
+    .pill--idle  { color: var(--muted);  background: rgba(80,90,95,.1);   border: 1px solid var(--dim); }
+
+    /* ── stats grid ── */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: .5rem;
+    }
+    .stat-card {
+      background: var(--surface); border: 1px solid var(--border);
+      padding: 16px; display: flex; flex-direction: column; gap: 4px;
+    }
+    .stat-num   { font-size: 28px; font-weight: 700; color: var(--white); line-height: 1; }
+    .stat-label { font-size: 9px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; }
+
+    /* ── scheduler log ── */
+    .sched-log {
+      background: #000; border: 1px solid var(--border);
+      padding: 12px 14px; font-size: 10px; color: var(--muted);
+      line-height: 2; letter-spacing: .5px; margin-top: 8px;
+    }
+    .sched-log-entry { display: flex; gap: 12px; }
+    .sched-log-ts    { color: var(--dim); flex-shrink: 0; }
+    .sched-log-msg   { color: var(--text); }
+    .sched-log-empty { color: var(--dim); font-style: italic; }
+
+    /* ── footer ── */
+    .status-footer {
+      margin-top: 48px; padding-top: 16px;
+      border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 8px;
+    }
+    .status-footer-left { font-size: 9px; color: var(--dim); letter-spacing: 2px; text-transform: uppercase; }
+    .status-footer-right{ font-size: 9px; color: var(--dim); letter-spacing: 1px; }
+
+    /* auto-refresh notice */
+    .refresh-note {
+      font-size: 9px; color: var(--dim); letter-spacing: 2px;
+      text-transform: uppercase; text-align: center; margin-top: 12px;
+    }
+
+    @media (max-width: 580px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .hero { flex-wrap: wrap; }
+      .hero-ts { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+<%
+  // ── helpers ──
+  function fmtUptime(ms) {
+    const s = Math.floor(ms / 1000);
+    const d = Math.floor(s / 86400);
+    const h = Math.floor((s % 86400) / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const parts = [];
+    if (d) parts.push(d + 'd');
+    if (h) parts.push(h + 'h');
+    parts.push(m + 'm');
+    return parts.join(' ');
+  }
+  const allOk = dbOk;
+  const heroStatus = allOk ? 'ok' : 'error';
+  const heroLabel  = allOk ? 'All Systems Operational' : 'Degraded — Database Unreachable';
+%>
+
+<div class="page">
+
+  <!-- ── Top bar ── -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <img class="topbar-logo" src="/loginlogo.svg" alt="MI5 Crest">
+      <div class="topbar-titles">
+        <div class="topbar-eyebrow">Military Intelligence Section 5</div>
+        <div class="topbar-name">System Status</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <a href="/" class="back-link">&larr; Return to Portal</a>
+    </div>
+  </div>
+
+  <!-- ── Hero ── -->
+  <div class="hero">
+    <div class="hero-dot hero-dot--<%= heroStatus %>"></div>
+    <div>
+      <div class="hero-label"><%= heroLabel %></div>
+      <div class="hero-sub">Uptime: <%= fmtUptime(uptimeMs) %> &nbsp;·&nbsp; Environment: <%= env %></div>
+    </div>
+    <div class="hero-ts">
+      Generated<br><%= generatedAt.toLocaleString('en-GB') %>
+    </div>
+  </div>
+
+  <!-- ── Services ── -->
+  <div class="section">
+    <div class="section-title">Services</div>
+
+    <div class="service-row">
+      <div class="service-row-left">
+        <div>
+          <div class="svc-name">Web Server</div>
+          <div class="svc-desc">Express.js — HTTP request handler</div>
+        </div>
+      </div>
+      <div class="service-row-right">
+        <span>Uptime: <%= fmtUptime(uptimeMs) %></span>
+        <span class="pill pill--ok">Operational</span>
+      </div>
+    </div>
+
+    <div class="service-row">
+      <div class="service-row-left">
+        <div>
+          <div class="svc-name">Database</div>
+          <div class="svc-desc">PostgreSQL — primary data store</div>
+        </div>
+      </div>
+      <div class="service-row-right">
+        <% if (dbOk) { %>
+          <span>Latency: <%= dbLatency %>ms</span>
+          <span class="pill pill--ok">Connected</span>
+        <% } else { %>
+          <span class="pill pill--error">Unreachable</span>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="service-row">
+      <div class="service-row-left">
+        <div>
+          <div class="svc-name">Auto-Refresh Scheduler</div>
+          <div class="svc-desc">node-cron — background entity surveillance</div>
+        </div>
+      </div>
+      <div class="service-row-right">
+        <% if (scheduler.running) { %>
+          <span class="pill pill--warn">Running</span>
+        <% } else if (scheduler.lastRun) { %>
+          <span>Last run: <%= new Date(scheduler.lastRun).toLocaleTimeString('en-GB') %></span>
+          <span class="pill pill--ok">Idle</span>
+        <% } else { %>
+          <span class="pill pill--idle">Awaiting first run</span>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="service-row">
+      <div class="service-row-left">
+        <div>
+          <div class="svc-name">Roblox API</div>
+          <div class="svc-desc">External — users.roblox.com, thumbnails.roblox.com</div>
+        </div>
+      </div>
+      <div class="service-row-right">
+        <span class="pill pill--idle">Not monitored</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Registry stats ── -->
+  <div class="section">
+    <div class="section-title">Registry</div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-num"><%= counts.entities.toLocaleString() %></div>
+        <div class="stat-label">Entities</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num"><%= counts.groups.toLocaleString() %></div>
+        <div class="stat-label">Groups</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num"><%= counts.users.toLocaleString() %></div>
+        <div class="stat-label">Operators</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num"><%= counts.notes.toLocaleString() %></div>
+        <div class="stat-label">Case Notes</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Scheduler log ── -->
+  <div class="section">
+    <div class="section-title">Scheduler — Last 5 Runs</div>
+    <div class="sched-log">
+      <% if (scheduler.log && scheduler.log.length) { %>
+        <% scheduler.log.slice().reverse().forEach(function(entry) { %>
+        <div class="sched-log-entry">
+          <span class="sched-log-ts"><%= new Date(entry.ts).toLocaleString('en-GB') %></span>
+          <span class="sched-log-msg">Refreshed <%= entry.refreshed %> entities &mdash; <%= entry.diffs %> change<%= entry.diffs !== 1 ? 's' : '' %> detected</span>
+        </div>
+        <% }); %>
+      <% } else { %>
+        <span class="sched-log-empty">No runs recorded yet.</span>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- ── Build info ── -->
+  <div class="section">
+    <div class="section-title">Build</div>
+    <div class="service-row">
+      <div class="service-row-left"><div class="svc-name">Version</div></div>
+      <div class="service-row-right"><span>v<%= version %></span></div>
+    </div>
+    <div class="service-row">
+      <div class="service-row-left"><div class="svc-name">Build Date</div></div>
+      <div class="service-row-right"><span><%= buildDate %></span></div>
+    </div>
+    <div class="service-row">
+      <div class="service-row-left"><div class="svc-name">Environment</div></div>
+      <div class="service-row-right"><span><%= env %></span></div>
+    </div>
+    <div class="service-row">
+      <div class="service-row-left"><div class="svc-name">Node.js</div></div>
+      <div class="service-row-right"><span><%= process.version %></span></div>
+    </div>
+  </div>
+
+  <!-- ── Footer ── -->
+  <div class="status-footer">
+    <div class="status-footer-left">MI5 Intel Portal &mdash; Restricted</div>
+    <div class="status-footer-right">Page auto-refreshes every 30 seconds</div>
+  </div>
+
+</div>
+</body>
+</html>

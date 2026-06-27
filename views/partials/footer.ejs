@@ -1,4 +1,50 @@
 </main>
+
+<footer class="site-footer-bar">
+
+  <!-- Classification banner -->
+  <div class="footer-classification">
+    <span class="footer-class-text">&#9632; RESTRICTED &mdash; AUTHORISED PERSONNEL ONLY &#9632;</span>
+  </div>
+
+  <!-- Nav + build row -->
+  <div class="footer-main">
+
+    <!-- Quick nav -->
+    <nav class="footer-nav" aria-label="Footer navigation">
+      <a href="/watchlist" class="footer-nav-link">Watchlist</a>
+      <span class="footer-nav-sep">/</span>
+      <a href="/groups" class="footer-nav-link">Groups</a>
+      <span class="footer-nav-sep">/</span>
+      <a href="/audit" class="footer-nav-link">Audit Logs</a>
+      <span class="footer-nav-sep">/</span>
+      <a href="/settings" class="footer-nav-link">Settings</a>
+      <span class="footer-nav-sep">/</span>
+      <a href="/status" class="footer-nav-link footer-nav-link--status" target="_blank">System Status</a>
+    </nav>
+
+    <!-- Build info -->
+    <div class="footer-build">
+      <span class="footer-build-item">
+        <span class="footer-build-label">ENV</span>
+        <span class="footer-build-val footer-env-<%= appEnv %>"><%= appEnv %></span>
+      </span>
+      <span class="footer-build-sep">·</span>
+      <span class="footer-build-item">
+        <span class="footer-build-label">VERSION</span>
+        <span class="footer-build-val">v<%= appVersion %></span>
+      </span>
+      <span class="footer-build-sep">·</span>
+      <span class="footer-build-item">
+        <span class="footer-build-label">BUILD</span>
+        <span class="footer-build-val"><%= buildDate %></span>
+      </span>
+    </div>
+
+  </div>
+
+</footer>
+
 <script src="/js/app.js"></script>
 </body>
 </html>
