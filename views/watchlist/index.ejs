@@ -28,6 +28,10 @@
     </select>
     <button type="submit" class="govuk-button govuk-button--secondary govuk-button--small">FILTER</button>
     <a href="/watchlist" class="govuk-button govuk-button--ghost govuk-button--small">CLEAR</a>
+    <span style="display:flex;align-items:center;gap:6px;margin-left:auto">
+      <input id="table-filter" type="text" class="filter-select" placeholder="Quick filter…" style="width:160px" autocomplete="off">
+      <span id="filter-count" style="font-size:11px;color:var(--mid-grey);white-space:nowrap"></span>
+    </span>
   </form>
 </div>
 
@@ -37,7 +41,7 @@
   <input type="hidden" name="bulk_value"  id="bulk-value-input">
 
 <div class="govuk-table-wrapper">
-  <table class="govuk-table">
+  <table class="govuk-table registry-table">
     <thead class="govuk-table__head">
       <tr>
         <% if (user.role === 'admin') { %>

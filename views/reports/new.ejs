@@ -14,7 +14,7 @@
 </div>
 <% } %>
 
-<form action="/reports/new" method="POST">
+<form id="report-form" action="/reports/new" method="POST">
   <input type="hidden" name="report_type" value="<%= type %>">
   <% if (entityId) { %><input type="hidden" name="entity_id" value="<%= entityId %>"><% } %>
 
@@ -59,8 +59,8 @@
       <% if (type === 'OCG') { %>
 
       <div class="panel">
-        <div class="panel-header"><span class="panel-title">SECTION 1 — AFFILIATIONS</span></div>
-        <div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
+        <div class="panel-header report-section-toggle" style="cursor:pointer"><span class="panel-title">SECTION 1 — AFFILIATIONS</span></div>
+        <div class="report-section-body"><div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
           <div class="form-group-compact">
             <label class="form-label-sm">Q1. What are the subject's current affiliations?</label>
             <textarea class="form-input form-textarea" name="q_s1_q1" rows="2" placeholder="Response…"></textarea>
@@ -73,12 +73,12 @@
             <label class="form-label-sm">Q3. What groups or organisations is the subject linked to?</label>
             <textarea class="form-input form-textarea" name="q_s1_q3" rows="2" placeholder="Response…"></textarea>
           </div>
-        </div>
+        </div></div>
       </div>
 
       <div class="panel">
-        <div class="panel-header"><span class="panel-title">SECTION 2 — STRUCTURE</span></div>
-        <div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
+        <div class="panel-header report-section-toggle" style="cursor:pointer"><span class="panel-title">SECTION 2 — STRUCTURE</span></div>
+        <div class="report-section-body"><div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
           <div class="form-group-compact">
             <label class="form-label-sm">Q4. What is the subject's role within the organisation?</label>
             <textarea class="form-input form-textarea" name="q_s2_q4" rows="2" placeholder="Response…"></textarea>
@@ -91,12 +91,12 @@
             <label class="form-label-sm">Q6. Describe the reporting hierarchy.</label>
             <textarea class="form-input form-textarea" name="q_s2_q6" rows="2" placeholder="Response…"></textarea>
           </div>
-        </div>
+        </div></div>
       </div>
 
       <div class="panel">
-        <div class="panel-header"><span class="panel-title">SECTION 3 — OPERATIONS</span></div>
-        <div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
+        <div class="panel-header report-section-toggle" style="cursor:pointer"><span class="panel-title">SECTION 3 — OPERATIONS</span></div>
+        <div class="report-section-body"><div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
           <div class="form-group-compact">
             <label class="form-label-sm">Q7. What are the organisation's current activities?</label>
             <textarea class="form-input form-textarea" name="q_s3_q7" rows="2" placeholder="Response…"></textarea>
@@ -109,12 +109,12 @@
             <label class="form-label-sm">Q9. What important locations are associated with the organisation?</label>
             <textarea class="form-input form-textarea" name="q_s3_q9" rows="2" placeholder="Response…"></textarea>
           </div>
-        </div>
+        </div></div>
       </div>
 
       <div class="panel">
-        <div class="panel-header"><span class="panel-title">SECTION 4 — ASSOCIATIONS</span></div>
-        <div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
+        <div class="panel-header report-section-toggle" style="cursor:pointer"><span class="panel-title">SECTION 4 — ASSOCIATIONS</span></div>
+        <div class="report-section-body"><div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
           <div class="form-group-compact">
             <label class="form-label-sm">Q10. What allied groups does the organisation work with?</label>
             <textarea class="form-input form-textarea" name="q_s4_q10" rows="2" placeholder="Response…"></textarea>
@@ -127,12 +127,12 @@
             <label class="form-label-sm">Q12. Are there any entities requiring particular attention?</label>
             <textarea class="form-input form-textarea" name="q_s4_q12" rows="2" placeholder="Response…"></textarea>
           </div>
-        </div>
+        </div></div>
       </div>
 
       <div class="panel">
-        <div class="panel-header"><span class="panel-title">SECTION 5 — CORRUPTION &amp; INFLUENCE</span></div>
-        <div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
+        <div class="panel-header report-section-toggle" style="cursor:pointer"><span class="panel-title">SECTION 5 — CORRUPTION &amp; INFLUENCE</span></div>
+        <div class="report-section-body"><div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
           <div class="form-group-compact">
             <label class="form-label-sm">Q13. Is authority assistance being provided to the organisation?</label>
             <textarea class="form-input form-textarea" name="q_s5_q13" rows="2" placeholder="Response…"></textarea>
@@ -145,12 +145,12 @@
             <label class="form-label-sm">Q15. Who benefits from the organisation's activities?</label>
             <textarea class="form-input form-textarea" name="q_s5_q15" rows="2" placeholder="Response…"></textarea>
           </div>
-        </div>
+        </div></div>
       </div>
 
       <div class="panel">
-        <div class="panel-header"><span class="panel-title">SECTION 6 — INTELLIGENCE</span></div>
-        <div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
+        <div class="panel-header report-section-toggle" style="cursor:pointer"><span class="panel-title">SECTION 6 — INTELLIGENCE</span></div>
+        <div class="report-section-body"><div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
           <div class="form-group-compact">
             <label class="form-label-sm">Q16. What important information has the subject disclosed?</label>
             <textarea class="form-input form-textarea" name="q_s6_q16" rows="2" placeholder="Response…"></textarea>
@@ -169,8 +169,8 @@
       <% } else { %>
 
       <div class="panel">
-        <div class="panel-header"><span class="panel-title">SECTION 1 — AFFILIATIONS</span></div>
-        <div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
+        <div class="panel-header report-section-toggle" style="cursor:pointer"><span class="panel-title">SECTION 1 — AFFILIATIONS</span></div>
+        <div class="report-section-body"><div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
           <div class="form-group-compact">
             <label class="form-label-sm">Q1. Who does the subject most frequently associate with?</label>
             <textarea class="form-input form-textarea" name="q_s1_q1" rows="2" placeholder="Response…"></textarea>
@@ -183,12 +183,12 @@
             <label class="form-label-sm">Q3. Who are the subject's closest contacts?</label>
             <textarea class="form-input form-textarea" name="q_s1_q3" rows="2" placeholder="Response…"></textarea>
           </div>
-        </div>
+        </div></div>
       </div>
 
       <div class="panel">
-        <div class="panel-header"><span class="panel-title">SECTION 2 — INTENTIONS</span></div>
-        <div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
+        <div class="panel-header report-section-toggle" style="cursor:pointer"><span class="panel-title">SECTION 2 — INTENTIONS</span></div>
+        <div class="report-section-body"><div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
           <div class="form-group-compact">
             <label class="form-label-sm">Q4. What are the subject's current objectives within Westbridge?</label>
             <textarea class="form-input form-textarea" name="q_s2_q4" rows="2" placeholder="Response…"></textarea>
@@ -201,12 +201,12 @@
             <label class="form-label-sm">Q6. Does the subject have interest in specific individuals or groups?</label>
             <textarea class="form-input form-textarea" name="q_s2_q6" rows="2" placeholder="Response…"></textarea>
           </div>
-        </div>
+        </div></div>
       </div>
 
       <div class="panel">
-        <div class="panel-header"><span class="panel-title">SECTION 3 — ACTIVITIES</span></div>
-        <div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
+        <div class="panel-header report-section-toggle" style="cursor:pointer"><span class="panel-title">SECTION 3 — ACTIVITIES</span></div>
+        <div class="report-section-body"><div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
           <div class="form-group-compact">
             <label class="form-label-sm">Q7. What has the subject been involved in recently?</label>
             <textarea class="form-input form-textarea" name="q_s3_q7" rows="2" placeholder="Response…"></textarea>
@@ -219,12 +219,12 @@
             <label class="form-label-sm">Q9. What notable meetings has the subject attended?</label>
             <textarea class="form-input form-textarea" name="q_s3_q9" rows="2" placeholder="Response…"></textarea>
           </div>
-        </div>
+        </div></div>
       </div>
 
       <div class="panel">
-        <div class="panel-header"><span class="panel-title">SECTION 4 — INFLUENCE &amp; RISK</span></div>
-        <div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
+        <div class="panel-header report-section-toggle" style="cursor:pointer"><span class="panel-title">SECTION 4 — INFLUENCE &amp; RISK</span></div>
+        <div class="report-section-body"><div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
           <div class="form-group-compact">
             <label class="form-label-sm">Q10. What influence does the subject have over others or groups?</label>
             <textarea class="form-input form-textarea" name="q_s4_q10" rows="2" placeholder="Response…"></textarea>
@@ -237,12 +237,12 @@
             <label class="form-label-sm">Q12. Does the subject pose threats to safety or organisations?</label>
             <textarea class="form-input form-textarea" name="q_s4_q12" rows="2" placeholder="Response…"></textarea>
           </div>
-        </div>
+        </div></div>
       </div>
 
       <div class="panel">
-        <div class="panel-header"><span class="panel-title">SECTION 5 — INTELLIGENCE</span></div>
-        <div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
+        <div class="panel-header report-section-toggle" style="cursor:pointer"><span class="panel-title">SECTION 5 — INTELLIGENCE</span></div>
+        <div class="report-section-body"><div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
           <div class="form-group-compact">
             <label class="form-label-sm">Q13. What information should MI5 be aware of?</label>
             <textarea class="form-input form-textarea" name="q_s5_q13" rows="2" placeholder="Response…"></textarea>
@@ -262,8 +262,8 @@
 
       <!-- Summary (both types) -->
       <div class="panel">
-        <div class="panel-header"><span class="panel-title">SECTION <%= type === 'OCG' ? '7' : '6' %> — OFFICER SUMMARY</span></div>
-        <div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
+        <div class="panel-header report-section-toggle" style="cursor:pointer"><span class="panel-title">SECTION <%= type === 'OCG' ? '7' : '6' %> — OFFICER SUMMARY</span></div>
+        <div class="report-section-body"><div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
           <div class="form-group-compact">
             <label class="form-label-sm">SUMMARY &amp; ASSESSMENT</label>
             <textarea class="form-input form-textarea" name="summary" rows="4" placeholder="Officer's summary, key findings, and overall assessment…"></textarea>
@@ -283,12 +283,28 @@
         </div>
       </div>
 
-      <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.5rem">
-        <a href="/reports" class="btn btn-secondary">CANCEL</a>
-        <button type="submit" class="btn btn-primary">FILE REPORT</button>
-      </div>
     </div>
   </div>
 </form>
+
+<script>
+document.querySelectorAll('.report-section-toggle').forEach(function(hdr) {
+  var chevron = document.createElement('svg');
+  chevron.setAttribute('viewBox','0 0 20 20');
+  chevron.setAttribute('fill','currentColor');
+  chevron.classList.add('report-section-chevron');
+  chevron.innerHTML = '<path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>';
+  hdr.appendChild(chevron);
+});
+</script>
+
+<div style="position:fixed;bottom:0;left:240px;right:0;background:#0f1011;border-top:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;z-index:200">
+  <span style="font-size:10px;color:var(--mid-grey);letter-spacing:2px"><%= type %> INTERVIEW REPORT &mdash; OFFICIAL SENSITIVE</span>
+  <div style="display:flex;gap:.5rem">
+    <a href="/reports" class="btn btn-secondary btn-sm">CANCEL</a>
+    <button form="report-form" type="submit" class="btn btn-primary btn-sm">FILE REPORT</button>
+  </div>
+</div>
+<div style="height:64px"></div>
 
 <%- include('../partials/footer') %>

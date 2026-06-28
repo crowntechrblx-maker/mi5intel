@@ -13,23 +13,23 @@
 
 <div class="stats-grid stats-grid--5">
   <div class="stat-card">
-    <div class="stat-value"><%= stats.total %></div>
+    <div class="stat-value" data-count="<%= stats.total %>">0</div>
     <div class="stat-label">TOTAL ENTITIES</div>
   </div>
   <div class="stat-card stat-card--critical">
-    <div class="stat-value"><%= stats.critical %></div>
+    <div class="stat-value" data-count="<%= stats.critical %>">0</div>
     <div class="stat-label">CRITICAL SEVERITY</div>
   </div>
   <div class="stat-card stat-card--high">
-    <div class="stat-value"><%= stats.high %></div>
+    <div class="stat-value" data-count="<%= stats.high %>">0</div>
     <div class="stat-label">HIGH SEVERITY</div>
   </div>
   <div class="stat-card stat-card--medium">
-    <div class="stat-value"><%= stats.medium %></div>
+    <div class="stat-value" data-count="<%= stats.medium %>">0</div>
     <div class="stat-label">MEDIUM SEVERITY</div>
   </div>
   <div class="stat-card stat-card--active">
-    <div class="stat-value"><%= stats.active %></div>
+    <div class="stat-value" data-count="<%= stats.active %>">0</div>
     <div class="stat-label">ACTIVE STATUS</div>
   </div>
 </div>

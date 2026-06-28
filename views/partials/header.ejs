@@ -41,6 +41,10 @@
      ═══════════════════════════════════════ -->
 <header class="site-header">
 
+  <button class="sidebar-hamburger" id="sidebar-toggle" aria-label="Toggle navigation" aria-expanded="false">
+    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/></svg>
+  </button>
+
   <a href="/" class="header-logo" aria-label="MI5 Intel Portal home">
     <svg width="32" height="28" viewBox="0 0 110 96" fill="none" aria-hidden="true">
       <polygon points="55,3 107,93 3,93" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
@@ -92,10 +96,12 @@
 
 </header>
 
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
 <!-- ═══════════════════════════════════════
      SIDEBAR  grid-area: sidebar (left col)
      ═══════════════════════════════════════ -->
-<nav class="site-sidebar" aria-label="Main navigation">
+<nav class="site-sidebar" id="site-sidebar" aria-label="Main navigation">
 
   <div class="sidebar-section">
     <span class="sidebar-label">OPERATIONS</span>
