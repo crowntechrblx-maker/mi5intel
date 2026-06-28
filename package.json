@@ -1,6 +1,6 @@
 {
   "name": "roblox-intelligence-db",
-  "version": "1.0.0",
+  "version": "1.5.2",
   "description": "HM Government Intelligence Database — Roblox Entity Registry",
   "main": "server.js",
   "scripts": {
