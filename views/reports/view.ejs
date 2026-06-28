@@ -1,0 +1,172 @@
+<%- include('../partials/header', { pageTitle: report.reference, page: 'reports' }) %>
+
+<div class="govuk-page-header">
+  <div>
+    <span class="govuk-caption-m">OFFICIAL SENSITIVE — <%= report.reference %></span>
+    <h1 class="govuk-heading-xl"><%= report.subject_name %></h1>
+  </div>
+  <div style="display:flex;gap:.5rem">
+    <button onclick="window.print()" class="btn btn-secondary btn-sm">PRINT</button>
+    <a href="/reports" class="btn btn-secondary btn-sm">&larr; Back</a>
+    <% if (user.role === 'admin') { %>
+    <form action="/reports/<%= report.id %>/delete" method="POST" style="display:inline"
+          onsubmit="return confirm('Permanently delete this report?')">
+      <button class="btn btn-danger btn-sm" type="submit">DELETE</button>
+    </form>
+    <% } %>
+  </div>
+</div>
+
+<div class="admin-grid" style="grid-template-columns:260px 1fr">
+
+  <!-- Metadata -->
+  <div>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">REPORT METADATA</span></div>
+      <div class="panel-body" style="display:flex;flex-direction:column;gap:.6rem">
+        <div>
+          <div style="font-size:9px;letter-spacing:3px;color:var(--mid-grey);text-transform:uppercase;margin-bottom:2px">Type</div>
+          <span class="govuk-tag <%= report.report_type === 'OCG' ? 'govuk-tag--red' : 'govuk-tag--blue' %>"><%= report.report_type %> Interview</span>
+        </div>
+        <div>
+          <div style="font-size:9px;letter-spacing:3px;color:var(--mid-grey);text-transform:uppercase;margin-bottom:2px">Status</div>
+          <% const sc = report.status === 'COOPERATING' ? 'green' : report.status === 'NC' ? 'red' : 'orange'; %>
+          <span class="govuk-tag govuk-tag--<%= sc %>"><%= report.status %></span>
+        </div>
+        <div>
+          <div style="font-size:9px;letter-spacing:3px;color:var(--mid-grey);text-transform:uppercase;margin-bottom:2px">Case Officer</div>
+          <div class="mono" style="font-size:12px"><%= report.case_officer %></div>
+        </div>
+        <div>
+          <div style="font-size:9px;letter-spacing:3px;color:var(--mid-grey);text-transform:uppercase;margin-bottom:2px">Filed</div>
+          <div class="mono" style="font-size:11px"><%= new Date(report.created_at).toLocaleString('en-GB') %></div>
+        </div>
+        <% if (report.reliability_rating) { %>
+        <div>
+          <div style="font-size:9px;letter-spacing:3px;color:var(--mid-grey);text-transform:uppercase;margin-bottom:2px">Reliability</div>
+          <div style="font-size:11px"><%= report.reliability_rating %></div>
+        </div>
+        <% } %>
+        <% if (report.entity_username) { %>
+        <div>
+          <div style="font-size:9px;letter-spacing:3px;color:var(--mid-grey);text-transform:uppercase;margin-bottom:2px">Linked Entity</div>
+          <a href="/watchlist/<%= report.entity_id %>" style="font-size:12px;color:var(--blue-light)">@<%= report.entity_username %></a>
+        </div>
+        <% } %>
+        <div style="margin-top:.5rem;padding-top:.5rem;border-top:1px solid var(--border)">
+          <div style="font-size:8px;letter-spacing:2px;color:var(--dim);text-transform:uppercase">NOT FOR DISCLOSURE OUTSIDE OF THE OFFICIAL MI5 OSA SERVER</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Answers -->
+  <div>
+    <%
+      const a = report.answers || {};
+      const loc = a.location || 'THAMES HOUSE, LONDON';
+      const dt  = a.datetime || new Date(report.created_at).toLocaleString('en-GB');
+
+      const ocgSections = [
+        { title: 'SECTION 1 — AFFILIATIONS', qs: [
+          ['s1_q1','Q1. Current affiliations'],
+          ['s1_q2','Q2. Closest associates'],
+          ['s1_q3','Q3. Group or organisational links'],
+        ]},
+        { title: 'SECTION 2 — STRUCTURE', qs: [
+          ['s2_q4','Q4. Role within organisation'],
+          ['s2_q5','Q5. Key figures in the group'],
+          ['s2_q6','Q6. Reporting hierarchy'],
+        ]},
+        { title: 'SECTION 3 — OPERATIONS', qs: [
+          ['s3_q7','Q7. Current activities'],
+          ['s3_q8','Q8. Ongoing operations or plans'],
+          ['s3_q9','Q9. Important locations'],
+        ]},
+        { title: 'SECTION 4 — ASSOCIATIONS', qs: [
+          ['s4_q10','Q10. Allied groups'],
+          ['s4_q11','Q11. Rival groups or individuals'],
+          ['s4_q12','Q12. Entities requiring attention'],
+        ]},
+        { title: 'SECTION 5 — CORRUPTION & INFLUENCE', qs: [
+          ['s5_q13','Q13. Authority assistance'],
+          ['s5_q14','Q14. Corrupt activity awareness'],
+          ['s5_q15','Q15. Beneficiaries of activities'],
+        ]},
+        { title: 'SECTION 6 — INTELLIGENCE', qs: [
+          ['s6_q16','Q16. Important information disclosed'],
+          ['s6_q17','Q17. Emerging threats'],
+          ['s6_q18','Q18. Additional undisclosed information'],
+        ]},
+      ];
+
+      const poiSections = [
+        { title: 'SECTION 1 — AFFILIATIONS', qs: [
+          ['s1_q1','Q1. Most frequent associations'],
+          ['s1_q2','Q2. Group or organisational memberships'],
+          ['s1_q3','Q3. Closest contacts'],
+        ]},
+        { title: 'SECTION 2 — INTENTIONS', qs: [
+          ['s2_q4','Q4. Current objectives within Westbridge'],
+          ['s2_q5','Q5. Planned activities'],
+          ['s2_q6','Q6. Interest in specific individuals or groups'],
+        ]},
+        { title: 'SECTION 3 — ACTIVITIES', qs: [
+          ['s3_q7','Q7. Recent involvement'],
+          ['s3_q8','Q8. Regular locations'],
+          ['s3_q9','Q9. Notable meetings attended'],
+        ]},
+        { title: 'SECTION 4 — INFLUENCE & RISK', qs: [
+          ['s4_q10','Q10. Influence over others or groups'],
+          ['s4_q11','Q11. Current disputes or conflicts'],
+          ['s4_q12','Q12. Threats to safety or organisations'],
+        ]},
+        { title: 'SECTION 5 — INTELLIGENCE', qs: [
+          ['s5_q13','Q13. Information MI5 should know'],
+          ['s5_q14','Q14. Emerging threats or concerns'],
+          ['s5_q15','Q15. Additional undisclosed information'],
+        ]},
+      ];
+
+      const sections = report.report_type === 'OCG' ? ocgSections : poiSections;
+    %>
+
+    <% sections.forEach(function(sec) { %>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title"><%= sec.title %></span></div>
+      <div class="panel-body--compact">
+        <% sec.qs.forEach(function(q) { %>
+        <div style="padding:10px 16px;border-bottom:1px solid var(--border)">
+          <div style="font-size:9px;letter-spacing:2px;color:var(--mid-grey);text-transform:uppercase;margin-bottom:4px"><%= q[1] %></div>
+          <div style="font-size:13px;line-height:1.6;color:<%= a[q[0]] ? 'var(--white)' : 'var(--dim)' %>">
+            <%= a[q[0]] || 'No response recorded.' %>
+          </div>
+        </div>
+        <% }); %>
+      </div>
+    </div>
+    <% }); %>
+
+    <% if (report.summary) { %>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">OFFICER SUMMARY</span></div>
+      <div class="panel-body">
+        <div style="font-size:13px;line-height:1.7;white-space:pre-wrap"><%= report.summary %></div>
+      </div>
+    </div>
+    <% } %>
+
+  </div>
+</div>
+
+<style>
+@media print {
+  .site-header, .site-footer-bar, .govuk-page-header .btn, form[action*="delete"] { display: none !important; }
+  .admin-grid { grid-template-columns: 200px 1fr !important; }
+  body { background: #fff !important; color: #000 !important; }
+  .panel { border: 1px solid #ccc !important; }
+  .panel-header { background: #f0f0f0 !important; }
+}
+</style>
+
+<%- include('../partials/footer') %>

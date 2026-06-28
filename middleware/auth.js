@@ -63,4 +63,18 @@ async function logAudit(actor, action, target, targetType, details, ip) {
   } catch {}
 }
 
-module.exports = { requireAuth, requireAdmin, requireIp, logAudit };
+function requireClearance(level) {
+  return function(req, res, next) {
+    const userLevel = req.session?.user?.clearance_level || 1;
+    if (userLevel < level) {
+      return res.status(403).render('error', {
+        user: req.session?.user || null,
+        code: 403,
+        message: `ACCESS DENIED — Clearance level ${level} required. Your current clearance is level ${userLevel}.`
+      });
+    }
+    next();
+  };
+}
+
+module.exports = { requireAuth, requireAdmin, requireIp, requireClearance, logAudit };

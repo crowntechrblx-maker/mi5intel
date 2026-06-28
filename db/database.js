@@ -43,6 +43,29 @@ async function initSchema() {
     ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS permissions JSONB NOT NULL DEFAULT '[]'::jsonb;
     ALTER TABLE admin_users DROP CONSTRAINT IF EXISTS admin_users_role_check;
     ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS suspended BOOLEAN NOT NULL DEFAULT FALSE;
+    ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS clearance_level INTEGER NOT NULL DEFAULT 1;
+
+    ALTER TABLE roblox_entities ADD COLUMN IF NOT EXISTS min_clearance INTEGER NOT NULL DEFAULT 1;
+    ALTER TABLE groups_of_interest ADD COLUMN IF NOT EXISTS min_clearance INTEGER NOT NULL DEFAULT 1;
+
+    CREATE TABLE IF NOT EXISTS interview_reports (
+      id               SERIAL PRIMARY KEY,
+      report_type      TEXT NOT NULL CHECK (report_type IN ('OCG','POI')),
+      reference        TEXT NOT NULL,
+      entity_id        INTEGER REFERENCES roblox_entities(id) ON DELETE SET NULL,
+      subject_name     TEXT NOT NULL,
+      case_officer     TEXT NOT NULL,
+      status           TEXT NOT NULL DEFAULT 'COOPERATING',
+      answers          JSONB NOT NULL DEFAULT '{}'::jsonb,
+      summary          TEXT,
+      reliability_rating TEXT,
+      classification   TEXT NOT NULL DEFAULT 'OFFICIAL SENSITIVE',
+      created_at       TIMESTAMPTZ DEFAULT NOW(),
+      updated_at       TIMESTAMPTZ DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS idx_reports_entity  ON interview_reports (entity_id);
+    CREATE INDEX IF NOT EXISTS idx_reports_type    ON interview_reports (report_type);
+    CREATE INDEX IF NOT EXISTS idx_reports_created ON interview_reports (created_at DESC);
 
     CREATE TABLE IF NOT EXISTS entity_aliases (
       id         SERIAL PRIMARY KEY,

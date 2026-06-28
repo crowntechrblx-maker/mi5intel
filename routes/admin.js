@@ -9,7 +9,7 @@ const { PERMISSIONS, ROLE_PERMISSIONS } = require('../config/permissions');
 function actor(req) { return req.session.user.username; }
 
 async function getUsers() {
-  return db.all('SELECT id, username, display_name, role, permissions, last_login, created_at, created_by, suspended FROM admin_users ORDER BY created_at DESC');
+  return db.all('SELECT id, username, display_name, role, permissions, last_login, created_at, created_by, suspended, clearance_level FROM admin_users ORDER BY created_at DESC');
 }
 
 function parsePermissions(body) {
@@ -131,6 +131,31 @@ router.post('/users/:id/change-role', requireAdmin, async (req, res) => {
 
   const updatedUsers = await getUsers();
   res.render('admin', { user: req.session.user, users: updatedUsers, PERMISSIONS, ROLE_PERMISSIONS, error: null, success: `Role updated for "${target.username}".`, page: 'admin', activityStats: [] });
+});
+
+router.get('/logins', requireAdmin, async (req, res) => {
+  const page = Math.max(1, parseInt(req.query.page) || 1);
+  const limit = 50;
+  const offset = (page - 1) * limit;
+  const [logs, totalRow] = await Promise.all([
+    db.all(
+      `SELECT * FROM audit_logs WHERE action IN ('LOGIN','FAILED_LOGIN','LOGOUT','BLOCKED_LOGIN','SUSPEND_USER','UNSUSPEND_USER')
+       ORDER BY created_at DESC LIMIT $1 OFFSET $2`, [limit, offset]
+    ),
+    db.get(`SELECT COUNT(*) AS cnt FROM audit_logs WHERE action IN ('LOGIN','FAILED_LOGIN','LOGOUT','BLOCKED_LOGIN','SUSPEND_USER','UNSUSPEND_USER')`),
+  ]);
+  res.render('admin/logins', { user: req.session.user, logs, total: +totalRow.cnt, limit, offset, page: 'admin' });
+});
+
+router.post('/users/:id/clearance', requireAdmin, async (req, res) => {
+  const level = Math.min(5, Math.max(1, parseInt(req.body.clearance_level) || 1));
+  const target = await db.get('SELECT * FROM admin_users WHERE id=$1', [req.params.id]);
+  if (!target) return res.redirect('/admin');
+  await db.run('UPDATE admin_users SET clearance_level=$1 WHERE id=$2', [level, target.id]);
+  await logAudit(actor(req), 'SET_CLEARANCE', target.username, 'admin', `Clearance set to level ${level}`, req.ip);
+  const updatedUsers = await getUsers();
+  const activityStats = await db.all(`SELECT actor, COUNT(*) FILTER (WHERE created_at > NOW() - INTERVAL '7 days') AS actions_7d, COUNT(*) FILTER (WHERE created_at > NOW() - INTERVAL '30 days') AS actions_30d, MAX(created_at) AS last_action FROM audit_logs WHERE actor != 'SYSTEM' GROUP BY actor ORDER BY last_action DESC NULLS LAST`);
+  res.render('admin', { user: req.session.user, users: updatedUsers, PERMISSIONS, ROLE_PERMISSIONS, error: null, success: `Clearance level updated for "${target.username}".`, page: 'admin', activityStats });
 });
 
 router.post('/users/:id/suspend', requireAdmin, async (req, res) => {

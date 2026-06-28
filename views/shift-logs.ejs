@@ -1,0 +1,57 @@
+<%- include('partials/header', { pageTitle: 'Shift Logs', page: null }) %>
+
+<div class="govuk-page-header">
+  <div>
+    <span class="govuk-caption-m">OPERATIONAL RECORDS</span>
+    <h1 class="govuk-heading-xl">Shift Logs</h1>
+  </div>
+  <a href="/" class="btn btn-secondary btn-sm">&larr; Dashboard</a>
+</div>
+
+<% if (fetchError) { %>
+<div class="govuk-notification-banner govuk-notification-banner--error" style="margin-bottom:1rem">
+  <div class="govuk-notification-banner__header">DISCORD INTEGRATION</div>
+  <div class="govuk-notification-banner__content"><%= fetchError %></div>
+</div>
+<% } %>
+
+<div class="panel">
+  <div class="panel-header">
+    <span class="panel-title">RECENT SHIFTS (<%= shifts.length %>)</span>
+    <span style="font-size:10px;color:var(--mid-grey)">Live from Discord — last 50 messages</span>
+  </div>
+  <% if (!shifts.length && !fetchError) { %>
+  <div class="panel-body"><p class="text-muted">No shift logs found in the configured channel.</p></div>
+  <% } else if (shifts.length) { %>
+  <table class="registry-table">
+    <thead>
+      <tr>
+        <th>PLAYER</th>
+        <th>DIVISION</th>
+        <th>DURATION</th>
+        <th>TIMESTAMP</th>
+        <th>NOTE</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% shifts.forEach(function(s) { %>
+      <tr>
+        <td class="mono" style="font-weight:600"><%= s.player %></td>
+        <td>
+          <span class="govuk-tag <%= s.division && s.division.toLowerCase().includes('intel') ? 'govuk-tag--blue' : s.division && s.division.toLowerCase().includes('tactical') ? 'govuk-tag--orange' : 'govuk-tag--grey' %>">
+            <%= s.division %>
+          </span>
+        </td>
+        <td class="mono"><%= s.duration %></td>
+        <td class="mono text-muted" style="font-size:10px">
+          <%= s.timestamp ? new Date(s.timestamp).toLocaleString('en-GB') : '—' %>
+        </td>
+        <td class="text-muted" style="font-size:10px"><%= s.footer %></td>
+      </tr>
+      <% }); %>
+    </tbody>
+  </table>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>

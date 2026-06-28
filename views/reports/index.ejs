@@ -1,0 +1,58 @@
+<%- include('../partials/header', { pageTitle: 'Interview Reports', page: 'reports' }) %>
+
+<div class="govuk-page-header">
+  <div>
+    <span class="govuk-caption-m">INTELLIGENCE RECORDS</span>
+    <h1 class="govuk-heading-xl">Interview Reports</h1>
+  </div>
+  <div style="display:flex;gap:.5rem">
+    <a href="/reports/new?type=POI" class="btn btn-secondary btn-sm">+ POI INTERVIEW</a>
+    <a href="/reports/new?type=OCG" class="btn btn-primary btn-sm">+ OCG INTERVIEW</a>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><span class="panel-title">FILED REPORTS (<%= reports.length %>)</span></div>
+  <% if (!reports.length) { %>
+  <div class="panel-body"><p class="text-muted">No reports filed yet.</p></div>
+  <% } else { %>
+  <table class="registry-table">
+    <thead>
+      <tr>
+        <th>REFERENCE</th>
+        <th>TYPE</th>
+        <th>SUBJECT</th>
+        <th>STATUS</th>
+        <th>CASE OFFICER</th>
+        <th>FILED</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% reports.forEach(function(r) { %>
+      <tr class="entity-tr" data-href="/reports/<%= r.id %>">
+        <td class="mono" style="font-size:10px"><%= r.reference %></td>
+        <td>
+          <span class="govuk-tag <%= r.report_type === 'OCG' ? 'govuk-tag--red' : 'govuk-tag--blue' %>">
+            <%= r.report_type %>
+          </span>
+        </td>
+        <td>
+          <div class="table-username"><%= r.subject_name %></div>
+          <% if (r.entity_username) { %><div class="table-meta">Linked: @<%= r.entity_username %></div><% } %>
+        </td>
+        <td>
+          <% const sc = r.status === 'COOPERATING' ? 'green' : r.status === 'NC' ? 'red' : 'orange'; %>
+          <span class="govuk-tag govuk-tag--<%= sc %>"><%= r.status %></span>
+        </td>
+        <td class="mono text-muted" style="font-size:11px"><%= r.case_officer %></td>
+        <td class="mono text-muted" style="font-size:10px"><%= new Date(r.created_at).toLocaleDateString('en-GB') %></td>
+        <td><a href="/reports/<%= r.id %>" class="btn btn-ghost btn-xs">VIEW</a></td>
+      </tr>
+      <% }); %>
+    </tbody>
+  </table>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

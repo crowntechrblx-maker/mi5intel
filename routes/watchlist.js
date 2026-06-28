@@ -27,15 +27,17 @@ router.get('/', requireAuth, async (req, res) => {
   const pageNum = Math.max(1, parseInt(req.query.page) || 1);
   const offset  = (pageNum - 1) * limit;
   const { where, params } = buildFilters(req.query);
+  const userClearance = req.session.user.clearance_level || 1;
+  const clearanceWhere = `(${where}) AND min_clearance <= ${userClearance}`;
 
   const [entities, totalRow] = await Promise.all([
     db.all(
       `SELECT id, roblox_id, username, display_name, avatar_url, severity, status, category, added_at
-       FROM roblox_entities WHERE ${where} ORDER BY added_at DESC
+       FROM roblox_entities WHERE ${clearanceWhere} ORDER BY added_at DESC
        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
       [...params, limit, offset]
     ),
-    db.get(`SELECT COUNT(*) AS cnt FROM roblox_entities WHERE ${where}`, params),
+    db.get(`SELECT COUNT(*) AS cnt FROM roblox_entities WHERE ${clearanceWhere}`, params),
   ]);
 
   // Single batch query for all tags — eliminates N+1
@@ -168,6 +170,9 @@ router.post('/batch', requireAuth, async (req, res) => {
 router.get('/:id', requireAuth, async (req, res) => {
   const entity = await db.get('SELECT * FROM roblox_entities WHERE id=$1', [req.params.id]);
   if (!entity) return res.status(404).render('error', { user: req.session.user, code: 404, message: 'Entity not found in registry.' });
+  if ((entity.min_clearance || 1) > (req.session.user.clearance_level || 1)) {
+    return res.status(403).render('error', { user: req.session.user, code: 403, message: 'ACCESS DENIED — Insufficient clearance to view this entity.' });
+  }
 
   const [tags, auditHistory, caseNotes, snapshots, aliases, groupEvents, rawLinks, entitiesWithGroups] = await Promise.all([
     db.all('SELECT * FROM entity_tags WHERE entity_id=$1 ORDER BY created_at DESC', [entity.id]),

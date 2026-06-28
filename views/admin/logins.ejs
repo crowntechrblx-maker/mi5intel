@@ -1,0 +1,60 @@
+<%- include('../partials/header', { pageTitle: 'Login History', page: 'admin' }) %>
+
+<div class="govuk-page-header">
+  <div>
+    <span class="govuk-caption-m">SYSTEM ADMINISTRATION</span>
+    <h1 class="govuk-heading-xl">Login History</h1>
+  </div>
+  <a href="/admin" class="btn btn-secondary btn-sm">&larr; Back to Admin</a>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><span class="panel-title">AUTHENTICATION EVENTS (<%= total %>)</span></div>
+  <table class="registry-table">
+    <thead>
+      <tr>
+        <th>TIME</th>
+        <th>OPERATOR</th>
+        <th>EVENT</th>
+        <th>IP ADDRESS</th>
+        <th>DETAIL</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% logs.forEach(function(l) { %>
+      <tr>
+        <td class="mono text-muted" style="font-size:10px;white-space:nowrap"><%= new Date(l.created_at).toLocaleString('en-GB') %></td>
+        <td class="mono"><%= l.actor %></td>
+        <td>
+          <% if (l.action === 'LOGIN') { %>
+            <span class="govuk-tag govuk-tag--green">LOGIN</span>
+          <% } else if (l.action === 'FAILED_LOGIN') { %>
+            <span class="govuk-tag govuk-tag--red">FAILED</span>
+          <% } else if (l.action === 'BLOCKED_LOGIN') { %>
+            <span class="govuk-tag govuk-tag--red">BLOCKED</span>
+          <% } else if (l.action === 'LOGOUT') { %>
+            <span class="govuk-tag govuk-tag--grey">LOGOUT</span>
+          <% } else if (l.action === 'SUSPEND_USER') { %>
+            <span class="govuk-tag govuk-tag--orange">SUSPENDED</span>
+          <% } else { %>
+            <span class="govuk-tag govuk-tag--grey"><%= l.action %></span>
+          <% } %>
+        </td>
+        <td class="mono text-muted" style="font-size:10px">
+          <%= user.username === 'pl_aced' ? (l.ip_address || '—') : '••••••••' %>
+        </td>
+        <td class="text-muted" style="font-size:11px"><%= l.details || '—' %></td>
+      </tr>
+      <% }); %>
+    </tbody>
+  </table>
+  <% if (total > limit) { %>
+  <div style="padding:12px 16px;display:flex;gap:8px;border-top:1px solid var(--border)">
+    <% if (offset > 0) { %><a href="?page=<%= Math.floor(offset/limit) %>" class="btn btn-secondary btn-sm">Previous</a><% } %>
+    <% if (offset + limit < total) { %><a href="?page=<%= Math.floor(offset/limit) + 2 %>" class="btn btn-secondary btn-sm">Next</a><% } %>
+    <span class="text-muted" style="font-size:11px;align-self:center">Showing <%= offset+1 %>–<%= Math.min(offset+limit, total) %> of <%= total %></span>
+  </div>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,294 @@
+<%- include('../partials/header', { pageTitle: type + ' Interview', page: 'reports' }) %>
+
+<div class="govuk-page-header">
+  <div>
+    <span class="govuk-caption-m">OFFICIAL SENSITIVE — <%= type === 'OCG' ? 'OCG/ITRVW/2026' : 'POI/ITRVW/2026' %></span>
+    <h1 class="govuk-heading-xl"><%= type === 'OCG' ? 'OCG' : 'Person of Interest' %> Interview Report</h1>
+  </div>
+  <a href="/reports" class="btn btn-secondary btn-sm">&larr; Back</a>
+</div>
+
+<% if (error) { %>
+<div class="govuk-notification-banner govuk-notification-banner--error" style="margin-bottom:1rem">
+  <div class="govuk-notification-banner__content"><%= error %></div>
+</div>
+<% } %>
+
+<form action="/reports/new" method="POST">
+  <input type="hidden" name="report_type" value="<%= type %>">
+  <% if (entityId) { %><input type="hidden" name="entity_id" value="<%= entityId %>"><% } %>
+
+  <div class="admin-grid" style="grid-template-columns:280px 1fr">
+
+    <!-- Left: Header fields -->
+    <div>
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">REPORT HEADER</span></div>
+        <div class="panel-body">
+          <div class="form-group-compact">
+            <label class="form-label-sm">SUBJECT NAME / USERNAME <span class="required">*</span></label>
+            <input class="form-input-sm" type="text" name="subject_name" required autocomplete="off">
+          </div>
+          <div class="form-group-compact">
+            <label class="form-label-sm">LOCATION</label>
+            <input class="form-input-sm" type="text" name="q_location" value="THAMES HOUSE, LONDON" autocomplete="off">
+          </div>
+          <div class="form-group-compact">
+            <label class="form-label-sm">DATE / TIME</label>
+            <input class="form-input-sm" type="text" name="q_datetime" value="<%= new Date().toLocaleString('en-GB') %>" autocomplete="off">
+          </div>
+          <div class="form-group-compact">
+            <label class="form-label-sm">STATUS</label>
+            <select class="form-input-sm" name="status">
+              <option value="SOI">SOI (Subject of Interest)</option>
+              <option value="COOPERATING">COOPERATING</option>
+              <option value="NC">NON-COOPERATIVE (NC)</option>
+            </select>
+          </div>
+          <div class="form-group-compact">
+            <label class="form-label-sm">CLASSIFICATION</label>
+            <input class="form-input-sm" type="text" value="OFFICIAL SENSITIVE" disabled>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Questions -->
+    <div>
+
+      <% if (type === 'OCG') { %>
+
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">SECTION 1 — AFFILIATIONS</span></div>
+        <div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
+          <div class="form-group-compact">
+            <label class="form-label-sm">Q1. What are the subject's current affiliations?</label>
+            <textarea class="form-input form-textarea" name="q_s1_q1" rows="2" placeholder="Response…"></textarea>
+          </div>
+          <div class="form-group-compact">
+            <label class="form-label-sm">Q2. Who are the subject's closest associates?</label>
+            <textarea class="form-input form-textarea" name="q_s1_q2" rows="2" placeholder="Response…"></textarea>
+          </div>
+          <div class="form-group-compact">
+            <label class="form-label-sm">Q3. What groups or organisations is the subject linked to?</label>
+            <textarea class="form-input form-textarea" name="q_s1_q3" rows="2" placeholder="Response…"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">SECTION 2 — STRUCTURE</span></div>
+        <div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
+          <div class="form-group-compact">
+            <label class="form-label-sm">Q4. What is the subject's role within the organisation?</label>
+            <textarea class="form-input form-textarea" name="q_s2_q4" rows="2" placeholder="Response…"></textarea>
+          </div>
+          <div class="form-group-compact">
+            <label class="form-label-sm">Q5. Who are the key figures in the group?</label>
+            <textarea class="form-input form-textarea" name="q_s2_q5" rows="2" placeholder="Response…"></textarea>
+          </div>
+          <div class="form-group-compact">
+            <label class="form-label-sm">Q6. Describe the reporting hierarchy.</label>
+            <textarea class="form-input form-textarea" name="q_s2_q6" rows="2" placeholder="Response…"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">SECTION 3 — OPERATIONS</span></div>
+        <div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
+          <div class="form-group-compact">
+            <label class="form-label-sm">Q7. What are the organisation's current activities?</label>
+            <textarea class="form-input form-textarea" name="q_s3_q7" rows="2" placeholder="Response…"></textarea>
+          </div>
+          <div class="form-group-compact">
+            <label class="form-label-sm">Q8. Are there ongoing operations or plans?</label>
+            <textarea class="form-input form-textarea" name="q_s3_q8" rows="2" placeholder="Response…"></textarea>
+          </div>
+          <div class="form-group-compact">
+            <label class="form-label-sm">Q9. What important locations are associated with the organisation?</label>
+            <textarea class="form-input form-textarea" name="q_s3_q9" rows="2" placeholder="Response…"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">SECTION 4 — ASSOCIATIONS</span></div>
+        <div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
+          <div class="form-group-compact">
+            <label class="form-label-sm">Q10. What allied groups does the organisation work with?</label>
+            <textarea class="form-input form-textarea" name="q_s4_q10" rows="2" placeholder="Response…"></textarea>
+          </div>
+          <div class="form-group-compact">
+            <label class="form-label-sm">Q11. What rival groups or individuals pose a threat?</label>
+            <textarea class="form-input form-textarea" name="q_s4_q11" rows="2" placeholder="Response…"></textarea>
+          </div>
+          <div class="form-group-compact">
+            <label class="form-label-sm">Q12. Are there any entities requiring particular attention?</label>
+            <textarea class="form-input form-textarea" name="q_s4_q12" rows="2" placeholder="Response…"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">SECTION 5 — CORRUPTION &amp; INFLUENCE</span></div>
+        <div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
+          <div class="form-group-compact">
+            <label class="form-label-sm">Q13. Is authority assistance being provided to the organisation?</label>
+            <textarea class="form-input form-textarea" name="q_s5_q13" rows="2" placeholder="Response…"></textarea>
+          </div>
+          <div class="form-group-compact">
+            <label class="form-label-sm">Q14. Is the subject aware of any corrupt activity?</label>
+            <textarea class="form-input form-textarea" name="q_s5_q14" rows="2" placeholder="Response…"></textarea>
+          </div>
+          <div class="form-group-compact">
+            <label class="form-label-sm">Q15. Who benefits from the organisation's activities?</label>
+            <textarea class="form-input form-textarea" name="q_s5_q15" rows="2" placeholder="Response…"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">SECTION 6 — INTELLIGENCE</span></div>
+        <div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
+          <div class="form-group-compact">
+            <label class="form-label-sm">Q16. What important information has the subject disclosed?</label>
+            <textarea class="form-input form-textarea" name="q_s6_q16" rows="2" placeholder="Response…"></textarea>
+          </div>
+          <div class="form-group-compact">
+            <label class="form-label-sm">Q17. Are there any emerging threats the subject is aware of?</label>
+            <textarea class="form-input form-textarea" name="q_s6_q17" rows="2" placeholder="Response…"></textarea>
+          </div>
+          <div class="form-group-compact">
+            <label class="form-label-sm">Q18. Is there any additional undisclosed information?</label>
+            <textarea class="form-input form-textarea" name="q_s6_q18" rows="2" placeholder="Response…"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <% } else { %>
+
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">SECTION 1 — AFFILIATIONS</span></div>
+        <div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
+          <div class="form-group-compact">
+            <label class="form-label-sm">Q1. Who does the subject most frequently associate with?</label>
+            <textarea class="form-input form-textarea" name="q_s1_q1" rows="2" placeholder="Response…"></textarea>
+          </div>
+          <div class="form-group-compact">
+            <label class="form-label-sm">Q2. Is the subject a member of any group or organisation?</label>
+            <textarea class="form-input form-textarea" name="q_s1_q2" rows="2" placeholder="Response…"></textarea>
+          </div>
+          <div class="form-group-compact">
+            <label class="form-label-sm">Q3. Who are the subject's closest contacts?</label>
+            <textarea class="form-input form-textarea" name="q_s1_q3" rows="2" placeholder="Response…"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">SECTION 2 — INTENTIONS</span></div>
+        <div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
+          <div class="form-group-compact">
+            <label class="form-label-sm">Q4. What are the subject's current objectives within Westbridge?</label>
+            <textarea class="form-input form-textarea" name="q_s2_q4" rows="2" placeholder="Response…"></textarea>
+          </div>
+          <div class="form-group-compact">
+            <label class="form-label-sm">Q5. What activities are planned?</label>
+            <textarea class="form-input form-textarea" name="q_s2_q5" rows="2" placeholder="Response…"></textarea>
+          </div>
+          <div class="form-group-compact">
+            <label class="form-label-sm">Q6. Does the subject have interest in specific individuals or groups?</label>
+            <textarea class="form-input form-textarea" name="q_s2_q6" rows="2" placeholder="Response…"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">SECTION 3 — ACTIVITIES</span></div>
+        <div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
+          <div class="form-group-compact">
+            <label class="form-label-sm">Q7. What has the subject been involved in recently?</label>
+            <textarea class="form-input form-textarea" name="q_s3_q7" rows="2" placeholder="Response…"></textarea>
+          </div>
+          <div class="form-group-compact">
+            <label class="form-label-sm">Q8. What are the subject's regular locations?</label>
+            <textarea class="form-input form-textarea" name="q_s3_q8" rows="2" placeholder="Response…"></textarea>
+          </div>
+          <div class="form-group-compact">
+            <label class="form-label-sm">Q9. What notable meetings has the subject attended?</label>
+            <textarea class="form-input form-textarea" name="q_s3_q9" rows="2" placeholder="Response…"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">SECTION 4 — INFLUENCE &amp; RISK</span></div>
+        <div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
+          <div class="form-group-compact">
+            <label class="form-label-sm">Q10. What influence does the subject have over others or groups?</label>
+            <textarea class="form-input form-textarea" name="q_s4_q10" rows="2" placeholder="Response…"></textarea>
+          </div>
+          <div class="form-group-compact">
+            <label class="form-label-sm">Q11. Are there any current disputes or conflicts involving the subject?</label>
+            <textarea class="form-input form-textarea" name="q_s4_q11" rows="2" placeholder="Response…"></textarea>
+          </div>
+          <div class="form-group-compact">
+            <label class="form-label-sm">Q12. Does the subject pose threats to safety or organisations?</label>
+            <textarea class="form-input form-textarea" name="q_s4_q12" rows="2" placeholder="Response…"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">SECTION 5 — INTELLIGENCE</span></div>
+        <div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
+          <div class="form-group-compact">
+            <label class="form-label-sm">Q13. What information should MI5 be aware of?</label>
+            <textarea class="form-input form-textarea" name="q_s5_q13" rows="2" placeholder="Response…"></textarea>
+          </div>
+          <div class="form-group-compact">
+            <label class="form-label-sm">Q14. Are there any emerging threats or concerns?</label>
+            <textarea class="form-input form-textarea" name="q_s5_q14" rows="2" placeholder="Response…"></textarea>
+          </div>
+          <div class="form-group-compact">
+            <label class="form-label-sm">Q15. Is there any additional undisclosed relevant information?</label>
+            <textarea class="form-input form-textarea" name="q_s5_q15" rows="2" placeholder="Response…"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <% } %>
+
+      <!-- Summary (both types) -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">SECTION <%= type === 'OCG' ? '7' : '6' %> — OFFICER SUMMARY</span></div>
+        <div class="panel-body" style="display:flex;flex-direction:column;gap:.75rem">
+          <div class="form-group-compact">
+            <label class="form-label-sm">SUMMARY &amp; ASSESSMENT</label>
+            <textarea class="form-input form-textarea" name="summary" rows="4" placeholder="Officer's summary, key findings, and overall assessment…"></textarea>
+          </div>
+          <div class="form-group-compact">
+            <label class="form-label-sm">RELIABILITY RATING</label>
+            <select class="form-input-sm" name="reliability_rating">
+              <option value="">— Select —</option>
+              <option value="A - Completely Reliable">A — Completely Reliable</option>
+              <option value="B - Usually Reliable">B — Usually Reliable</option>
+              <option value="C - Fairly Reliable">C — Fairly Reliable</option>
+              <option value="D - Not Usually Reliable">D — Not Usually Reliable</option>
+              <option value="E - Unreliable">E — Unreliable</option>
+              <option value="F - Cannot Be Judged">F — Cannot Be Judged</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.5rem">
+        <a href="/reports" class="btn btn-secondary">CANCEL</a>
+        <button type="submit" class="btn btn-primary">FILE REPORT</button>
+      </div>
+    </div>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

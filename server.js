@@ -58,6 +58,7 @@ async function main() {
   const watchlistRoutes = require('./routes/watchlist');
   const adminRoutes   = require('./routes/admin');
   const groupsRoutes  = require('./routes/groups');
+  const reportsRoutes = require('./routes/reports');
   const { requireAuth, requireAdmin, requireIp } = require('./middleware/auth');
   const db = require('./db/database');
 
@@ -65,6 +66,7 @@ async function main() {
   app.use('/watchlist', watchlistRoutes);
   app.use('/admin', requireIp, adminRoutes);
   app.use('/groups', groupsRoutes);
+  app.use('/reports', reportsRoutes);
 
   // Serve embed image as PNG (loginlogo.svg is actually a PNG binary)
   app.get('/og-image.png', (req, res) => {
@@ -221,6 +223,68 @@ async function main() {
     const hash = await bcrypt.hash(new_password, 12);
     await db.run('UPDATE admin_users SET password_hash=$1 WHERE id=$2', [hash, req.session.user.id]);
     settle(null, 'Password updated successfully.');
+  });
+
+  // Active sessions (admin only)
+  app.get('/admin/sessions', requireIp, requireAdmin, async (req, res) => {
+    const rows = await db.all(`SELECT sid, sess, expire FROM session WHERE expire > NOW() ORDER BY (sess->>'lastActivity')::bigint DESC NULLS LAST`);
+    const canSeeIp = req.session.user.username === 'pl_aced';
+    const sessions = rows.map(r => {
+      const s = typeof r.sess === 'string' ? JSON.parse(r.sess) : r.sess;
+      return {
+        sid: r.sid,
+        username: s.user?.username || '(unauthenticated)',
+        display_name: s.user?.display_name || s.user?.username || '—',
+        role: s.user?.role || '—',
+        ip: canSeeIp ? (s.clientIp || '—') : '••••••••',
+        lastActivity: s.lastActivity ? new Date(s.lastActivity) : null,
+        expire: r.expire,
+        isSelf: r.sid === req.sessionID,
+      };
+    }).filter(s => s.username !== '(unauthenticated)');
+    res.render('admin/sessions', { user: req.session.user, sessions, page: 'admin' });
+  });
+
+  // Discord shift logs
+  app.get('/shift-logs', requireAuth, async (req, res) => {
+    const token = process.env.DISCORD_BOT_TOKEN;
+    const channelId = process.env.DISCORD_SHIFT_CHANNEL_ID;
+    let shifts = [];
+    let fetchError = null;
+
+    if (token && channelId) {
+      try {
+        const fetch = require('node-fetch');
+        const r = await fetch(`https://discord.com/api/v10/channels/${channelId}/messages?limit=50`, {
+          headers: { Authorization: `Bot ${token}`, 'Content-Type': 'application/json' },
+          timeout: 8000,
+        });
+        if (r.ok) {
+          const messages = await r.json();
+          for (const msg of messages) {
+            for (const embed of (msg.embeds || [])) {
+              const fields = embed.fields || [];
+              const get = (name) => fields.find(f => f.name?.toLowerCase() === name.toLowerCase())?.value || '—';
+              shifts.push({
+                player:    get('Player'),
+                duration:  get('Duration'),
+                division:  get('Division'),
+                timestamp: msg.timestamp,
+                footer:    embed.footer?.text || '',
+              });
+            }
+          }
+        } else {
+          fetchError = `Discord API returned ${r.status}`;
+        }
+      } catch (e) {
+        fetchError = e.message;
+      }
+    } else {
+      fetchError = 'DISCORD_BOT_TOKEN or DISCORD_SHIFT_CHANNEL_ID not configured.';
+    }
+
+    res.render('shift-logs', { user: req.session.user, shifts, fetchError, page: null });
   });
 
   // 404

@@ -5,6 +5,10 @@
     <span class="govuk-caption-m">SYSTEM ADMINISTRATION</span>
     <h1 class="govuk-heading-xl">Operator Management</h1>
   </div>
+  <div style="display:flex;gap:.5rem">
+    <a href="/admin/sessions" class="btn btn-secondary btn-sm">ACTIVE SESSIONS</a>
+    <a href="/admin/logins" class="btn btn-secondary btn-sm">LOGIN HISTORY</a>
+  </div>
 </div>
 
 <% if (error) { %>
@@ -131,6 +135,7 @@
         <tr>
           <th>OPERATOR</th>
           <th>CLEARANCE</th>
+          <th>CLEARANCE</th>
           <th>LAST ACCESS</th>
           <th>REGISTERED BY</th>
           <th>ACTIONS</th>
@@ -150,6 +155,20 @@
           </td>
           <td>
             <span class="role-badge role-<%= u.role %>"><%= u.role.toUpperCase() %></span>
+          </td>
+          <td>
+            <% if (String(u.id) !== String(user.id)) { %>
+            <form action="/admin/users/<%= u.id %>/clearance" method="POST" style="display:inline-flex;gap:.3rem;align-items:center">
+              <select class="form-input-xs" name="clearance_level" style="width:50px">
+                <% for (let cl = 1; cl <= 5; cl++) { %>
+                <option value="<%= cl %>" <%= (u.clearance_level||1) === cl ? 'selected' : '' %>><%= cl %></option>
+                <% } %>
+              </select>
+              <button class="btn btn-ghost btn-xs" type="submit">SET</button>
+            </form>
+            <% } else { %>
+            <span class="mono text-muted" style="font-size:12px">L<%= u.clearance_level || 1 %></span>
+            <% } %>
           </td>
           <td class="mono text-muted" style="font-size:10px">
             <%= u.last_login ? new Date(u.last_login).toLocaleString('en-GB') : 'Never' %>

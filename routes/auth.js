@@ -49,6 +49,7 @@ router.post('/login', loginLimiter, async (req, res) => {
     display_name: user.display_name || user.username,
     role: user.role, permissions: user.permissions || [],
     suspended: user.suspended || false,
+    clearance_level: user.clearance_level || 1,
   };
   req.session.lastActivity = Date.now();
   const redirectTo = (next && next.startsWith('/') && !next.startsWith('//')) ? next : '/';

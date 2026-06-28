@@ -46,7 +46,7 @@
         <td class="table-username"><%= log.actor %></td>
         <td class="mono"><%= log.target || '—' %></td>
         <td class="text-muted"><%= log.details || '—' %></td>
-        <td class="mono text-muted"><%= log.ip_address || '—' %></td>
+        <td class="mono text-muted"><%= user.username === 'pl_aced' ? (log.ip_address || '—') : '••••••••' %></td>
         <td class="mono text-muted"><%= new Date(log.created_at).toLocaleString('en-GB') %></td>
       </tr>
       <% }); %>
