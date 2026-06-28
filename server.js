@@ -27,10 +27,12 @@ async function main() {
 
   // Inject globals into every view
   const { version } = require('./package.json');
+  const commitHash = process.env.RENDER_GIT_COMMIT?.slice(0, 7);
+  const displayVersion = commitHash ? `${version}-${commitHash}` : version;
   app.use((req, res, next) => {
-    res.locals.appVersion  = version;
+    res.locals.appVersion  = displayVersion;
     res.locals.appEnv      = process.env.NODE_ENV === 'production' ? 'PROD' : 'DEV';
-    res.locals.buildDate   = '27 Jun 2026';
+    res.locals.buildDate   = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
     res.locals.clientIp    = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || '—';
     res.locals.baseUrl     = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
     next();
@@ -77,7 +79,6 @@ async function main() {
 
   // Public status page — no auth required
   app.get('/status', async (req, res) => {
-    const { version } = require('./package.json');
     const startTime = app.get('startTime');
     const uptimeMs = Date.now() - startTime;
 
@@ -104,9 +105,9 @@ async function main() {
     } catch (_) {}
 
     res.render('status', {
-      version,
+      version: displayVersion,
       env:         process.env.NODE_ENV === 'production' ? 'PRODUCTION' : 'DEVELOPMENT',
-      buildDate:   '27 Jun 2026',
+      buildDate:   new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
       uptimeMs,
       dbOk,
       dbLatency,
