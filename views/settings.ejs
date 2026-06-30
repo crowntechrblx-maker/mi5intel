@@ -85,4 +85,42 @@
 
 </div>
 
+<!-- Discord Link -->
+<div style="max-width:900px;margin-top:24px">
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">DISCORD LINK</span>
+      <% if (user.discord_id) { %>
+        <span class="govuk-tag govuk-tag--green">LINKED</span>
+      <% } else { %>
+        <span class="govuk-tag govuk-tag--grey">NOT LINKED</span>
+      <% } %>
+    </div>
+    <div class="panel-body">
+      <p style="font-size:13px;color:var(--grey);margin-bottom:16px">
+        Link your Discord account to use field commands in the MI5 Intel bot (<code>/lookup</code>, <code>/flag</code>, <code>/note</code>, <code>/shift</code>, <code>/report</code>).
+      </p>
+
+      <% if (locals.discordToken) { %>
+        <div class="alert alert-success" style="margin-bottom:16px;font-family:var(--mono)">
+          <strong>Your one-time token (expires in 15 min):</strong><br>
+          <span style="font-size:15px;letter-spacing:.05em"><%= discordToken %></span>
+        </div>
+        <p style="font-size:12px;color:var(--mid-grey);font-family:var(--mono)">
+          In Discord run: <code>/verify <%= user.username %> <%= discordToken %></code>
+        </p>
+      <% } else { %>
+        <form action="/settings/discord/token" method="POST">
+          <button class="btn btn-secondary btn-sm" type="submit">GENERATE LINK TOKEN</button>
+        </form>
+        <% if (user.discord_id) { %>
+          <p style="font-size:11px;color:var(--mid-grey);font-family:var(--mono);margin-top:10px">
+            Linked Discord ID: <%= user.discord_id %>
+          </p>
+        <% } %>
+      <% } %>
+    </div>
+  </div>
+</div>
+
 <%- include('partials/footer') %>

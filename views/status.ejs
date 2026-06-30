@@ -258,6 +258,25 @@
     <div class="service-row">
       <div class="service-row-left">
         <div>
+          <div class="svc-name">Discord Field Bot</div>
+          <div class="svc-desc">discord.js gateway — slash command handler</div>
+        </div>
+      </div>
+      <div class="service-row-right">
+        <% if (!botConfigured) { %>
+          <span class="pill pill--idle">Not configured</span>
+        <% } else if (botOk) { %>
+          <span>Latency: <%= botLatency %>ms</span>
+          <span class="pill pill--ok">Online</span>
+        <% } else { %>
+          <span class="pill pill--error">Unreachable</span>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="service-row">
+      <div class="service-row-left">
+        <div>
           <div class="svc-name">Roblox API</div>
           <div class="svc-desc">External — users.roblox.com, thumbnails.roblox.com</div>
         </div>

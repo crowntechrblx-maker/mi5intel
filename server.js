@@ -104,6 +104,20 @@ async function main() {
       counts = { entities: +e.c, groups: +g.c, users: +u.c, notes: +n.c };
     } catch (_) {}
 
+    // Bot health check
+    let botOk = false;
+    let botLatency = null;
+    const botUrl = process.env.BOT_STATUS_URL;
+    if (botUrl) {
+      try {
+        const fetch = require('node-fetch');
+        const t0 = Date.now();
+        const r = await fetch(botUrl, { timeout: 5000 });
+        botLatency = Date.now() - t0;
+        botOk = r.ok;
+      } catch (_) {}
+    }
+
     res.render('status', {
       version: displayVersion,
       env:         process.env.NODE_ENV === 'production' ? 'PRODUCTION' : 'DEVELOPMENT',
@@ -114,6 +128,9 @@ async function main() {
       counts,
       scheduler:   scheduler.getState(),
       generatedAt: new Date(),
+      botOk,
+      botLatency,
+      botConfigured: !!botUrl,
     });
   });
 
@@ -197,6 +214,7 @@ async function main() {
       success: null,
       error: null,
       schedulerState: scheduler.getState(),
+      discordToken: null,
     });
   });
 
@@ -207,12 +225,36 @@ async function main() {
     res.redirect('/settings?schedulerTriggered=1');
   });
 
+  // Discord account link — generate a one-time token
+  app.post('/settings/discord/token', requireAuth, async (req, res) => {
+    const crypto = require('crypto');
+    const token  = crypto.randomBytes(16).toString('hex');
+    const expiry = new Date(Date.now() + 15 * 60 * 1000); // 15 min
+    await db.run(
+      `UPDATE admin_users SET verify_token = $1, verify_token_expires = $2 WHERE id = $3`,
+      [token, expiry, req.session.user.id]
+    );
+    await db.run(
+      `INSERT INTO audit_logs (action, actor, target, target_type, details)
+       VALUES ('DISCORD_TOKEN_GENERATED', $1, $1, 'admin_user', 'Discord link token generated')`,
+      [req.session.user.username]
+    );
+    res.render('settings', {
+      user: req.session.user,
+      page: 'settings',
+      success: null,
+      error: null,
+      schedulerState: scheduler.getState(),
+      discordToken: token,
+    });
+  });
+
   app.post('/settings/password', requireIp, requireAuth, async (req, res) => {
     const bcrypt = require('bcryptjs');
     const { current_password, new_password, confirm_password } = req.body;
     const settle = (error, success) => res.render('settings', {
       user: req.session.user, page: 'settings',
-      schedulerState: scheduler.getState(), error, success,
+      schedulerState: scheduler.getState(), error, success, discordToken: null,
     });
     const userRow = await db.get('SELECT * FROM admin_users WHERE id = $1', [req.session.user.id]);
     if (!await bcrypt.compare(current_password, userRow.password_hash))
