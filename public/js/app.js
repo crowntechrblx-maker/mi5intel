@@ -224,6 +224,42 @@ document.querySelectorAll('.report-section-toggle').forEach(function(btn) {
   });
 })();
 
+// ── Win+Shift+S screenshot detection → force logout ───────────
+(function() {
+  var blurTime = null;
+
+  window.addEventListener('blur', function() {
+    blurTime = Date.now();
+  });
+
+  window.addEventListener('focus', function() {
+    if (!blurTime) return;
+    var elapsed = Date.now() - blurTime;
+    blurTime = null;
+
+    // Snipping Tool focus-away is typically under 2 seconds
+    if (elapsed > 2000) return;
+
+    // Check clipboard for image content — Win+Shift+S copies to clipboard
+    if (!navigator.clipboard || !navigator.clipboard.read) return;
+    navigator.clipboard.read().then(function(items) {
+      for (var i = 0; i < items.length; i++) {
+        if (items[i].types.some(function(t) { return t.startsWith('image/'); })) {
+          // Image in clipboard after a brief blur = screenshot detected
+          var form = document.createElement('form');
+          form.method = 'POST';
+          form.action = '/logout?reason=screenshot';
+          document.body.appendChild(form);
+          form.submit();
+          return;
+        }
+      }
+    }).catch(function() {
+      // Clipboard read denied — user hasn't granted permission, can't detect
+    });
+  });
+})();
+
 // ── Security: right-click disable ─────────────────────────────
 document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
 

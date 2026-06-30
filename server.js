@@ -61,6 +61,7 @@ async function main() {
   const adminRoutes   = require('./routes/admin');
   const groupsRoutes  = require('./routes/groups');
   const reportsRoutes = require('./routes/reports');
+  const psdRoutes     = require('./routes/psd');
   const { requireAuth, requireAdmin, requireIp } = require('./middleware/auth');
   const db = require('./db/database');
 
@@ -69,6 +70,7 @@ async function main() {
   app.use('/admin', requireIp, adminRoutes);
   app.use('/groups', groupsRoutes);
   app.use('/reports', reportsRoutes);
+  app.use('/psd', psdRoutes);
 
   // Serve embed image as PNG (loginlogo.svg is actually a PNG binary)
   app.get('/og-image.png', (req, res) => {

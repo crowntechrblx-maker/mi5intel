@@ -1,0 +1,104 @@
+<%- include('../partials/header', { pageTitle: 'Log Case Report', page: 'psd' }) %>
+
+<div class="govuk-page-header">
+  <div>
+    <span class="govuk-caption-m">PSD — DISCIPLINARY SUMMARY</span>
+    <h1 class="govuk-heading-xl">Log Case Report</h1>
+  </div>
+  <a href="/psd" class="btn btn-secondary btn-sm">&larr; Back</a>
+</div>
+
+<% if (error) { %>
+<div class="govuk-notification-banner govuk-notification-banner--error" style="margin-bottom:1rem">
+  <div class="govuk-notification-banner__content"><%= error %></div>
+</div>
+<% } %>
+
+<div style="max-width:620px">
+  <div style="background:rgba(29,112,184,.07);border:1px solid rgba(29,112,184,.2);border-left:3px solid var(--blue);padding:12px 16px;border-radius:0 var(--r) var(--r) 0;margin-bottom:1.5rem;font-size:12px;color:var(--grey);line-height:1.6">
+    Create the case report document in Google Docs first, then paste the link below to log it on the portal. The document is stored in Google Docs — this entry is the registry record only.
+  </div>
+
+  <form action="/psd/new" method="POST">
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">CASE DETAILS</span></div>
+      <div class="panel-body" style="display:flex;flex-direction:column;gap:1rem">
+
+        <div class="form-group-compact">
+          <label class="form-label-sm">ACCUSED OFFICER (USERNAME) <span class="required">*</span></label>
+          <input class="form-input" type="text" name="accused_officer" required placeholder="e.g. raptor_two" autocomplete="off">
+        </div>
+
+        <div class="form-group-compact">
+          <label class="form-label-sm">INVESTIGATING OFFICER <span class="required">*</span></label>
+          <input class="form-input" type="text" name="investigating_officer" required placeholder="e.g. Director General 04tac MBE" autocomplete="off">
+        </div>
+
+        <div class="form-group-compact">
+          <label class="form-label-sm">MISCONDUCT LEVEL <span class="required">*</span></label>
+          <select class="form-input" name="misconduct_level" required>
+            <option value="">— Select —</option>
+            <option value="MINOR MISCONDUCT">MINOR MISCONDUCT</option>
+            <option value="MISCONDUCT">MISCONDUCT</option>
+            <option value="SEVERE MISCONDUCT">SEVERE MISCONDUCT</option>
+          </select>
+        </div>
+
+        <div class="form-group-compact">
+          <label class="form-label-sm">DISCIPLINARY DECISION <span class="required">*</span></label>
+          <select class="form-input" name="disciplinary_decision" id="decision-select" onchange="toggleCustom(this)">
+            <option value="">— Select —</option>
+            <option value="IMMEDIATE DISMISSAL FROM His Majesty's Service">IMMEDIATE DISMISSAL</option>
+            <option value="FINAL WRITTEN WARNING">FINAL WRITTEN WARNING</option>
+            <option value="WRITTEN WARNING">WRITTEN WARNING</option>
+            <option value="WORDS OF ADVICE">WORDS OF ADVICE</option>
+            <option value="SUSPENSION (PENDING INVESTIGATION)">SUSPENSION (PENDING INVESTIGATION)</option>
+            <option value="NO FURTHER ACTION">NO FURTHER ACTION</option>
+            <option value="__custom__">Other (specify)…</option>
+          </select>
+          <input class="form-input" type="text" id="decision-custom" name="decision_custom"
+                 placeholder="Specify decision…" style="margin-top:.5rem;display:none" autocomplete="off">
+        </div>
+
+        <div class="form-group-compact">
+          <label class="form-label-sm">GOOGLE DOCS LINK <span class="required">*</span></label>
+          <input class="form-input" type="url" name="doc_url" required
+                 placeholder="https://docs.google.com/document/d/…"
+                 pattern="https://docs\.google\.com/.*">
+          <div style="font-size:10px;color:var(--mid-grey);margin-top:4px">Must be a Google Docs URL. Ensure sharing is set to "Anyone with the link" if you want others to view it.</div>
+        </div>
+
+        <div class="form-group-compact">
+          <label class="form-label-sm">INTERNAL NOTES</label>
+          <textarea class="form-input form-textarea" name="notes" rows="3"
+                    placeholder="Any additional context for the internal registry…"></textarea>
+        </div>
+
+      </div>
+    </div>
+
+    <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:1rem">
+      <a href="/psd" class="btn btn-secondary">CANCEL</a>
+      <button type="submit" class="btn btn-danger">LOG CASE REPORT</button>
+    </div>
+  </form>
+</div>
+
+<script>
+function toggleCustom(sel) {
+  var custom = document.getElementById('decision-custom');
+  if (sel.value === '__custom__') {
+    custom.style.display = '';
+    custom.required = true;
+    custom.name = 'disciplinary_decision';
+    sel.name = '_ignored';
+  } else {
+    custom.style.display = 'none';
+    custom.required = false;
+    custom.name = 'decision_custom';
+    sel.name = 'disciplinary_decision';
+  }
+}
+</script>
+
+<%- include('../partials/footer') %>

@@ -24,6 +24,8 @@ router.get('/login', (req, res) => {
     ? 'Your session expired due to inactivity.'
     : req.query.suspended === '1'
     ? 'This account has been suspended. Contact an administrator.'
+    : req.query.reason === 'screenshot'
+    ? 'Session terminated: attempted screen capture detected.'
     : null;
   res.render('login', { error, next: req.query.next || '/', setupDone: req.query.setup === '1' });
 });

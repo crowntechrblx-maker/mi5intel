@@ -67,6 +67,22 @@ async function initSchema() {
     CREATE INDEX IF NOT EXISTS idx_reports_type    ON interview_reports (report_type);
     CREATE INDEX IF NOT EXISTS idx_reports_created ON interview_reports (created_at DESC);
 
+    CREATE TABLE IF NOT EXISTS psd_case_reports (
+      id                    SERIAL PRIMARY KEY,
+      reference             TEXT NOT NULL UNIQUE,
+      accused_officer       TEXT NOT NULL,
+      investigating_officer TEXT NOT NULL,
+      misconduct_level      TEXT NOT NULL DEFAULT 'MISCONDUCT',
+      disciplinary_decision TEXT NOT NULL,
+      doc_url               TEXT NOT NULL,
+      notes                 TEXT,
+      filed_by              TEXT NOT NULL,
+      created_at            TIMESTAMPTZ DEFAULT NOW()
+    );
+    ALTER TABLE psd_case_reports ADD COLUMN IF NOT EXISTS doc_url TEXT;
+    CREATE INDEX IF NOT EXISTS idx_psd_accused ON psd_case_reports (accused_officer);
+    CREATE INDEX IF NOT EXISTS idx_psd_created ON psd_case_reports (created_at DESC);
+
     CREATE TABLE IF NOT EXISTS entity_aliases (
       id         SERIAL PRIMARY KEY,
       entity_id  INTEGER NOT NULL REFERENCES roblox_entities(id) ON DELETE CASCADE,
